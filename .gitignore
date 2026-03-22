@@ -1,0 +1,20 @@
+# ── Ignore everything by default ────────────────────────────
+*
+
+# ── Allow project folders ────────────────────────────────────
+!frontend/
+!frontend/**
+!backend/
+!backend/**
+!.gitignore
+
+# ── But still ignore build artifacts & secrets inside them ──
+frontend/.next/
+frontend/node_modules/
+frontend/.env*
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.env*
+backend/venv/
+backend/env/
