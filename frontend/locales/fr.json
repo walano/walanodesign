@@ -1,0 +1,44 @@
+{
+  "nav": {
+    "services": "services",
+    "portfolio": "portfolio",
+    "about": "à propos",
+    "contact": "nous contacter",
+    "estimate": "obtenir un devis gratuit"
+  },
+  "hero": {
+    "title": "walano design",
+    "contact": "nous contacter",
+    "estimate": "obtenir un devis gratuit"
+  },
+  "services": {
+    "title": "services",
+    "covers": { "label": "covers", "desc": "pochettes de singles et d'albums" },
+    "videos": { "label": "videos", "desc": "lyrics videos et montage vidéo" },
+    "affiches": { "label": "affiches", "desc": "affiches événementielles et visuels" },
+    "branding": { "label": "logo & branding", "desc": "identité visuelle complète" },
+    "miniatures": { "label": "miniatures", "desc": "thumbnails youtube et visuels web" },
+    "bannieres": { "label": "bannières", "desc": "bannières & profils twitch / youtube" }
+  },
+  "portfolio": {
+    "title": "portfolio",
+    "voir_plus": "voir plus",
+    "categories": {
+      "covers": "covers",
+      "branding": "logo & branding",
+      "videos": "videos",
+      "affiches": "affiches",
+      "miniatures": "miniatures",
+      "bannieres": "bannières"
+    }
+  },
+  "about": {
+    "title": "qui suis-je ?",
+    "p1": "je suis walano, graphiste spécialisé dans la création d'univers visuels forts, entre esthétique urbaine et élégance moderne. mon objectif est de transformer tes idées, tes émotions et ton identité en visuels qui parlent d'eux-même. chaque projet est traité avec précision car un bon design ne se voit pas juste, il se ressent.",
+    "trust": "ils m'ont fait",
+    "trust_em": "confiance"
+  },
+  "footer": {
+    "rights": "© 2026 walano design — tous droits réservés"
+  }
+}

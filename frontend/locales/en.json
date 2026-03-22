@@ -1,0 +1,46 @@
+{
+  "nav": {
+    "services": "services",
+    "portfolio": "portfolio",
+    "about": "about",
+    "contact": "contact us",
+    "estimate": "get a free quote"
+  },
+  "hero": {
+    "title": "walano design",
+    "contact": "contact us",
+    "estimate": "get a free quote"
+  },
+  "services": {
+    "title": "services",
+    "covers": { "label": "covers", "desc": "single & album cover artwork" },
+    "videos": { "label": "videos", "desc": "lyrics videos & video editing" },
+    "affiches": { "label": "posters", "desc": "event posters & visual sets" },
+    "branding": { "label": "logo & branding", "desc": "full visual identity" },
+    "miniatures": { "label": "thumbnails", "desc": "youtube thumbnails & web visuals" },
+    "bannieres": { "label": "banners", "desc": "twitch / youtube banners & profiles" }
+  },
+  "portfolio": {
+    "title": "portfolio",
+    "voir_plus": "see more",
+    "categories": {
+      "covers": "covers",
+      "branding": "logo & branding",
+      "videos": "videos",
+      "affiches": "posters",
+      "miniatures": "thumbnails",
+      "bannieres": "banners"
+    }
+  },
+  "about": {
+    "title": "who am i?",
+    "p1": "i'm walans, a visual designer specialized in the music industry.",
+    "p2": "based in quebec, i create striking visual identities for independent artists and labels.",
+    "p3": "every project is a collaboration — your vision, my execution.",
+    "trust": "they trusted",
+    "trust_em": "me"
+  },
+  "footer": {
+    "rights": "© 2026 walano design — all rights reserved"
+  }
+}
