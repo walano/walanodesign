@@ -107,6 +107,12 @@ STORAGES = {
     },
 }
 
+# ── CSRF ──────────────────────────────────────────────────────
+CSRF_TRUSTED_ORIGINS = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:8000"
+).split(",")
+
 # ── CORS ──────────────────────────────────────────────────────
 CORS_ALLOWED_ORIGINS = os.getenv(
     "CORS_ALLOWED_ORIGINS",
