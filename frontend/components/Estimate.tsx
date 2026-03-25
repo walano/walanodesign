@@ -356,7 +356,7 @@ function NavButtons({ onBack, onNext, nextLabel, backLabel, disabled }: {
 function ResultScreen({ state, onReset, copy }: {
   state: FormState;
   onReset: () => void;
-  copy: typeof COPY["fr"];
+  copy: typeof COPY["fr"] | typeof COPY["en"];
 }) {
   const [result, setResult]   = useState<DevisResult | null>(null);
   const [loading, setLoading] = useState(true);
