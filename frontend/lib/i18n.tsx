@@ -9,10 +9,16 @@ type Translations = typeof fr;
 
 const translations: Record<Lang, Translations> = { fr, en };
 
+const STORAGE_KEY = "wd-lang";
+
 function detectLang(): Lang {
-  if (typeof navigator === "undefined") return "fr";
+  if (typeof window === "undefined") return "fr";
+  const saved = localStorage.getItem(STORAGE_KEY) as Lang | null;
+  if (saved === "fr" || saved === "en") return saved;
   const preferred = navigator.language || "fr";
-  return preferred.toLowerCase().startsWith("fr") ? "fr" : "en";
+  const detected: Lang = preferred.toLowerCase().startsWith("fr") ? "fr" : "en";
+  localStorage.setItem(STORAGE_KEY, detected);
+  return detected;
 }
 
 interface I18nContextType {
@@ -26,7 +32,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>("fr");
 
   useEffect(() => {
-    setLang(detectLang());
+    const l = detectLang();
+    setLang(l);
+    document.documentElement.lang = l;
   }, []);
 
   const t = useCallback(

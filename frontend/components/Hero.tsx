@@ -206,7 +206,7 @@ export default function Hero() {
 
   const NAV_LINKS = [
     { key: "services",  href: "#services"  },
-    { key: "portfolio", href: "#portfolio" },
+    { key: "portfolio", href: "/portfolio" },
     { key: "about",     href: "#about"     },
   ];
 
@@ -245,7 +245,7 @@ export default function Hero() {
             lineHeight: 1,
           }}
         >
-          {t("hero.title")}
+          walano des<span style={{ marginRight: "-0.05em" }}>i</span>gn
         </h1>
 
         {/* Nav */}
@@ -273,7 +273,7 @@ export default function Hero() {
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.color = "var(--violet)")}
                 onMouseLeave={(e) => (e.currentTarget.style.color = "var(--white)")}
-                onClick={(e) => { e.preventDefault(); scrollTo(href); }}
+                onClick={(e) => { if (href.startsWith("/")) return; e.preventDefault(); scrollTo(href); }}
               >
                 {t(`nav.${key}`)}
               </a>
@@ -299,7 +299,7 @@ export default function Hero() {
           }}
         >
           <span>
-            ce que tu{" "}
+            {t("hero.tagline_l1")}
             <em style={{
               fontFamily:    "source-serif-pro, serif",
               fontStyle:     "italic",
@@ -307,11 +307,11 @@ export default function Hero() {
               fontSize:      "115%",
               letterSpacing: "-0.04em",
               color:         "var(--violet)",
-            }}>vois</em>
+            }}>{t("hero.tagline_w1")}</em>
           </span>
           <br />
           <span>
-            avant d&apos;
+            {t("hero.tagline_l2")}
             <em style={{
               fontFamily:    "source-serif-pro, serif",
               fontStyle:     "italic",
@@ -319,7 +319,7 @@ export default function Hero() {
               fontSize:      "115%",
               letterSpacing: "-0.04em",
               color:         "var(--violet)",
-            }}>entendre</em>
+            }}>{t("hero.tagline_w2")}</em>
             .
           </span>
         </div>
@@ -336,7 +336,7 @@ export default function Hero() {
           }}
         >
           <a
-            href="#about"
+            href="/contact"
             style={{
               fontFamily:          "Inter, sans-serif",
               fontWeight:          600,
@@ -360,12 +360,11 @@ export default function Hero() {
               e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
               e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.18)";
             }}
-            onClick={(e) => { e.preventDefault(); scrollTo("#about"); }}
           >
             {t("hero.contact")}
           </a>
           <a
-            href="#about"
+            href="/devis"
             style={{
               fontFamily:          "Inter, sans-serif",
               fontWeight:          600,
@@ -389,7 +388,7 @@ export default function Hero() {
               e.currentTarget.style.backgroundColor = "rgba(133, 92, 157, 0.3)";
               e.currentTarget.style.borderColor = "rgba(133, 92, 157, 0.5)";
             }}
-            onClick={(e) => { e.preventDefault(); scrollTo("#about"); }}
+            onClick={undefined}
           >
             {t("hero.estimate")}
           </a>

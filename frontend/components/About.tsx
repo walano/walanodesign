@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useI18n } from "@/lib/i18n";
 import Image from "next/image";
+import { fetchSiteConfig, fetchClients, type SiteConfig, type Client } from "@/lib/api";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const CLIENTS = [
-  { name: "Toossaint H.", role: "artiste" },
-  { name: "Trianon Homes", role: "entreprise" },
-  { name: "Nom", role: "entrepreneur" },
-  { name: "QLB Club", role: "label" },
-  { name: "Nom", role: "entreprise" },
+const FALLBACK_CLIENTS: Client[] = [
+  { id: 1, name: "Toossaint H.", role: "artiste",      avatar_url: null, order: 0 },
+  { id: 2, name: "Trianon Homes",role: "entreprise",   avatar_url: null, order: 1 },
+  { id: 3, name: "QLB Club",     role: "label",        avatar_url: null, order: 2 },
 ];
 
 export default function About() {
@@ -23,6 +22,14 @@ export default function About() {
   const textRef       = useRef<HTMLDivElement>(null);
   const trustTitleRef = useRef<HTMLParagraphElement>(null);
   const avatarsRef    = useRef<HTMLDivElement>(null);
+
+  const [config, setConfig]   = useState<SiteConfig | null>(null);
+  const [clients, setClients] = useState<Client[]>(FALLBACK_CLIENTS);
+
+  useEffect(() => {
+    fetchSiteConfig().then(data => { if (data) setConfig(data); });
+    fetchClients().then(data => { if (data.length > 0) setClients(data); });
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -84,7 +91,7 @@ export default function About() {
                 height: "clamp(200px, 28vw, 400px)",
               }}
             >
-              <Image src="/me.png" alt="walano" fill className="object-cover object-top" />
+              <Image src={config?.about_photo_url || "/me.png"} alt="walano" fill className="object-cover object-top" />
             </div>
 
             {/* Dark box — title + text, capped to photo height */}
@@ -134,10 +141,10 @@ export default function About() {
                   minHeight: 0,
                 }}
               >
-                <p>{t("about.p1")}</p>
+                <p>{config?.about_text || t("about.p1")}</p>
               </div>
               <a
-                href="#contact"
+                href="/devis"
                 className="about-cta"
                 style={{
                   alignSelf: "flex-start",
@@ -255,7 +262,7 @@ export default function About() {
                 }}
               >
                 {[...Array(3)].flatMap((_, rep) =>
-                  CLIENTS.map((client, ci) => (
+                  clients.map((client, ci) => (
                     <div
                       key={`${rep}-${ci}`}
                       style={{
@@ -270,6 +277,7 @@ export default function About() {
                       {/* Avatar circle */}
                       <div
                         style={{
+                          position:        "relative",
                           width:           "clamp(120px, 20vw, 200px)",
                           height:          "clamp(120px, 20vw, 200px)",
                           borderRadius:    "9999px",
@@ -278,17 +286,16 @@ export default function About() {
                           display:         "flex",
                           alignItems:      "center",
                           justifyContent:  "center",
+                          overflow:        "hidden",
                         }}
                       >
-                        <span
-                          style={{
-                            fontFamily: "Inter, sans-serif",
-                            color:      "rgba(133,92,157,0.6)",
-                            fontSize:   "clamp(1.2rem, 3vw, 2rem)",
-                          }}
-                        >
-                          {client.name.charAt(0)}
-                        </span>
+                        {client.avatar_url ? (
+                          <Image src={client.avatar_url} alt={client.name} fill className="object-cover rounded-full" />
+                        ) : (
+                          <span style={{ fontFamily: "Inter, sans-serif", color: "rgba(133,92,157,0.6)", fontSize: "clamp(1.2rem, 3vw, 2rem)" }}>
+                            {client.name.charAt(0)}
+                          </span>
+                        )}
                       </div>
 
                       {/* Name + Role */}

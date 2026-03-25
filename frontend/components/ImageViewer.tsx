@@ -37,8 +37,17 @@ export default function ImageViewer({ images, initialIndex, onClose }: Props) {
       if (e.key === "ArrowLeft")  prev();
       if (e.key === "ArrowRight") next();
     };
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaX > 30 || e.deltaY > 30)  next();
+      if (e.deltaX < -30 || e.deltaY < -30) prev();
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("wheel", onWheel, { passive: false });
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("wheel", onWheel);
+    };
   }, [onClose, prev, next]);
 
   const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX; };
@@ -132,26 +141,28 @@ export default function ImageViewer({ images, initialIndex, onClose }: Props) {
               left:           "clamp(0.5rem, 2vw, 1.5rem)",
               top:            "50%",
               transform:      "translateY(-50%)",
-              width:          48,
-              height:         48,
+              padding:        "0.5rem 1rem",
               alignItems:     "center",
               justifyContent: "center",
               background:     "rgba(12,12,12,0.55)",
               border:         "1px solid rgba(255,255,255,0.15)",
               backdropFilter: "blur(10px)",
               color:          "#f5f3f7",
-              fontSize:       "1.2rem",
+              fontFamily:     "Inter, sans-serif",
+              fontWeight:     600,
+              fontSize:       "0.72rem",
+              letterSpacing:  "0.06em",
               cursor:         "pointer",
               transition:     "background 0.2s",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
           >
-            ←
+            prev
           </button>
         )}
 
-        {/* Next arrow — desktop only */}
+        {/* Next button — desktop only */}
         {images.length > 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
@@ -161,22 +172,24 @@ export default function ImageViewer({ images, initialIndex, onClose }: Props) {
               right:          "clamp(0.5rem, 2vw, 1.5rem)",
               top:            "50%",
               transform:      "translateY(-50%)",
-              width:          48,
-              height:         48,
+              padding:        "0.5rem 1rem",
               alignItems:     "center",
               justifyContent: "center",
               background:     "rgba(12,12,12,0.55)",
               border:         "1px solid rgba(255,255,255,0.15)",
               backdropFilter: "blur(10px)",
               color:          "#f5f3f7",
-              fontSize:       "1.2rem",
+              fontFamily:     "Inter, sans-serif",
+              fontWeight:     600,
+              fontSize:       "0.72rem",
+              letterSpacing:  "0.06em",
               cursor:         "pointer",
               transition:     "background 0.2s",
             }}
             onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
             onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
           >
-            →
+            next
           </button>
         )}
       </div>
@@ -229,7 +242,7 @@ export default function ImageViewer({ images, initialIndex, onClose }: Props) {
             e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
           }}
         >
-          ← retour
+          retour
         </button>
       </div>
     </div>

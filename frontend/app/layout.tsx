@@ -4,13 +4,55 @@ import { I18nProvider } from "@/lib/i18n";
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 
 export const metadata: Metadata = {
-  title: "Walans Design — Design visuel pour la musique",
+  metadataBase: new URL("https://walanodesign.com"),
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
+  title: {
+    default: "Walano Design | Design visuel pour la musique",
+    template: "%s | Walano Design",
+  },
   description:
-    "Covers, vidéos, affiches, branding et miniatures pour artistes et labels indépendants.",
+    "Covers, lyrics videos, affiches, logo & branding, miniatures YouTube pour artistes et labels indépendants. Devis gratuit en ligne.",
+  keywords: [
+    "walano design",
+    "graphiste musique",
+    "cover album",
+    "pochette single",
+    "lyrics video",
+    "branding artiste",
+    "miniatures youtube",
+    "affiche concert",
+    "design visuel musique",
+    "graphic designer music",
+    "album artwork",
+    "music branding",
+  ],
+  authors: [{ name: "Walano Design" }],
+  creator: "Walano Design",
   openGraph: {
-    title: "Walans Design",
-    description: "Design visuel pour l'industrie musicale",
-    siteName: "Walans Design",
+    title: "Walano Design | Design visuel pour la musique",
+    description:
+      "Covers, lyrics videos, affiches, logo & branding, miniatures YouTube pour artistes et labels indépendants.",
+    siteName: "Walano Design",
+    url: "https://walanodesign.com",
+    type: "website",
+    images: [
+      {
+        url: "/me.png",
+        alt: "Walano Design — Design visuel pour la musique",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Walano Design | Design visuel pour la musique",
+    description:
+      "Covers, lyrics videos, affiches, branding pour artistes indépendants.",
+    images: ["/me.png"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 

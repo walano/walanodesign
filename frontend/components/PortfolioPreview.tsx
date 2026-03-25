@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useI18n } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
 import ImageViewer, { ViewerImage } from "@/components/ImageViewer";
+import { fetchPreviewSlots, Project } from "@/lib/api";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -18,23 +19,25 @@ const CATEGORIES = [
   { key: "bannieres",  aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
 ] as const;
 
-// Mobile: flat 2-col grid — all items same treatment, no special wide handling
-const MOBILE_ITEMS: string[] = [
-  "aspect-square",
-  "aspect-square",
-  "aspect-[3/4]",
-  "aspect-square",
-  "aspect-video",
-  "aspect-[3/4]",
-  "aspect-square",
-  "aspect-square",
-  "aspect-video",
-  "aspect-[3/4]",
-  "aspect-square",
-  "aspect-square",
-];
+// Mobile layout: 4 squares | 1 wide | 2 tall | 1 wide  (8 slots total)
+// slot index →  aspect
+const MOBILE_LAYOUT = [
+  "aspect-square",  // 0
+  "aspect-square",  // 1
+  "aspect-square",  // 2
+  "aspect-square",  // 3
+  "aspect-video",   // 4 — full width
+  "aspect-[3/4]",   // 5
+  "aspect-[3/4]",   // 6
+  "aspect-video",   // 7 — full width
+] as const;
 
 const CARD_GAP = "clamp(0.4rem, 0.8vw, 0.75rem)";
+
+function getYouTubeId(url: string): string | null {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
 
 interface ViewerState { images: ViewerImage[]; index: number; }
 
@@ -42,7 +45,15 @@ export default function PortfolioPreview() {
   const { t } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
-  const [viewer, setViewer] = useState<ViewerState | null>(null);
+  const [viewer,   setViewer]   = useState<ViewerState | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [desktopProjects, setDesktopProjects] = useState<Project[]>([]);
+  const [mobileProjects,  setMobileProjects]  = useState<Project[]>([]);
+
+  useEffect(() => {
+    fetchPreviewSlots("desktop").then(slots => setDesktopProjects(slots.map(s => s.project)));
+    fetchPreviewSlots("mobile").then(slots  => setMobileProjects(slots.map(s => s.project)));
+  }, []);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -124,8 +135,13 @@ export default function PortfolioPreview() {
                 <div className={`grid ${cols}`} style={{ gap: CARD_GAP }}>
                   {Array.from({ length: count }).map((_, i) => {
                     const isLast = i === count - 1;
-                    const rowImages: ViewerImage[] = Array.from({ length: count - 1 }).map((_, j) => ({
-                      label:           `${t(`portfolio.categories.${key}`)} — ${j + 1}`,
+                    const catProjects = desktopProjects.filter(p =>
+                      (p.images.length > 0 || p.yt_thumbnail) && p.category === key);
+                    const proj = catProjects[i];
+                    const imgUrl = proj?.images[0]?.url || proj?.yt_thumbnail;
+                    const rowImages: ViewerImage[] = catProjects.slice(0, count - 1).map(p => ({
+                      src:             p.images[0]?.url || p.yt_thumbnail || "",
+                      label:           p.title || t(`portfolio.categories.${key}`),
                       aspectRatio:     aspect.replace("aspect-[", "").replace("]", "").replace("aspect-square", "1").replace("aspect-video", "16/9"),
                       backgroundColor: "#e8dff2",
                     }));
@@ -135,10 +151,32 @@ export default function PortfolioPreview() {
                         className={`relative ${aspect} overflow-hidden cursor-pointer group/card`}
                         style={{ backgroundColor: "#e8dff2" }}
                         onClick={() => {
-                          if (isLast) router.push(`/portfolio?category=${key}`);
-                          else setViewer({ images: rowImages, index: i });
+                          if (isLast) { router.push(`/portfolio?category=${key}`); return; }
+                          if (proj?.youtube_url) {
+                            const id = getYouTubeId(proj.youtube_url);
+                            if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
+                          }
+                          setViewer({ images: rowImages, index: i });
                         }}
                       >
+                        {imgUrl && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={imgUrl} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                        )}
+                        {/* Play button overlay for video projects */}
+                        {proj?.youtube_url && !isLast && (
+                          <div className="absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover/card:opacity-100 transition-opacity duration-200">
+                            <div style={{
+                              width: 36, height: 36, borderRadius: "50%",
+                              background: "rgba(12,12,12,0.7)", border: "1px solid rgba(255,255,255,0.3)",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                            }}>
+                              <svg viewBox="0 0 12 12" width="12" height="12" fill="#f5f3f7">
+                                <polygon points="3,1 11,6 3,11" />
+                              </svg>
+                            </div>
+                          </div>
+                        )}
                         <div
                           className="absolute inset-0 transition-all duration-300"
                           style={{ backgroundColor: "rgba(133,92,157,0)" }}
@@ -151,20 +189,20 @@ export default function PortfolioPreview() {
                         />
                         {isLast && (
                           <>
-                            <div className="absolute inset-0 z-[5] backdrop-blur-[2px]" />
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
+                            <div className="absolute inset-0 z-[5]" style={{ backdropFilter: "blur(3px)", backgroundColor: "rgba(12,12,12,0.45)" }} />
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1">
                               <span
                                 style={{
                                   fontFamily: "Inter, sans-serif",
                                   fontWeight: 700,
                                   fontSize: "0.6rem",
-                                  color: "#0c0c0c",
+                                  color: "#f5f3f7",
                                   textTransform: "lowercase",
+                                  letterSpacing: "0.06em",
                                 }}
                               >
                                 {t("portfolio.voir_plus")}
                               </span>
-                              <span style={{ color: "#855c9d", fontSize: "0.9rem" }}>→</span>
                             </div>
                           </>
                         )}
@@ -209,46 +247,79 @@ export default function PortfolioPreview() {
             </a>
           </div>
 
-          {/* ── Mobile: flat 2-col grid, uniform treatment ── */}
+          {/* ── Mobile: structured layout ── */}
           <div className="md:hidden flex flex-col" style={{ gap: CARD_GAP, paddingTop: "1.5rem" }}>
             {(() => {
-              const mobileImages: ViewerImage[] = MOBILE_ITEMS.map((asp, i) => ({
-                label:           `visuel ${i + 1}`,
-                aspectRatio:     asp.replace("aspect-[", "").replace("]", "").replace("aspect-square", "1").replace("aspect-video", "16/9"),
+              const images = mobileProjects.map(p => ({
+                src:             p.images[0]?.url || p.yt_thumbnail || undefined,
+                label:           p.title || "",
+                aspectRatio:     "1",
                 backgroundColor: "#e8dff2",
               }));
-              const leftItems  = MOBILE_ITEMS.filter((_, i) => i % 2 === 0);
-              const rightItems = MOBILE_ITEMS.filter((_, i) => i % 2 === 1);
+              // pad to 8 slots
+              const slots = MOBILE_LAYOUT.map((aspect, i) => ({
+                ...(images[i] ?? { src: undefined, label: `visuel ${i + 1}`, aspectRatio: "1", backgroundColor: "#e8dff2" }),
+                aspect,
+              }));
+
+              const card = (idx: number, extraStyle?: React.CSSProperties) => {
+                const proj = mobileProjects[idx];
+                const handleClick = () => {
+                  if (proj?.youtube_url) {
+                    const id = getYouTubeId(proj.youtube_url);
+                    if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
+                  }
+                  setViewer({ images: images.slice(0, 8), index: idx });
+                };
+                return (
+                  <div
+                    key={idx}
+                    className={`relative ${slots[idx].aspect} overflow-hidden cursor-pointer`}
+                    style={{ backgroundColor: "#e8dff2", ...extraStyle }}
+                    onClick={handleClick}
+                  >
+                    {slots[idx].src && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={slots[idx].src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+                    )}
+                    {proj?.youtube_url && (
+                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(12,12,12,0.15)" }}>
+                        <div style={{
+                          width: 32, height: 32, borderRadius: "50%",
+                          background: "rgba(12,12,12,0.65)", border: "1px solid rgba(255,255,255,0.3)",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          <svg viewBox="0 0 12 12" width="11" height="11" fill="#f5f3f7">
+                            <polygon points="3,1 11,6 3,11" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              };
+
               return (
-                <div style={{ display: "flex", gap: CARD_GAP }}>
-                  {/* Left column — even indices */}
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: CARD_GAP }}>
-                    {leftItems.map((aspect, col) => {
-                      const realIdx = col * 2;
-                      return (
-                        <div
-                          key={col}
-                          className={`relative ${aspect} overflow-hidden cursor-pointer`}
-                          style={{ backgroundColor: "#e8dff2", width: "100%" }}
-                          onClick={() => setViewer({ images: mobileImages, index: realIdx })}
-                        />
-                      );
-                    })}
+                <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
+                  {/* row 1: squares 0 + 1 */}
+                  <div style={{ display: "flex", gap: CARD_GAP }}>
+                    <div style={{ flex: 1 }}>{card(0)}</div>
+                    <div style={{ flex: 1 }}>{card(1)}</div>
                   </div>
-                  {/* Right column — odd indices */}
-                  <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: CARD_GAP }}>
-                    {rightItems.map((aspect, col) => {
-                      const realIdx = col * 2 + 1;
-                      return (
-                        <div
-                          key={col}
-                          className={`relative ${aspect} overflow-hidden cursor-pointer`}
-                          style={{ backgroundColor: "#e8dff2", width: "100%" }}
-                          onClick={() => setViewer({ images: mobileImages, index: realIdx })}
-                        />
-                      );
-                    })}
+                  {/* row 2: squares 2 + 3 */}
+                  <div style={{ display: "flex", gap: CARD_GAP }}>
+                    <div style={{ flex: 1 }}>{card(2)}</div>
+                    <div style={{ flex: 1 }}>{card(3)}</div>
                   </div>
+                  {/* row 3: full-width horizontal 4 */}
+                  {card(4, { width: "100%" })}
+                  {/* row 4: tall 5 + 6 */}
+                  <div style={{ display: "flex", gap: CARD_GAP }}>
+                    <div style={{ flex: 1 }}>{card(5)}</div>
+                    <div style={{ flex: 1 }}>{card(6)}</div>
+                  </div>
+                  {/* row 5: full-width horizontal 7 */}
+                  {card(7, { width: "100%" })}
                 </div>
               );
             })()}
@@ -296,6 +367,37 @@ export default function PortfolioPreview() {
           initialIndex={viewer.index}
           onClose={() => setViewer(null)}
         />
+      )}
+
+      {videoUrl && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center"
+          style={{ background: "rgba(0,0,0,0.85)" }}
+          onClick={() => setVideoUrl(null)}
+        >
+          <div
+            style={{ position: "relative", width: "min(90vw, 900px)", aspectRatio: "16/9" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <iframe
+              src={videoUrl}
+              allow="autoplay; fullscreen"
+              allowFullScreen
+              style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+            />
+            <button
+              onClick={() => setVideoUrl(null)}
+              style={{
+                position: "absolute", top: "-2.2rem", right: 0,
+                background: "none", border: "none",
+                color: "rgba(245,243,247,0.6)", fontFamily: "Inter, sans-serif",
+                fontSize: "0.8rem", letterSpacing: "0.06em", cursor: "pointer",
+              }}
+            >
+              fermer
+            </button>
+          </div>
+        </div>
       )}
     </section>
   );

@@ -3,13 +3,17 @@
     "services": "services",
     "portfolio": "portfolio",
     "about": "à propos",
-    "contact": "nous contacter",
+    "contact": "me contacter",
     "estimate": "obtenir un devis gratuit"
   },
   "hero": {
     "title": "walano design",
-    "contact": "nous contacter",
-    "estimate": "obtenir un devis gratuit"
+    "contact": "me contacter",
+    "estimate": "obtenir un devis gratuit",
+    "tagline_l1": "ce que tu ",
+    "tagline_w1": "vois",
+    "tagline_l2": "avant d\u2019",
+    "tagline_w2": "entendre"
   },
   "services": {
     "title": "services",
@@ -38,7 +42,29 @@
     "trust": "ils m'ont fait",
     "trust_em": "confiance"
   },
+  "contact": {
+    "title": "contact",
+    "label_before": "un projet en ",
+    "label_em": "tête",
+    "label_after": " ?",
+    "sub": "décrivez votre projet ou posez une question directement.",
+    "name": "votre prénom",
+    "email": "votre email",
+    "subject": "sujet",
+    "message": "votre message",
+    "send": "envoyer",
+    "sending": "envoi en cours…",
+    "success": "message envoyé. on vous recontacte bientôt.",
+    "error": "une erreur est survenue. réessayez ou écrivez directement à contact@walanodesign.com"
+  },
+  "notfound": {
+    "code":    "404",
+    "title":   "cette page n'existe pas.",
+    "sub":     "elle a peut-être été déplacée, supprimée, ou n'a jamais existé.",
+    "home":    "retour à l'accueil",
+    "hint":    "clique sur le logo"
+  },
   "footer": {
-    "rights": "© 2026 walano design — tous droits réservés"
+    "rights": "© 2026 walano design, tous droits réservés"
   }
 }

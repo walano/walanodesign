@@ -1,5 +1,7 @@
 "use client";
 
+import { useI18n } from "@/lib/i18n";
+
 const SOCIALS = [
   {
     label: "Instagram",
@@ -58,6 +60,7 @@ const SOCIALS = [
 ];
 
 export default function Footer() {
+  const { t } = useI18n();
   return (
     <footer
       style={{
@@ -143,7 +146,7 @@ export default function Footer() {
             display:    "block",
           }}
         >
-          walano design
+          walano des<span style={{ marginRight: "-0.05em" }}>i</span>gn
         </span>
       </div>
 
@@ -159,7 +162,7 @@ export default function Footer() {
           paddingInline: "1rem",
         }}
       >
-        © 2026 walano design — tous droits réservés
+        {t("footer.rights")}
       </p>
     </footer>
   );

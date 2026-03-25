@@ -3,13 +3,17 @@
     "services": "services",
     "portfolio": "portfolio",
     "about": "about",
-    "contact": "contact us",
+    "contact": "contact me",
     "estimate": "get a free quote"
   },
   "hero": {
     "title": "walano design",
-    "contact": "contact us",
-    "estimate": "get a free quote"
+    "contact": "contact me",
+    "estimate": "get a free quote",
+    "tagline_l1": "what you ",
+    "tagline_w1": "see",
+    "tagline_l2": "before you ",
+    "tagline_w2": "hear"
   },
   "services": {
     "title": "services",
@@ -34,13 +38,33 @@
   },
   "about": {
     "title": "who am i?",
-    "p1": "i'm walans, a visual designer specialized in the music industry.",
-    "p2": "based in quebec, i create striking visual identities for independent artists and labels.",
-    "p3": "every project is a collaboration — your vision, my execution.",
+    "p1": "i'm walano, a graphic designer specialized in crafting strong visual universes, blending urban aesthetics with modern elegance. my goal is to transform your ideas, emotions and identity into visuals that speak for themselves. every project is handled with precision, because great design isn't just seen, it's felt.",
     "trust": "they trusted",
     "trust_em": "me"
   },
+  "contact": {
+    "title": "contact",
+    "label_before": "got a project in ",
+    "label_em": "mind",
+    "label_after": " ?",
+    "sub": "describe your project or ask a question directly.",
+    "name": "your first name",
+    "email": "your email",
+    "subject": "subject",
+    "message": "your message",
+    "send": "send",
+    "sending": "sending…",
+    "success": "message sent. we'll get back to you soon.",
+    "error": "something went wrong. try again or write directly to contact@walanodesign.com"
+  },
+  "notfound": {
+    "code":    "404",
+    "title":   "this page doesn't exist.",
+    "sub":     "it may have been moved, deleted, or never existed.",
+    "home":    "back to home",
+    "hint":    "click the logo"
+  },
   "footer": {
-    "rights": "© 2026 walano design — all rights reserved"
+    "rights": "© 2026 walano design, all rights reserved"
   }
 }
