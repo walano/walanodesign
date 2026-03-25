@@ -28,7 +28,10 @@ export async function submitDevis(payload: DevisPayload): Promise<DevisResult> {
     headers: { "Content-Type": "application/json" },
     body:    JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Erreur serveur");
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `Erreur ${res.status}`);
+  }
   return res.json();
 }
 

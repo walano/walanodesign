@@ -187,7 +187,7 @@ def _build_prompt(data: dict) -> str:
     surcharge_note = f" (supplément +{dl_surcharge}%)" if dl_surcharge else ""
 
     lang       = data.get("lang", "fr")
-    lang_note  = "Write in English." if (lang == "en" or currency == "USD") else "Écris en français."
+    lang_note  = "Write in English." if lang == "en" else "Écris en français."
 
     return f"""Tu es la voix de Walano, graphiste et artiste visuel spécialisé dans l'industrie musicale. Tu ne parles pas comme un commercial, tu parles comme un artiste qui prend le travail au sérieux. Tu t'adresses directement au client, avec chaleur, sans fioriture, sans sur-vente. Aucun emoji. {lang_note}
 
@@ -289,7 +289,7 @@ def devis(request):
                 "max_tokens": 1000,
                 "messages":   [{"role": "user", "content": prompt}],
             },
-            timeout=30,
+            timeout=90,
         )
         resp.raise_for_status()
         text = resp.json()["content"][0]["text"].strip()
@@ -297,6 +297,9 @@ def devis(request):
         ai_result = json.loads(text)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
+
+    client_name  = data.get("name", "")
+    client_email = data.get("email", "")
 
     Devis.objects.create(
         category       = data.get("category", ""),
@@ -306,10 +309,73 @@ def devis(request):
         deadline       = data.get("deadline", ""),
         currency       = data.get("currency", "FCFA"),
         budget         = data.get("budget", ""),
-        name           = data.get("name", ""),
-        email          = data.get("email", ""),
+        name           = client_name,
+        email          = client_email,
         ai_response    = ai_result,
     )
+
+    # ── Email au client ────────────────────────────────────────
+    try:
+        pack    = ai_result.get("packName", "")
+        offer   = ai_result.get("offerTitle", "")
+        price   = ai_result.get("price", "")
+        details = ai_result.get("offerDetails", "")
+        message = ai_result.get("message", "")
+        upsell  = ai_result.get("upsell", "")
+
+        body_client = f"""Bonjour {client_name},
+
+Voici votre estimation Walano Design.
+
+{pack}
+{offer}
+Prix estimé : {price}
+
+Ce qui est inclus :
+{details}
+
+{message}
+
+{"---" + chr(10) + upsell if upsell else ""}
+
+---
+Cette estimation est indicative et peut être ajustée selon les détails finaux de votre projet.
+Pour aller plus loin : contact@walanodesign.com
+"""
+        send_mail(
+            subject      = f"[Walano Design] Votre estimation — {pack}",
+            message      = body_client,
+            from_email   = os.getenv("DEFAULT_FROM_EMAIL", "contact@walanodesign.com"),
+            recipient_list = [client_email],
+            fail_silently  = True,
+        )
+
+        # ── Notif interne ──────────────────────────────────────
+        contact_email = os.getenv("CONTACT_EMAIL", "")
+        if contact_email:
+            body_internal = f"""Nouveau devis soumis.
+
+Prénom : {client_name}
+Email   : {client_email}
+Catégorie : {data.get("category")} / {data.get("subtype")}
+Budget : {data.get("budget")} ({data.get("currency")})
+Deadline : {data.get("deadline")}
+
+Description : {data.get("extra", "—")}
+
+Résultat IA :
+{pack} — {price}
+{details}
+"""
+            send_mail(
+                subject        = f"[Walano Devis] {client_name} — {pack}",
+                message        = body_internal,
+                from_email     = os.getenv("DEFAULT_FROM_EMAIL", "contact@walanodesign.com"),
+                recipient_list = [contact_email],
+                fail_silently  = True,
+            )
+    except Exception:
+        pass  # l'email ne bloque pas la réponse
 
     return Response(ai_result, status=status.HTTP_200_OK)
 

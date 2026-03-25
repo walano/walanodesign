@@ -38,7 +38,7 @@ class ProjectAdmin(ModelAdmin):
 
     class Media:
         js = [
-            "adminsortable2/js/sortable.js",
+            "https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js",
             "portfolio/admin/project_wizard.js",
             "portfolio/admin/drag_sort.js",
         ]
