@@ -722,7 +722,7 @@ function PortfolioContent() {
         />;
       }
       return projects.length > 0
-        ? <AllImagesGrid projects={projects} aspect={ASPECT[active]} onOpen={openViewer} threeCol={threeCol} square={active === "branding" || active === "covers"} />
+        ? <AllImagesGrid projects={projects} aspect={ASPECT[active]} onOpen={openViewer} threeCol={threeCol} square={active === "covers"} />
         : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
     }
 
