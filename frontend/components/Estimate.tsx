@@ -249,7 +249,7 @@ const COPY = {
       sentTo:         "sent to",
     },
   },
-} as const;
+};
 
 // ─── Currency / budget data (labels stay numeric, language-agnostic) ───────────
 const CURRENCIES = [
@@ -356,7 +356,7 @@ function NavButtons({ onBack, onNext, nextLabel, backLabel, disabled }: {
 function ResultScreen({ state, onReset, copy }: {
   state: FormState;
   onReset: () => void;
-  copy: typeof COPY["fr"] | typeof COPY["en"];
+  copy: typeof COPY["fr"];
 }) {
   const [result, setResult]   = useState<DevisResult | null>(null);
   const [loading, setLoading] = useState(true);
