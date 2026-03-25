@@ -380,7 +380,7 @@ Résultat IA :
                     fail_silently  = False,
                 )
         except Exception as e:
-            logger.error(f"[devis email error] {e}")
+            print(f"[devis email error] {type(e).__name__}: {e}", flush=True)
 
     threading.Thread(target=_send_emails, daemon=True).start()
 
