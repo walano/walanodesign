@@ -1,7 +1,10 @@
 import os
 import json
+import logging
 import threading
 import requests as http
+
+logger = logging.getLogger(__name__)
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -350,7 +353,7 @@ Pour aller plus loin : contact@walanodesign.com
                 message        = body_client,
                 from_email     = from_email,
                 recipient_list = [client_email],
-                fail_silently  = True,
+                fail_silently  = False,
             )
 
             contact_email = os.getenv("CONTACT_EMAIL", "")
@@ -374,10 +377,10 @@ Résultat IA :
                     message        = body_internal,
                     from_email     = from_email,
                     recipient_list = [contact_email],
-                    fail_silently  = True,
+                    fail_silently  = False,
                 )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.error(f"[devis email error] {e}")
 
     threading.Thread(target=_send_emails, daemon=True).start()
 
