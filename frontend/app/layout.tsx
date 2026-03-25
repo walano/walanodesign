@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://walanodesign.com/me.png",
+        url: "https://walanodesign.com/me.jpg",
         alt: "Walano Design",
       },
     ],
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "Walano Design",
     description:
       "Covers, lyrics videos, affiches, branding, miniatures, bannières.",
-    images: ["https://walanodesign.com/me.png"],
+    images: ["https://walanodesign.com/me.jpg"],
   },
   robots: {
     index: true,
