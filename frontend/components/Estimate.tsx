@@ -258,29 +258,30 @@ const CURRENCIES = [
   { id: "USD",  label: "dollar ($)", sub_fr: "english",            sub_en: "english",             symbol: "USD" },
 ];
 
-const BUDGETS_BY_CURRENCY: Record<string, { id: string; label: string }[]> = {
-  FCFA: [
-    { id: "b1", label: "moins de 50.000 fcfa" },
+function getBudgets(currency: string, lang: string): { id: string; label: string }[] {
+  const fr = lang === "fr";
+  if (currency === "FCFA") return [
+    { id: "b1", label: fr ? "moins de 50.000 fcfa"        : "less than 50,000 fcfa" },
     { id: "b2", label: "50.000 – 150.000 fcfa" },
     { id: "b3", label: "150.000 – 300.000 fcfa" },
     { id: "b4", label: "300.000 – 500.000 fcfa" },
-    { id: "b5", label: "500.000 fcfa et plus" },
-  ],
-  EUR: [
-    { id: "b1", label: "less than 80€" },
+    { id: "b5", label: fr ? "500.000 fcfa et plus"        : "500,000 fcfa and above" },
+  ];
+  if (currency === "EUR") return [
+    { id: "b1", label: fr ? "moins de 80€"   : "less than 80€" },
     { id: "b2", label: "80€ – 250€" },
     { id: "b3", label: "250€ – 500€" },
     { id: "b4", label: "500€ – 800€" },
-    { id: "b5", label: "800€ and above" },
-  ],
-  USD: [
-    { id: "b1", label: "less than $90" },
+    { id: "b5", label: fr ? "800€ et plus"   : "800€ and above" },
+  ];
+  return [
+    { id: "b1", label: fr ? "moins de 90$"   : "less than $90" },
     { id: "b2", label: "$90 – $270" },
     { id: "b3", label: "$270 – $540" },
     { id: "b4", label: "$540 – $850" },
-    { id: "b5", label: "$850 and above" },
-  ],
-};
+    { id: "b5", label: fr ? "850$ et plus"   : "$850 and above" },
+  ];
+}
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function getSteps(category: string | null) {
@@ -738,7 +739,7 @@ export default function Estimate() {
             {/* STEP: budget */}
             {currentStep === "budget" && state.currency && (
               <div style={{ display: "flex", flexDirection: "column", gap: 7, flex: 1 }}>
-                {(BUDGETS_BY_CURRENCY[state.currency] ?? []).map(b => (
+                {getBudgets(state.currency, state.lang).map(b => (
                   <button key={b.id} onClick={() => set("budget", b.id)} style={{
                     background:  state.budget === b.id ? C.btnSelBg : C.btnBg,
                     border:      `1px solid ${state.budget === b.id ? C.btnSelBorder : C.btnBorder}`,
