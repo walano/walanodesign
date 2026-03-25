@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     "cloudinary",
     "cloudinary_storage",
     "portfolio",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -38,6 +39,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -106,6 +108,17 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
+
+# ── Authentication ────────────────────────────────────────────
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# ── Axes (brute-force protection) ─────────────────────────────
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME  = 1  # heure(s) de blocage après 5 échecs
+AXES_LOCKOUT_CALLABLE = None
 
 # ── CSRF ──────────────────────────────────────────────────────
 CSRF_TRUSTED_ORIGINS = os.getenv(
