@@ -11,14 +11,16 @@ from rest_framework import status
 def _resend(to: str, subject: str, text: str):
     api_key = os.getenv("RESEND_API_KEY", "")
     if not api_key:
+        print("[resend] no API key", flush=True)
         return
     try:
-        http.post(
+        r = http.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
             json={"from": "Walano Design <contact@walanodesign.com>", "to": [to], "subject": subject, "text": text},
             timeout=15,
         )
+        print(f"[resend] to={to} status={r.status_code} body={r.text}", flush=True)
     except Exception as e:
         print(f"[resend error] {e}", flush=True)
 from .models import Project, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
