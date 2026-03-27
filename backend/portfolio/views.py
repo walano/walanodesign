@@ -359,7 +359,7 @@ Ce qui est inclus :
 Cette estimation est indicative et peut être ajustée selon les détails finaux de votre projet.
 Pour aller plus loin : contact@walanodesign.com
 """
-        _resend(client_email, f"[Walano Design] Votre estimation — {pack}", body_client)
+        _resend(client_email, f"Votre estimation — {pack}", body_client)
 
         contact_email = os.getenv("CONTACT_EMAIL", "")
         if contact_email:
@@ -377,7 +377,7 @@ Résultat IA :
 {pack} — {price}
 {details}
 """
-            _resend(contact_email, f"[Walano Devis] {client_name} — {pack}", body_internal)
+            _resend(contact_email, f"Devis — {client_name} · {pack}", body_internal)
 
     threading.Thread(target=_send_emails, daemon=True).start()
 
