@@ -215,8 +215,8 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
               key={thumbI}
               onClick={() => setIndex(thumbI)}
               style={{
-                width:           52,
-                height:          70,
+                width:           96,
+                height:          54,
                 flexShrink:      0,
                 cursor:          "pointer",
                 opacity:         thumbI === index ? 1 : 0.4,
