@@ -8,8 +8,14 @@ from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
 
 
-class MultipleFileInput(forms.ClearableFileInput):
+class MultipleFileInput(forms.FileInput):
     allow_multiple_selected = True
+
+    def __init__(self, attrs=None):
+        defaults = {"multiple": True, "accept": "image/*"}
+        if attrs:
+            defaults.update(attrs)
+        super().__init__(attrs=defaults)
 
 
 class MultipleFileField(forms.FileField):
