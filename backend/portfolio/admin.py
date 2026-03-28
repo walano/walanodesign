@@ -1,9 +1,38 @@
 import json
+from django import forms
 from django.contrib import admin
+from django.db.models import Max
 from django.http import JsonResponse
 from django.urls import path
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
+
+
+class MultipleFileInput(forms.ClearableFileInput):
+    allow_multiple_selected = True
+
+
+class MultipleFileField(forms.FileField):
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("widget", MultipleFileInput())
+        super().__init__(*args, **kwargs)
+
+    def clean(self, data, initial=None):
+        single = super().clean
+        if isinstance(data, (list, tuple)):
+            return [single(d, initial) for d in data]
+        return [single(data, initial)]
+
+
+class ProjectAdminForm(forms.ModelForm):
+    bulk_images = MultipleFileField(
+        label="Ajouter des images (sélection multiple)",
+        required=False,
+    )
+
+    class Meta:
+        model  = Project
+        fields = "__all__"
 
 
 class ProjectImageInline(TabularInline):
@@ -14,6 +43,7 @@ class ProjectImageInline(TabularInline):
 
 @admin.register(Project)
 class ProjectAdmin(ModelAdmin):
+    form            = ProjectAdminForm
     list_display    = ["drag_handle", "title", "category", "sub_type", "yt_views", "yt_published", "published"]
 
     @admin.display(description="")
@@ -28,13 +58,22 @@ class ProjectAdmin(ModelAdmin):
     readonly_fields = ["yt_title", "yt_published", "yt_views", "yt_thumbnail"]
     fieldsets = [
         (None, {
-            "fields": ["title", "category", "sub_type", "order", "published"],
+            "fields": ["title", "category", "sub_type", "order", "published", "bulk_images"],
         }),
         ("YouTube", {
             "fields":  ["youtube_url", "yt_title", "yt_published", "yt_views", "yt_thumbnail"],
             "classes": ["youtube-fieldset"],
         }),
     ]
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        files = request.FILES.getlist("bulk_images")
+        if files:
+            project = form.instance
+            last = project.images.aggregate(m=Max("order"))["m"] or -1
+            for i, f in enumerate(files):
+                ProjectImage.objects.create(project=project, image=f, order=last + 1 + i)
 
     class Media:
         js = [
