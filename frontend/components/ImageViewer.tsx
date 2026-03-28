@@ -14,9 +14,10 @@ interface Props {
   images: ViewerImage[];
   initialIndex: number;
   onClose: () => void;
+  showThumbnails?: boolean;
 }
 
-export default function ImageViewer({ images, initialIndex, onClose }: Props) {
+export default function ImageViewer({ images, initialIndex, onClose, showThumbnails }: Props) {
   const [index, setIndex] = useState(initialIndex);
   const [ready, setReady] = useState(false);
   const touchStartX = useRef<number | null>(null);
@@ -193,6 +194,46 @@ export default function ImageViewer({ images, initialIndex, onClose }: Props) {
           </button>
         )}
       </div>
+
+      {/* ── Thumbnail strip (pack images) ── */}
+      {showThumbnails && images.length > 1 && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          data-lenis-prevent
+          style={{
+            display:         "flex",
+            gap:             "0.35rem",
+            padding:         "0 1rem 0.75rem",
+            overflowX:       "auto",
+            justifyContent:  "center",
+            flexShrink:      0,
+            scrollbarWidth:  "none",
+          }}
+        >
+          {images.map((thumb, thumbI) => (
+            <div
+              key={thumbI}
+              onClick={() => setIndex(thumbI)}
+              style={{
+                width:           52,
+                height:          70,
+                flexShrink:      0,
+                cursor:          "pointer",
+                opacity:         thumbI === index ? 1 : 0.4,
+                outline:         thumbI === index ? "2px solid #855c9d" : "2px solid transparent",
+                backgroundColor: "#e8dff2",
+                overflow:        "hidden",
+                transition:      "opacity 0.2s, outline 0.2s",
+              }}
+            >
+              {thumb.src && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumb.src} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ── Bottom bar — counter + retour ── */}
       <div

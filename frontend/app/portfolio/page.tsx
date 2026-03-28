@@ -256,21 +256,21 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
    threeCol: true  → columns-3 on all sizes (videos/miniatures/bannieres)
    threeCol: false → 2 flex cols on mobile (aligned tops), columns-5 on desktop
 ───────────────────────────────────────────────────────── */
-function AllImagesGrid({ projects, aspect, onOpen, threeCol = false, square = false }: {
-  projects:  Project[];
-  aspect:    string;
-  onOpen:    (images: ViewerImage[], index: number) => void;
-  threeCol?: boolean;
-  square?:   boolean;
+function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false }: {
+  projects:    Project[];
+  aspect:      string;
+  onOpen:      (images: ViewerImage[], index: number) => void;
+  onOpenPack?: (images: ViewerImage[]) => void;
+  threeCol?:   boolean;
+  square?:     boolean;
 }) {
-  const allImages: ViewerImage[] = projects
-    .filter(p => p.images.length > 0 || p.yt_thumbnail)
-    .map(p => ({
-      src:             p.images[0]?.url || p.yt_thumbnail || "",
-      label:           p.title || "",
-      aspectRatio:     aspect,
-      backgroundColor: "#e8dff2",
-    }));
+  const filteredProjects = projects.filter(p => p.images.length > 0 || p.yt_thumbnail);
+  const allImages: ViewerImage[] = filteredProjects.map(p => ({
+    src:             p.images[0]?.url || p.yt_thumbnail || "",
+    label:           p.title || "",
+    aspectRatio:     aspect,
+    backgroundColor: "#e8dff2",
+  }));
 
   if (allImages.length === 0) return (
     <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>
@@ -278,12 +278,24 @@ function AllImagesGrid({ projects, aspect, onOpen, threeCol = false, square = fa
     </p>
   );
 
+  const handleClick = (i: number) => {
+    const p = filteredProjects[i];
+    if (onOpenPack && p && p.images.length > 1) {
+      const packImages: ViewerImage[] = p.images.map(img => ({
+        src: img.url, label: p.title || "", aspectRatio: aspect, backgroundColor: "#e8dff2",
+      }));
+      onOpenPack(packImages);
+    } else {
+      onOpen(allImages, i);
+    }
+  };
+
   // Square grid card (used when square=true — proper CSS grid, exact 6/2 per row)
   const SquareCard = ({ img, i }: { img: ViewerImage; i: number }) => (
     <div
       className="relative aspect-square overflow-hidden group cursor-pointer"
       style={{ backgroundColor: "#e8dff2" }}
-      onClick={() => onOpen(allImages, i)}
+      onClick={() => handleClick(i)}
     >
       {img.src
         ? // eslint-disable-next-line @next/next/no-img-element
@@ -316,7 +328,7 @@ function AllImagesGrid({ projects, aspect, onOpen, threeCol = false, square = fa
             key={i}
             className="relative overflow-hidden group cursor-pointer"
             style={{ backgroundColor: "#e8dff2", marginBottom: CARD_GAP, breakInside: "avoid" }}
-            onClick={() => onOpen(allImages, i)}
+            onClick={() => handleClick(i)}
           >
             {img.src
               ? // eslint-disable-next-line @next/next/no-img-element
@@ -334,62 +346,29 @@ function AllImagesGrid({ projects, aspect, onOpen, threeCol = false, square = fa
     );
   }
 
-  // Natural ratio masonry — 2 flex cols mobile (aligned tops) / 6 CSS columns desktop
+  // Unified grid — 2 cols mobile / 5 cols desktop
   return (
-    <>
-      {/* Mobile — 2 flex columns interleaved */}
-      <div className="md:hidden" style={{ display: "flex", gap: CARD_GAP }}>
-        {[0, 1].map(col => (
-          <div key={col} style={{ flex: 1, display: "flex", flexDirection: "column", gap: CARD_GAP }}>
-            {allImages.filter((_, i) => i % 2 === col).map((img, idx) => {
-              const globalIdx = idx * 2 + col;
-              return (
-                <div
-                  key={idx}
-                  className="relative overflow-hidden group cursor-pointer"
-                  style={{ backgroundColor: "#e8dff2" }}
-                  onClick={() => onOpen(allImages, globalIdx)}
-                >
-                  {img.src
-                    ? // eslint-disable-next-line @next/next/no-img-element
-                      <img src={img.src} alt="" style={{ width: "100%", height: "auto", display: "block" }} />
-                    : <div style={{ height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
-                      </div>
-                  }
-                  <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
-                    <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
-                  </div>
-                </div>
-              );
-            })}
+    <div className="grid grid-cols-2 md:grid-cols-5" style={{ gap: CARD_GAP }}>
+      {allImages.map((img, i) => (
+        <div
+          key={i}
+          className="relative overflow-hidden group cursor-pointer"
+          style={{ backgroundColor: "#e8dff2", aspectRatio: aspect || "3/4" }}
+          onClick={() => handleClick(i)}
+        >
+          {img.src
+            ? // eslint-disable-next-line @next/next/no-img-element
+              <img src={img.src} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            : <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
+              </div>
+          }
+          <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
+            <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
           </div>
-        ))}
-      </div>
-
-      {/* Desktop — CSS columns-5 */}
-      <div className="hidden md:block columns-5" style={{ columnGap: CARD_GAP }}>
-        {allImages.map((img, i) => (
-          <div
-            key={i}
-            className="relative overflow-hidden group cursor-pointer"
-            style={{ backgroundColor: "#e8dff2", marginBottom: CARD_GAP, breakInside: "avoid" }}
-            onClick={() => onOpen(allImages, i)}
-          >
-            {img.src
-              ? // eslint-disable-next-line @next/next/no-img-element
-                <img src={img.src} alt="" style={{ width: "100%", height: "auto", display: "block" }} />
-              : <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
-                </div>
-            }
-            <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
-              <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </>
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -650,7 +629,7 @@ function RowsView({ projects, aspect, onOpen }: {
 /* ─────────────────────────────────────────────────────────
    Page
 ───────────────────────────────────────────────────────── */
-interface ViewerState        { images: ViewerImage[];       index: number; }
+interface ViewerState        { images: ViewerImage[];       index: number; showThumbnails?: boolean; }
 interface BrandingViewerState { images: { url: string }[]; label: string; }
 
 function PortfolioContent() {
@@ -722,7 +701,14 @@ function PortfolioContent() {
         />;
       }
       return projects.length > 0
-        ? <AllImagesGrid projects={projects} aspect={ASPECT[active]} onOpen={openViewer} threeCol={threeCol} square={active === "covers"} />
+        ? <AllImagesGrid
+            projects={projects}
+            aspect={ASPECT[active]}
+            onOpen={openViewer}
+            onOpenPack={(imgs) => setViewer({ images: imgs, index: 0, showThumbnails: true })}
+            threeCol={threeCol}
+            square={active === "covers"}
+          />
         : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
     }
 
@@ -814,7 +800,7 @@ function PortfolioContent() {
       <Footer />
 
       {viewer && (
-        <ImageViewer images={viewer.images} initialIndex={viewer.index} onClose={() => setViewer(null)} />
+        <ImageViewer images={viewer.images} initialIndex={viewer.index} onClose={() => setViewer(null)} showThumbnails={viewer.showThumbnails} />
       )}
       {brandingViewer && (
         <BrandingProjectViewer
