@@ -639,7 +639,7 @@ function PortfolioContent() {
   const initial      = (searchParams.get("category") as Category) || "covers";
 
   const [active,         setActive]         = useState<Category>(initial);
-  const [sub,            setSub]            = useState<string | null>(null);
+  const [sub,            setSub]            = useState<string | null>(searchParams.get("sub") || null);
   const [projects,       setProjects]       = useState<Project[]>([]);
   const [viewer,            setViewer]            = useState<ViewerState | null>(null);
   const [brandingViewer,    setBrandingViewer]    = useState<BrandingViewerState | null>(null);
@@ -648,18 +648,28 @@ function PortfolioContent() {
   const openViewer = useCallback((images: ViewerImage[], index: number) => setViewer({ images, index }), []);
 
   useEffect(() => {
-    const cat = searchParams.get("category") as Category;
-    if (cat && CATEGORIES.includes(cat)) { setActive(cat); setSub(null); }
+    const cat    = searchParams.get("category") as Category;
+    const subVal = searchParams.get("sub") || null;
+    if (cat && CATEGORIES.includes(cat)) setActive(cat);
+    setSub(subVal);
   }, [searchParams]);
 
   useEffect(() => {
     fetchProjects(active).then(setProjects);
-    setSub(null);
   }, [active]);
 
   const switchCategory = (cat: Category) => {
     setActive(cat);
+    setSub(null);
     router.replace(`/portfolio?category=${cat}`, { scroll: false });
+  };
+
+  const switchSub = (newSub: string | null) => {
+    setSub(newSub);
+    const url = newSub
+      ? `/portfolio?category=${active}&sub=${newSub}`
+      : `/portfolio?category=${active}`;
+    router.replace(url, { scroll: false });
   };
 
   const subtabs = SUBTABS[active] ?? null;
@@ -771,9 +781,9 @@ function PortfolioContent() {
           {/* Sub-tabs */}
           {subtabs && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
-              <button onClick={() => setSub(null)}            style={tabStyle(sub === null)}>tout</button>
-              <button onClick={() => setSub(subtabs.solo)}    style={tabStyle(sub === subtabs.solo)}>{subtabs.solo}</button>
-              <button onClick={() => setSub(subtabs.grouped)} style={tabStyle(sub === subtabs.grouped)}>{subtabs.grouped}</button>
+              <button onClick={() => switchSub(null)}            style={tabStyle(sub === null)}>tout</button>
+              <button onClick={() => switchSub(subtabs.solo)}    style={tabStyle(sub === subtabs.solo)}>{subtabs.solo}</button>
+              <button onClick={() => switchSub(subtabs.grouped)} style={tabStyle(sub === subtabs.grouped)}>{subtabs.grouped}</button>
             </div>
           )}
 

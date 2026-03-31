@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useI18n } from "@/lib/i18n";
@@ -18,8 +19,9 @@ const SERVICES = [
 ] satisfies { key: string; col: number; row: number; center?: true }[];
 
 export default function Services() {
-  const { t } = useI18n();
-  const sectionRef = useRef<HTMLElement>(null);
+  const { t }        = useI18n();
+  const router       = useRouter();
+  const sectionRef   = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -75,7 +77,7 @@ export default function Services() {
             style={{ gap: "2rem" }}
           >
             {SERVICES.map(({ key }) => (
-              <div key={key} className="svc-item" style={{ textAlign: "center" }}>
+              <div key={key} className="svc-item" style={{ textAlign: "center", cursor: "pointer" }} onClick={() => router.push(`/portfolio?category=${key}`)}>
                 <h3
                   style={{
                     fontFamily: "Inter, sans-serif",
