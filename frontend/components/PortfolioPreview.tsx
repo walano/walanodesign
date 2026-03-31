@@ -161,7 +161,7 @@ export default function PortfolioPreview() {
                       >
                         {imgUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={imgUrl} alt={proj?.title || ""} className="absolute inset-0 w-full h-full object-cover" />
+                          <img src={imgUrl} alt={proj?.title || ""} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                         )}
                         {/* Play button overlay for video projects */}
                         {proj?.youtube_url && !isLast && (
@@ -280,7 +280,7 @@ export default function PortfolioPreview() {
                   >
                     {slots[idx].src && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={slots[idx].src} alt={proj?.title || ""} className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={slots[idx].src} alt={proj?.title || ""} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                     )}
                     {proj?.youtube_url && (
                       <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(12,12,12,0.15)" }}>

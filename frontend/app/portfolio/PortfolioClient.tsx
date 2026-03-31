@@ -299,7 +299,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     >
       {img.src
         ? // eslint-disable-next-line @next/next/no-img-element
-          <img src={img.src} alt={img.label} className="absolute inset-0 w-full h-full object-cover" />
+          <img src={img.src} alt={img.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
         : <div className="absolute inset-0 flex items-center justify-center">
             <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
           </div>
@@ -332,7 +332,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
           >
             {img.src
               ? // eslint-disable-next-line @next/next/no-img-element
-                <img src={img.src} alt={img.label} style={{ width: "100%", height: "auto", display: "block" }} />
+                <img src={img.src} alt={img.label} loading="lazy" style={{ width: "100%", height: "auto", display: "block" }} />
               : <div style={{ height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
                 </div>
@@ -358,7 +358,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
         >
           {img.src
             ? // eslint-disable-next-line @next/next/no-img-element
-              <img src={img.src} alt={img.label} className="absolute inset-0 w-full h-full object-cover" />
+              <img src={img.src} alt={img.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
             : <div className="absolute inset-0 flex items-center justify-center">
                 <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
               </div>
@@ -492,7 +492,7 @@ function VideoGrid({ projects }: { projects: Project[] }) {
               <div className="relative w-full aspect-video overflow-hidden group" style={{ backgroundColor: "#e8dff2" }}>
                 {thumb && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={thumb} alt={p.yt_title || p.title} className="absolute inset-0 w-full h-full object-cover" />
+                  <img src={thumb} alt={p.yt_title || p.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                 )}
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(0,0,0,0.35)" }}>
@@ -607,7 +607,7 @@ function RowsView({ projects, aspect, onOpen }: {
                 >
                   {img.url
                     ? // eslint-disable-next-line @next/next/no-img-element
-                      <img src={img.url} alt={img.title} className="absolute inset-0 w-full h-full object-cover" />
+                      <img src={img.url} alt={img.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
                     : <div className="absolute inset-0 flex items-center justify-center"><span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.title}</span></div>
                   }
                   <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
