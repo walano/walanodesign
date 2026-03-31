@@ -5,7 +5,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { SmoothScrollProvider } from "@/components/SmoothScrollProvider";
 
 const base: Partial<Metadata> = {
-  metadataBase: new URL("https://walanodesign.com"),
+  metadataBase: new URL("https://www.walanodesign.com"),
   icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
   authors: [{ name: "Walano Design" }],
   creator: "Walano Design",
@@ -41,17 +41,17 @@ const metadataFR: Metadata = {
     description:
       "Covers, logos, identités visuelles, affiches et vidéos pour artistes et labels indépendants.",
     siteName: "Walano Design",
-    url: "https://walanodesign.com",
+    url: "https://www.walanodesign.com",
     type: "website",
     locale: "fr_FR",
-    images: [{ url: "https://walanodesign.com/me.jpg", alt: "Walano Design" }],
+    images: [{ url: "https://www.walanodesign.com/me.jpg", alt: "Walano Design" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Walano Design — Graphiste Freelance",
     description:
       "Covers, logos, identités visuelles, affiches et vidéos pour artistes et labels.",
-    images: ["https://walanodesign.com/me.jpg"],
+    images: ["https://www.walanodesign.com/me.jpg"],
   },
 };
 
@@ -80,17 +80,17 @@ const metadataEN: Metadata = {
     description:
       "Covers, logos, visual identity, posters and videos for independent artists and labels.",
     siteName: "Walano Design",
-    url: "https://walanodesign.com",
+    url: "https://www.walanodesign.com",
     type: "website",
     locale: "en_US",
-    images: [{ url: "https://walanodesign.com/me.jpg", alt: "Walano Design" }],
+    images: [{ url: "https://www.walanodesign.com/me.jpg", alt: "Walano Design" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Walano Design — Freelance Graphic Designer",
     description:
       "Covers, logos, visual identity, posters and videos for artists and labels.",
-    images: ["https://walanodesign.com/me.jpg"],
+    images: ["https://www.walanodesign.com/me.jpg"],
   },
 };
 
