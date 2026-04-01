@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <div class="flex flex-row items-center">
+        <a
+            href="bulk-import/"
+            class="flex items-center gap-1 h-[38px] px-3 -my-1 rounded-full bg-primary-600 text-white text-sm font-medium transition-colors hover:bg-primary-500"
+            title="Import en masse"
+        >
+            <span class="material-symbols-outlined" style="font-size:18px;line-height:1;">upload</span>
+            <span>import</span>
+        </a>
+    </div>
+{% endblock %}
