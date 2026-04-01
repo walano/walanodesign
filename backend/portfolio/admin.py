@@ -1,8 +1,9 @@
 import json
 from django import forms
-from django.contrib import admin
+from django.contrib import admin, messages
 from django.db.models import Max
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import path
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
@@ -100,9 +101,51 @@ class ProjectAdmin(ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
         custom = [
-            path("reorder/", self.admin_site.admin_view(self.reorder_view), name="portfolio_project_reorder"),
+            path("reorder/",     self.admin_site.admin_view(self.reorder_view),     name="portfolio_project_reorder"),
+            path("bulk-import/", self.admin_site.admin_view(self.bulk_import_view), name="portfolio_project_bulk_import"),
         ]
         return custom + urls
+
+    BULK_TYPE_MAP = {
+        "covers__single":    {"category": "covers",   "sub_type": "single"},
+        "branding__logo":    {"category": "branding", "sub_type": "logo"},
+        "affiches__affiche": {"category": "affiches", "sub_type": "affiche"},
+    }
+
+    def bulk_import_view(self, request):
+        if request.method == "POST":
+            type_key = request.POST.get("type_key", "")
+            config   = self.BULK_TYPE_MAP.get(type_key)
+            if not config:
+                messages.error(request, "Type de projet invalide.")
+                return redirect(".")
+
+            titles = request.POST.getlist("title")
+            images = request.FILES.getlist("images")
+            pairs  = [(t.strip(), img) for t, img in zip(titles, images) if t.strip()]
+
+            if not pairs:
+                messages.error(request, "Aucun projet à importer.")
+                return redirect(".")
+
+            max_order = Project.objects.filter(category=config["category"]).aggregate(m=Max("order"))["m"] or -1
+            for i, (title, image) in enumerate(pairs):
+                project = Project.objects.create(
+                    title=title,
+                    category=config["category"],
+                    sub_type=config["sub_type"],
+                    order=max_order + 1 + i,
+                )
+                ProjectImage.objects.create(project=project, image=image, order=0)
+
+            messages.success(request, f"{len(pairs)} projet(s) importé(s) avec succès.")
+            return redirect("../")
+
+        context = {
+            **self.admin_site.each_context(request),
+            "title": "Import en masse",
+        }
+        return render(request, "admin/portfolio/project/bulk_import.html", context)
 
     def reorder_view(self, request):
         if request.method != "POST":
