@@ -40,10 +40,19 @@ class ProjectAdminForm(forms.ModelForm):
         model  = Project
         fields = "__all__"
 
+    def clean(self):
+        cleaned  = super().clean()
+        sub_type = cleaned.get("sub_type")
+        # For video projects the title is auto-fetched from YouTube — use a
+        # placeholder so form validation passes; models.save() overwrites it.
+        if sub_type == "video" and not cleaned.get("title"):
+            cleaned["title"] = "_yt_pending_"
+        return cleaned
+
 
 class ProjectImageInline(TabularInline):
     model  = ProjectImage
-    extra  = 3
+    extra  = 1
     fields = ["image", "order"]
 
 

@@ -13,17 +13,16 @@ type Category = "covers" | "branding" | "videos" | "affiches" | "miniatures" | "
 const CATEGORIES: Category[] = ["covers", "branding", "videos", "affiches", "miniatures", "bannieres"];
 
 const SUBTABS: Partial<Record<Category, { solo: string; grouped: string }>> = {
-  covers:     { solo: "singles",  grouped: "albums"    },
-  branding:   { solo: "logos",    grouped: "brandings" },
-  affiches:   { solo: "solo",     grouped: "packs"     },
-  miniatures: { solo: "solo",     grouped: "packs"     },
+  covers:   { solo: "singles", grouped: "albums"    },
+  branding: { solo: "logos",   grouped: "brandings" },
+  affiches: { solo: "affiche", grouped: "pack"      },
 };
 
 const ASPECT: Record<Category, string> = {
   covers:     "1",
   branding:   "1",
   videos:     "16/9",
-  affiches:   "3/4",
+  affiches:   "4/5",
   miniatures: "16/9",
   bannieres:  "16/9",
 };
@@ -32,13 +31,13 @@ const ASPECT_CLASS: Record<Category, string> = {
   covers:     "aspect-square",
   branding:   "aspect-square",
   videos:     "aspect-video",
-  affiches:   "aspect-[3/4]",
+  affiches:   "aspect-[4/5]",
   miniatures: "aspect-video",
   bannieres:  "aspect-video",
 };
 
 // "tout" grid: 3 cols for video-like categories, 2 mobile / 6 desktop for others
-const THREE_COL_CATS: Category[] = ["videos", "miniatures", "bannieres"];
+const THREE_COL_CATS: Category[] = ["videos", "bannieres"];
 
 const CARD_GAP   = "clamp(0.4rem, 0.8vw, 0.75rem)";
 const ROW_HEIGHT = "clamp(160px, 18vw, 260px)";
@@ -257,13 +256,14 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
    threeCol: true  → columns-3 on all sizes (videos/miniatures/bannieres)
    threeCol: false → 2 flex cols on mobile (aligned tops), columns-5 on desktop
 ───────────────────────────────────────────────────────── */
-function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false }: {
+function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false, singleCol = false }: {
   projects:    Project[];
   aspect:      string;
   onOpen:      (images: ViewerImage[], index: number) => void;
   onOpenPack?: (images: ViewerImage[]) => void;
   threeCol?:   boolean;
   square?:     boolean;
+  singleCol?:  boolean;
 }) {
   const filteredProjects = projects.filter(p => p.images.length > 0 || p.yt_thumbnail);
   const allImages: ViewerImage[] = filteredProjects.map(p => ({
@@ -349,9 +349,9 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     );
   }
 
-  // Unified grid — 2 cols mobile / 5 cols desktop
+  // Unified grid — 2 cols mobile / 5 cols desktop (or 1 col when singleCol)
   return (
-    <div className="grid grid-cols-2 md:grid-cols-5" style={{ gap: CARD_GAP }}>
+    <div className={`grid ${singleCol ? "grid-cols-1" : "grid-cols-2 md:grid-cols-5"}`} style={{ gap: CARD_GAP }}>
       {allImages.map((img, i) => (
         <div
           key={i}
@@ -682,10 +682,10 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   const subtabs = SUBTABS[active] ?? null;
 
   const SUB_TYPE_SOLO:    Partial<Record<Category, string>> = {
-    covers: "single", branding: "logo", affiches: "affiche", miniatures: "miniature",
+    covers: "single", branding: "logo", affiches: "affiche",
   };
   const SUB_TYPE_GROUPED: Partial<Record<Category, string>> = {
-    covers: "album", branding: "branding", affiches: "pack", miniatures: "minipack",
+    covers: "album", branding: "branding", affiches: "pack",
   };
 
   const soloProjects    = projects.filter(p => p.sub_type === SUB_TYPE_SOLO[active]);
@@ -717,12 +717,17 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           square
         />;
       }
+      if (active === "miniatures") {
+        return projects.length > 0
+          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} singleCol />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+      }
       return projects.length > 0
         ? <AllImagesGrid
             projects={projects}
             aspect={ASPECT[active]}
             onOpen={openViewer}
-            onOpenPack={(imgs) => setViewer({ images: imgs, index: 0, showThumbnails: true })}
+            onOpenPack={(imgs) => setHorizontalViewer({ images: imgs.map(img => ({ url: img.src || "" })), label: imgs[0]?.label || "" })}
             threeCol={threeCol}
             square={active === "covers"}
           />
@@ -732,7 +737,14 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
     // ── solo sub-tab ─────────────────────────────────────
     if (sub === subtabs?.solo) {
       if (active === "branding") {
-        return <BrandingGrid items={brandingLogoItems} onOpen={(imgs, lbl) => setBrandingViewer({ images: imgs, label: lbl })} />;
+        return <BrandingGrid
+          items={brandingLogoItems}
+          cols="grid-cols-2 md:grid-cols-5"
+          onOpen={(imgs, lbl) => {
+            const viewerImages: ViewerImage[] = imgs.map(img => ({ src: img.url, label: lbl, aspectRatio: "1", backgroundColor: "#e8dff2" }));
+            openViewer(viewerImages, 0);
+          }}
+        />;
       }
       if (active === "videos") return <VideoGrid projects={soloProjects} />;
       return soloProjects.length > 0
@@ -751,7 +763,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         }));
         return <BrandingGrid
           items={items}
-          aspectRatio={active === "covers" ? "1" : "3/4"}
+          aspectRatio={active === "covers" ? "1" : "4/5"}
           cols="grid-cols-2 md:grid-cols-5"
           onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
         />;
@@ -807,7 +819,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
               onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.15)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.35)"; }}
               onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "rgba(255,255,255,0.08)"; (e.currentTarget as HTMLAnchorElement).style.borderColor = "rgba(255,255,255,0.18)"; }}
             >
-              retour
+              {t("portfolio.back")}
             </a>
           </div>
 

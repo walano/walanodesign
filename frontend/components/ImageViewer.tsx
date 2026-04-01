@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback, useState, useRef } from "react";
 import { lenisRef } from "@/lib/lenis";
+import { useI18n } from "@/lib/i18n";
 
 export interface ViewerImage {
   src?: string;
@@ -21,6 +22,7 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
   const [index, setIndex] = useState(initialIndex);
   const [ready, setReady] = useState(false);
   const touchStartX = useRef<number | null>(null);
+  const { t } = useI18n();
   const img = images[index];
 
   useEffect(() => {
@@ -77,9 +79,31 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
         opacity:              ready ? 1 : 0,
       }}
     >
+      {/* ── Counter — above image ── */}
+      {images.length > 1 && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            textAlign:  "center",
+            padding:    "1rem 1.5rem 0",
+            flexShrink: 0,
+          }}
+        >
+          <span
+            style={{
+              fontFamily:    "Inter, sans-serif",
+              fontSize:      "0.72rem",
+              letterSpacing: "0.06em",
+              color:         "rgba(245,243,247,0.4)",
+            }}
+          >
+            {index + 1} / {images.length}
+          </span>
+        </div>
+      )}
+
       {/* ── Image area — fills all available height ── */}
       <div
-        onClick={(e) => e.stopPropagation()}
         style={{
           flex:           1,
           minHeight:      0,
@@ -97,6 +121,7 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           <img
             src={img.src}
             alt={img.label ?? ""}
+            onClick={(e) => e.stopPropagation()}
             style={{
               maxWidth:   "100%",
               maxHeight:  "100%",
@@ -105,8 +130,8 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
             }}
           />
         ) : (
-          /* Placeholder — same colour as cards, fills space at natural aspect ratio */
           <div
+            onClick={(e) => e.stopPropagation()}
             style={{
               backgroundColor: img.backgroundColor ?? "#e8dff2",
               aspectRatio:     img.aspectRatio ?? "1",
@@ -132,17 +157,17 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           </div>
         )}
 
-        {/* Prev arrow — desktop only, overlaid on image area */}
+        {/* Prev arrow — overlaid on image area, desktop & mobile */}
         {images.length > 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); prev(); }}
-            className="hidden md:flex"
             style={{
               position:       "absolute",
               left:           "clamp(0.5rem, 2vw, 1.5rem)",
               top:            "50%",
               transform:      "translateY(-50%)",
               padding:        "0.5rem 1rem",
+              display:        "flex",
               alignItems:     "center",
               justifyContent: "center",
               background:     "rgba(12,12,12,0.55)",
@@ -163,17 +188,17 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           </button>
         )}
 
-        {/* Next button — desktop only */}
+        {/* Next button */}
         {images.length > 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
-            className="hidden md:flex"
             style={{
               position:       "absolute",
               right:          "clamp(0.5rem, 2vw, 1.5rem)",
               top:            "50%",
               transform:      "translateY(-50%)",
               padding:        "0.5rem 1rem",
+              display:        "flex",
               alignItems:     "center",
               justifyContent: "center",
               background:     "rgba(12,12,12,0.55)",
@@ -235,29 +260,17 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
         </div>
       )}
 
-      {/* ── Bottom bar — counter + retour ── */}
+      {/* ── Bottom bar — close button ── */}
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
           display:        "flex",
           alignItems:     "center",
           justifyContent: "center",
-          gap:            "2rem",
           padding:        "1rem 1.5rem",
           flexShrink:     0,
         }}
       >
-        <span
-          style={{
-            fontFamily:    "Inter, sans-serif",
-            fontSize:      "0.72rem",
-            letterSpacing: "0.06em",
-            color:         "rgba(245,243,247,0.3)",
-          }}
-        >
-          {index + 1} / {images.length}
-        </span>
-
         <button
           onClick={onClose}
           style={{
@@ -283,7 +296,7 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
             e.currentTarget.style.borderColor = "rgba(255,255,255,0.18)";
           }}
         >
-          retour
+          {t("viewer.close")}
         </button>
       </div>
     </div>

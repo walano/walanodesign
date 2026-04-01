@@ -56,7 +56,6 @@ SUB_TYPE_CHOICES = [
     ("affiche",   "Affiche"),
     ("pack",      "Pack"),
     ("miniature", "Miniature"),
-    ("minipack",  "Pack de miniatures"),
     ("video",     "Vidéo"),
     ("banniere",  "Bannière"),
 ]
@@ -65,7 +64,7 @@ VALID_SUB_TYPES = {
     "covers":     ["single", "album"],
     "branding":   ["logo", "branding"],
     "affiches":   ["affiche", "pack"],
-    "miniatures": ["miniature", "minipack"],
+    "miniatures": ["miniature"],
     "videos":     ["video"],
     "bannieres":  ["banniere"],
 }
@@ -104,6 +103,8 @@ class Project(models.Model):
 
     def save(self, *args, **kwargs):
         self.refresh_youtube()
+        if self.sub_type == "video" and self.yt_title:
+            self.title = self.yt_title
         super().save(*args, **kwargs)
 
     def __str__(self):

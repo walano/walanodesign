@@ -24,8 +24,12 @@
     "miniatures": { "label": "thumbnails", "desc": "youtube thumbnails & web visuals" },
     "bannieres": { "label": "banners", "desc": "twitch / youtube banners & profiles" }
   },
+  "viewer": {
+    "close": "back"
+  },
   "portfolio": {
     "title": "portfolio",
+    "back": "back",
     "voir_plus": "see more",
     "categories": {
       "covers": "covers",
