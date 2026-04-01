@@ -86,6 +86,11 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# File upload limits
+DATA_UPLOAD_MAX_MEMORY_SIZE  = 200 * 1024 * 1024   # 200 MB total request
+FILE_UPLOAD_MAX_MEMORY_SIZE  = 50  * 1024 * 1024   # 50 MB per file
+DATA_UPLOAD_MAX_NUMBER_FILES = 500                  # up to 500 files per upload
+
 # ── Cloudinary ────────────────────────────────────────────────
 import cloudinary
 
