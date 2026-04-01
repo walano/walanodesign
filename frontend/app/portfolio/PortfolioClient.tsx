@@ -247,6 +247,7 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
       <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
         <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{project.title}</span>
       </div>
+      <a href={`/portfolio/${project.id}`} className="sr-only">{project.title}</a>
     </div>
   );
 }
@@ -291,7 +292,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
   };
 
   // Square grid card (used when square=true — proper CSS grid, exact 6/2 per row)
-  const SquareCard = ({ img, i }: { img: ViewerImage; i: number }) => (
+  const SquareCard = ({ img, i, projectId }: { img: ViewerImage; i: number; projectId: number }) => (
     <div
       className="relative aspect-square overflow-hidden group cursor-pointer"
       style={{ backgroundColor: "#e8dff2" }}
@@ -307,6 +308,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
       <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
         <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
       </div>
+      <a href={`/portfolio/${projectId}`} className="sr-only">{img.label}</a>
     </div>
   );
 
@@ -314,7 +316,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
   if (square) {
     return (
       <div className="grid grid-cols-2 md:grid-cols-5" style={{ gap: CARD_GAP }}>
-        {allImages.map((img, i) => <SquareCard key={i} img={img} i={i} />)}
+        {allImages.map((img, i) => <SquareCard key={i} img={img} i={i} projectId={filteredProjects[i].id} />)}
       </div>
     );
   }
@@ -340,6 +342,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
             <div className="absolute inset-0 flex items-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
               <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
             </div>
+            <a href={`/portfolio/${filteredProjects[i].id}`} className="sr-only">{img.label}</a>
           </div>
         ))}
       </div>
@@ -366,6 +369,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
           <div className="absolute inset-0 flex items-end p-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }}>
             <span className="text-[#f5f3f7] text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{img.label}</span>
           </div>
+          <a href={`/portfolio/${filteredProjects[i].id}`} className="sr-only">{img.label}</a>
         </div>
       ))}
     </div>
@@ -487,7 +491,8 @@ function VideoGrid({ projects }: { projects: Project[] }) {
         {projects.map(p => {
           const thumb = p.yt_thumbnail || p.images[0]?.url;
           return (
-            <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", cursor: "pointer" }} onClick={() => setPlaying(p)}>
+            <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", cursor: "pointer", position: "relative" }} onClick={() => setPlaying(p)}>
+              <a href={`/portfolio/${p.id}`} className="sr-only">{p.yt_title || p.title}</a>
               {/* Thumbnail */}
               <div className="relative w-full aspect-video overflow-hidden group" style={{ backgroundColor: "#e8dff2" }}>
                 {thumb && (
@@ -567,6 +572,7 @@ function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 
               </div>
             )}
             <div className="absolute inset-0 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }} />
+            <a href={`/portfolio/${item.id}`} className="sr-only">{item.label}</a>
           </div>
           {item.label && (
             <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 300, fontSize: "clamp(0.6rem, 0.85vw, 0.75rem)", letterSpacing: "0.06em", color: "rgba(245,243,247,0.6)", textTransform: "lowercase" }}>
@@ -597,6 +603,7 @@ function RowsView({ projects, aspect, onOpen }: {
         }));
         return (
           <div key={project.id} style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+            <a href={`/portfolio/${project.id}`} className="sr-only">{project.title}</a>
             <DragRow>
               {allImgs.map((img, i) => (
                 <div

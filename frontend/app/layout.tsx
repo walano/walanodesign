@@ -44,14 +44,14 @@ const metadataFR: Metadata = {
     url: "https://www.walanodesign.com",
     type: "website",
     locale: "fr_FR",
-    images: [{ url: "https://www.walanodesign.com/me.jpg", alt: "Walano Design" }],
+    images: [{ url: "https://www.walanodesign.com/ogimage.webp", width: 1200, height: 630, alt: "Walano Design — Graphiste Freelance" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Walano Design — Graphiste Freelance",
     description:
       "Covers, logos, identités visuelles, affiches et vidéos pour artistes et labels.",
-    images: ["https://www.walanodesign.com/me.jpg"],
+    images: ["https://www.walanodesign.com/ogimage.webp"],
   },
 };
 
@@ -83,14 +83,14 @@ const metadataEN: Metadata = {
     url: "https://www.walanodesign.com",
     type: "website",
     locale: "en_US",
-    images: [{ url: "https://www.walanodesign.com/me.jpg", alt: "Walano Design" }],
+    images: [{ url: "https://www.walanodesign.com/ogimage.webp", width: 1200, height: 630, alt: "Walano Design — Freelance Graphic Designer" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Walano Design — Freelance Graphic Designer",
     description:
       "Covers, logos, visual identity, posters and videos for artists and labels.",
-    images: ["https://www.walanodesign.com/me.jpg"],
+    images: ["https://www.walanodesign.com/ogimage.webp"],
   },
 };
 
@@ -109,7 +109,7 @@ const jsonLd = {
     "Graphiste freelance spécialisé dans les covers, logos, identités visuelles, affiches et vidéos pour artistes et labels.",
   url: "https://www.walanodesign.com",
   email: "contact@walanodesign.com",
-  image: "https://www.walanodesign.com/me.jpg",
+  image: "https://www.walanodesign.com/ogimage.webp",
   priceRange: "$$",
   serviceType: [
     "Graphic Design",

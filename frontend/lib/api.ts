@@ -115,6 +115,14 @@ export async function fetchPreviewSlots(device: "desktop" | "mobile"): Promise<P
   } catch { return []; }
 }
 
+export async function fetchProject(id: number): Promise<Project | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/projects/${id}/`, { next: { revalidate: 60 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
 export async function fetchProjects(category?: string): Promise<Project[]> {
   const url = category
     ? `${API_URL}/api/projects/?category=${category}`

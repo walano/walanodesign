@@ -246,6 +246,7 @@ export default function Hero() {
           }}
         >
           walano des<span style={{ marginRight: "-0.05em" }}>i</span>gn
+          <span className="sr-only"> — graphiste freelance, covers, logos & identités visuelles</span>
         </h1>
 
         {/* Nav */}

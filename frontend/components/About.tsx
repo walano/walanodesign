@@ -91,7 +91,7 @@ export default function About() {
                 height: "clamp(200px, 28vw, 400px)",
               }}
             >
-              <Image src={config?.about_photo_url || "/me.jpg"} alt="walano" fill className="object-cover object-top" />
+              <Image src={config?.about_photo_url || "/me.webp"} alt="Walano — graphiste freelance spécialisé dans les covers et identités visuelles" fill className="object-cover object-top" />
             </div>
 
             {/* Dark box — title + text, capped to photo height */}

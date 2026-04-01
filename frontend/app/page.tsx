@@ -81,6 +81,7 @@ export default function Home() {
       <Preloader onDone={onDone} />
 
       <main>
+        <p className="sr-only">ce que tu vois avant d&apos;entendre — what you see before you hear</p>
         <StarBackground />
         <Nav />
         <Hero />
