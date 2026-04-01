@@ -160,6 +160,41 @@ UNFOLD = {
     "SITE_TITLE": "walano design",
     "SITE_HEADER": "walano design",
     "SITE_SYMBOL": "palette",
+    "SIDEBAR": {
+        "navigation": [
+            {
+                "title": "Projets",
+                "items": [
+                    {
+                        "title": "Tous les projets",
+                        "icon": "grid_view",
+                        "link": "/admin/portfolio/project/",
+                    },
+                    {
+                        "title": "Import en masse",
+                        "icon": "upload",
+                        "link": "/admin/portfolio/project/bulk-import/",
+                    },
+                ],
+            },
+            {
+                "title": "Contenu",
+                "items": [
+                    {"title": "Clients",           "icon": "people",        "link": "/admin/portfolio/client/"},
+                    {"title": "Slots de preview",  "icon": "view_carousel", "link": "/admin/portfolio/portfoliopreviewslot/"},
+                    {"title": "Config du site",    "icon": "settings",      "link": "/admin/portfolio/siteconfig/"},
+                    {"title": "Tarifs",            "icon": "payments",      "link": "/admin/portfolio/serviceprice/"},
+                ],
+            },
+            {
+                "title": "Boîte de réception",
+                "items": [
+                    {"title": "Messages",  "icon": "mail",       "link": "/admin/portfolio/contactmessage/"},
+                    {"title": "Devis",     "icon": "description","link": "/admin/portfolio/devis/"},
+                ],
+            },
+        ],
+    },
     "COLORS": {
         "primary": {
             "50":  "245 243 247",
