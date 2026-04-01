@@ -89,7 +89,10 @@ class ProjectAdmin(ModelAdmin):
             project = form.instance
             last = project.images.aggregate(m=Max("order"))["m"] or -1
             for i, f in enumerate(files):
-                ProjectImage.objects.create(project=project, image=f, order=last + 1 + i)
+                try:
+                    ProjectImage.objects.create(project=project, image=f, order=last + 1 + i)
+                except Exception as e:
+                    self.message_user(request, f"Erreur upload image {f.name} : {e}", level=messages.ERROR)
 
     class Media:
         js = [
@@ -129,16 +132,22 @@ class ProjectAdmin(ModelAdmin):
                 return redirect(".")
 
             max_order = Project.objects.filter(category=config["category"]).aggregate(m=Max("order"))["m"] or -1
+            imported = 0
             for i, (title, image) in enumerate(pairs):
-                project = Project.objects.create(
-                    title=title,
-                    category=config["category"],
-                    sub_type=config["sub_type"],
-                    order=max_order + 1 + i,
-                )
-                ProjectImage.objects.create(project=project, image=image, order=0)
+                try:
+                    project = Project.objects.create(
+                        title=title,
+                        category=config["category"],
+                        sub_type=config["sub_type"],
+                        order=max_order + 1 + i,
+                    )
+                    ProjectImage.objects.create(project=project, image=image, order=0)
+                    imported += 1
+                except Exception as e:
+                    messages.error(request, f"Erreur pour « {title} » : {e}")
 
-            messages.success(request, f"{len(pairs)} projet(s) importé(s) avec succès.")
+            if imported:
+                messages.success(request, f"{imported} projet(s) importé(s) avec succès.")
             return redirect("../")
 
         context = {
