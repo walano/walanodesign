@@ -256,14 +256,14 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
    threeCol: true  → columns-3 on all sizes (videos/miniatures/bannieres)
    threeCol: false → 2 flex cols on mobile (aligned tops), columns-5 on desktop
 ───────────────────────────────────────────────────────── */
-function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false, singleCol = false }: {
+function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false, colsClass }: {
   projects:    Project[];
   aspect:      string;
   onOpen:      (images: ViewerImage[], index: number) => void;
   onOpenPack?: (images: ViewerImage[]) => void;
   threeCol?:   boolean;
   square?:     boolean;
-  singleCol?:  boolean;
+  colsClass?:  string;
 }) {
   const filteredProjects = projects.filter(p => p.images.length > 0 || p.yt_thumbnail);
   const allImages: ViewerImage[] = filteredProjects.map(p => ({
@@ -349,9 +349,9 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     );
   }
 
-  // Unified grid — 2 cols mobile / 5 cols desktop (or 1 col when singleCol)
+  // Unified grid — default 2 cols mobile / 5 cols desktop, or custom colsClass
   return (
-    <div className={`grid ${singleCol ? "grid-cols-1" : "grid-cols-2 md:grid-cols-5"}`} style={{ gap: CARD_GAP }}>
+    <div className={`grid ${colsClass ?? "grid-cols-2 md:grid-cols-5"}`} style={{ gap: CARD_GAP }}>
       {allImages.map((img, i) => (
         <div
           key={i}
@@ -719,7 +719,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       }
       if (active === "miniatures") {
         return projects.length > 0
-          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} singleCol />
+          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} colsClass="grid-cols-1 md:grid-cols-3" />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
       }
       return projects.length > 0
@@ -740,6 +740,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         return <BrandingGrid
           items={brandingLogoItems}
           cols="grid-cols-2 md:grid-cols-5"
+          aspectRatio="1"
           onOpen={(imgs, lbl) => {
             const viewerImages: ViewerImage[] = imgs.map(img => ({ src: img.url, label: lbl, aspectRatio: "1", backgroundColor: "#e8dff2" }));
             openViewer(viewerImages, 0);

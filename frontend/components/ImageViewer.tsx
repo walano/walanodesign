@@ -157,10 +157,11 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           </div>
         )}
 
-        {/* Prev arrow — overlaid on image area, desktop & mobile */}
+        {/* Prev arrow — desktop only, swipe on mobile */}
         {images.length > 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); prev(); }}
+            className="hidden md:flex"
             style={{
               position:       "absolute",
               left:           "clamp(0.5rem, 2vw, 1.5rem)",
@@ -188,10 +189,11 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           </button>
         )}
 
-        {/* Next button */}
+        {/* Next button — desktop only */}
         {images.length > 1 && (
           <button
             onClick={(e) => { e.stopPropagation(); next(); }}
+            className="hidden md:flex"
             style={{
               position:       "absolute",
               right:          "clamp(0.5rem, 2vw, 1.5rem)",
