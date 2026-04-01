@@ -36,6 +36,8 @@ class ProjectAdminForm(forms.ModelForm):
         label="Ajouter des images (sélection multiple)",
         required=False,
     )
+    # Title is optional in the form: video projects auto-fetch it from YouTube.
+    title = forms.CharField(required=False, max_length=200, label="Titre")
 
     class Meta:
         model  = Project
@@ -44,10 +46,11 @@ class ProjectAdminForm(forms.ModelForm):
     def clean(self):
         cleaned  = super().clean()
         sub_type = cleaned.get("sub_type")
-        # For video projects the title is auto-fetched from YouTube — use a
-        # placeholder so form validation passes; models.save() overwrites it.
+        # For video projects the title is auto-fetched from YouTube in model.save().
         if sub_type == "video" and not cleaned.get("title"):
             cleaned["title"] = "_yt_pending_"
+        elif sub_type != "video" and not cleaned.get("title"):
+            raise forms.ValidationError({"title": "Ce champ est obligatoire."})
         return cleaned
 
 
