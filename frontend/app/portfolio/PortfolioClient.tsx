@@ -242,7 +242,7 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
   return (
     <div
       className={`relative ${aspectClass} overflow-hidden group cursor-pointer`}
-      style={{ backgroundColor: "#e8dff2", backgroundImage: imgUrl ? `url(${imgUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}
+      style={{ backgroundColor: "#0c0c0c", backgroundImage: imgUrl ? `url(${imgUrl})` : undefined, backgroundSize: "cover", backgroundPosition: "center" }}
       onClick={() => onOpen(allImages, index)}
     >
       {!imgUrl && (
@@ -277,7 +277,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     src:             p.images[0]?.url || p.yt_thumbnail || "",
     label:           p.title || "",
     aspectRatio:     aspect,
-    backgroundColor: "#e8dff2",
+    backgroundColor: "#0c0c0c",
   }));
 
   if (allImages.length === 0) return (
@@ -290,7 +290,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     const p = filteredProjects[i];
     if (onOpenPack && p && p.images.length > 1) {
       const packImages: ViewerImage[] = p.images.map(img => ({
-        src: img.url, label: p.title || "", aspectRatio: aspect, backgroundColor: "#e8dff2",
+        src: img.url, label: p.title || "", aspectRatio: aspect, backgroundColor: "#0c0c0c",
       }));
       onOpenPack(packImages);
     } else {
@@ -302,7 +302,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
   const SquareCard = ({ img, i, projectId }: { img: ViewerImage; i: number; projectId: number }) => (
     <div
       className="relative aspect-square overflow-hidden group cursor-pointer"
-      style={{ backgroundColor: "#e8dff2" }}
+      style={{ backgroundColor: "#0c0c0c" }}
       onClick={() => handleClick(i)}
     >
       {img.src
@@ -319,10 +319,10 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
     </div>
   );
 
-  // Square mode — exact grid, 2 cols mobile / 6 cols desktop
+  // Square mode — exact grid, 2 cols mobile / 3 mid / 5 desktop
   if (square) {
     return (
-      <div className="grid grid-cols-2 md:grid-cols-5" style={{ gap: CARD_GAP }}>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" style={{ gap: CARD_GAP }}>
         {allImages.map((img, i) => <SquareCard key={i} img={img} i={i} projectId={filteredProjects[i].id} />)}
       </div>
     );
@@ -336,7 +336,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
           <div
             key={i}
             className="relative overflow-hidden group cursor-pointer"
-            style={{ backgroundColor: "#e8dff2", marginBottom: CARD_GAP, breakInside: "avoid" }}
+            style={{ backgroundColor: "#0c0c0c", marginBottom: CARD_GAP, breakInside: "avoid" }}
             onClick={() => handleClick(i)}
           >
             {img.src
@@ -363,7 +363,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
         <div
           key={i}
           className="relative overflow-hidden group cursor-pointer"
-          style={{ backgroundColor: "#e8dff2", aspectRatio: aspect || "3/4" }}
+          style={{ backgroundColor: "#0c0c0c", aspectRatio: aspect || "3/4" }}
           onClick={() => handleClick(i)}
         >
           {img.src
@@ -392,7 +392,7 @@ function CardGrid({ projects, aspectClass, aspect, onOpen }: {
   aspect:     string;
   onOpen:     (images: ViewerImage[], index: number) => void;
 }) {
-  const cols = aspectClass === "aspect-square" || aspectClass === "aspect-[3/4]"
+  const cols = aspectClass === "aspect-square" || aspectClass === "aspect-[3/4]" || aspectClass === "aspect-[4/5]"
     ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
     : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
@@ -400,7 +400,7 @@ function CardGrid({ projects, aspectClass, aspect, onOpen }: {
     src:             p.images[0]?.url || p.yt_thumbnail || undefined,
     label:           p.title || "",
     aspectRatio:     aspect,
-    backgroundColor: "#e8dff2",
+    backgroundColor: "#0c0c0c",
   }));
 
   if (projects.length === 0) return (
@@ -501,7 +501,7 @@ function VideoGrid({ projects }: { projects: Project[] }) {
             <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", cursor: "pointer", position: "relative" }} onClick={() => setPlaying(p)}>
               <a href={`/portfolio/${p.id}`} className="sr-only">{p.yt_title || p.title}</a>
               {/* Thumbnail */}
-              <div className="relative w-full aspect-video overflow-hidden group" style={{ backgroundColor: "#e8dff2" }}>
+              <div className="relative w-full aspect-video overflow-hidden group" style={{ backgroundColor: "#0c0c0c" }}>
                 {thumb && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={thumb} alt={p.yt_title || p.title} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
@@ -546,7 +546,7 @@ interface BrandingItem {
   images:     { url: string }[];
 }
 
-function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 md:grid-cols-3" }: {
+function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" }: {
   items:        BrandingItem[];
   onOpen:       (images: { url: string }[], label: string) => void;
   aspectRatio?: string;
@@ -564,7 +564,7 @@ function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 
         <div key={item.id} style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           <div
             className="relative w-full overflow-hidden group cursor-pointer"
-            style={{ aspectRatio: aspectRatio, backgroundColor: "#e8dff2" }}
+            style={{ aspectRatio: aspectRatio, backgroundColor: "#0c0c0c" }}
             onClick={() => onOpen(item.images, item.label)}
           >
             {item.firstImage
@@ -602,7 +602,7 @@ function RowsView({ projects, aspect, onOpen }: {
         const label   = project.title;
         const allImgs = project.images.map(img => ({ url: img.url, title: label }));
         const rowImages: ViewerImage[] = allImgs.map(img => ({
-          src: img.url, label: img.title, aspectRatio: aspect, backgroundColor: "#e8dff2",
+          src: img.url, label: img.title, aspectRatio: aspect, backgroundColor: "#0c0c0c",
         }));
         return (
           <div key={project.id} style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -612,7 +612,7 @@ function RowsView({ projects, aspect, onOpen }: {
                 <div
                   key={i}
                   className="relative overflow-hidden flex-shrink-0 group cursor-pointer"
-                  style={{ backgroundColor: "#e8dff2", height: ROW_HEIGHT, aspectRatio: aspect || "1" }}
+                  style={{ backgroundColor: "#0c0c0c", height: ROW_HEIGHT, aspectRatio: aspect || "1" }}
                   onClick={() => onOpen(rowImages, i)}
                 >
                   {img.url
@@ -723,7 +723,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       }
       if (active === "miniatures") {
         return projects.length > 0
-          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} colsClass="grid-cols-1 md:grid-cols-3" />
+          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} colsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
       }
       if (active === "bannieres") {
@@ -759,10 +759,10 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       if (active === "branding") {
         return <BrandingGrid
           items={brandingLogoItems}
-          cols="grid-cols-2 md:grid-cols-5"
+          cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
           aspectRatio="1"
           onOpen={(imgs, lbl) => {
-            const viewerImages: ViewerImage[] = imgs.map(img => ({ src: img.url, label: lbl, aspectRatio: "1", backgroundColor: "#e8dff2" }));
+            const viewerImages: ViewerImage[] = imgs.map(img => ({ src: img.url, label: lbl, aspectRatio: "1", backgroundColor: "#0c0c0c" }));
             openViewer(viewerImages, 0);
           }}
         />;
@@ -795,7 +795,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         return <BrandingGrid
           items={items}
           aspectRatio="1"
-          cols="grid-cols-2 md:grid-cols-5"
+          cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
           onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
         />;
       }

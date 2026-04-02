@@ -199,7 +199,6 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
               top:            "50%",
               transform:      "translateY(-50%)",
               padding:        "0.5rem 1rem",
-              display:        "flex",
               alignItems:     "center",
               justifyContent: "center",
               background:     "rgba(12,12,12,0.55)",
