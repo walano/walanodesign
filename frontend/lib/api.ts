@@ -48,11 +48,12 @@ export interface Project {
   sub_type:     string;
   order:        number;
   images:       ProjectImage[];
-  youtube_url:  string | null;
-  yt_title:     string;
-  yt_published: string;
-  yt_views:     number;
-  yt_thumbnail: string;
+  youtube_url:   string | null;
+  yt_title:      string;
+  yt_published:  string;
+  yt_views:      number;
+  yt_thumbnail:  string;
+  thumbnail_url: string | null;
 }
 
 export interface SiteConfig {

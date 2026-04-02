@@ -79,6 +79,7 @@ class Project(models.Model):
     yt_published = models.CharField(max_length=10,  blank=True, default="", verbose_name="Date de publication")
     yt_views     = models.PositiveIntegerField(default=0, verbose_name="Vues")
     yt_thumbnail = models.URLField(blank=True, default="", verbose_name="Miniature YouTube")
+    thumbnail    = models.ImageField(upload_to="thumbnails/", blank=True, null=True, verbose_name="Miniature personnalisée")
     order        = models.PositiveIntegerField(default=0)
     published    = models.BooleanField(default=True)
     created_at   = models.DateTimeField(auto_now_add=True)

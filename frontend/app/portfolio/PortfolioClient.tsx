@@ -36,11 +36,18 @@ const ASPECT_CLASS: Record<Category, string> = {
   bannieres:  "aspect-video",
 };
 
-// "tout" grid: 3 cols for video-like categories, 2 mobile / 6 desktop for others
-const THREE_COL_CATS: Category[] = ["videos", "bannieres"];
+// "tout" grid: 3 cols for video-like categories (bannieres handled separately)
+const THREE_COL_CATS: Category[] = ["videos"];
 
 const CARD_GAP   = "clamp(0.4rem, 0.8vw, 0.75rem)";
 const ROW_HEIGHT = "clamp(160px, 18vw, 260px)";
+
+// Cloudinary URL optimiser — inserts transform before the version segment
+function cl(url: string | undefined, w = 800): string | undefined {
+  if (!url) return undefined;
+  if (!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/", `/upload/q_auto,f_auto,w_${w}/`);
+}
 
 const tabStyle = (active: boolean): React.CSSProperties => ({
   fontFamily:    "Inter, sans-serif",
@@ -489,7 +496,7 @@ function VideoGrid({ projects }: { projects: Project[] }) {
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" style={{ gap: CARD_GAP }}>
         {projects.map(p => {
-          const thumb = p.yt_thumbnail || p.images[0]?.url;
+          const thumb = p.thumbnail_url || p.yt_thumbnail || p.images[0]?.url;
           return (
             <div key={p.id} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", cursor: "pointer", position: "relative" }} onClick={() => setPlaying(p)}>
               <a href={`/portfolio/${p.id}`} className="sr-only">{p.yt_title || p.title}</a>
@@ -552,25 +559,21 @@ function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 
   );
 
   return (
-    <div className={`grid ${cols}`} style={{ gap: "clamp(1rem, 2vw, 1.5rem)" }}>
+    <div className={`grid ${cols}`} style={{ columnGap: CARD_GAP, rowGap: "clamp(1.5rem, 2.5vw, 2rem)" }}>
       {items.map(item => (
         <div key={item.id} style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           <div
             className="relative w-full overflow-hidden group cursor-pointer"
-            style={{
-              aspectRatio:        aspectRatio,
-              backgroundColor:    "#e8dff2",
-              backgroundImage:    item.firstImage ? `url(${item.firstImage})` : undefined,
-              backgroundSize:     "cover",
-              backgroundPosition: "center",
-            }}
+            style={{ aspectRatio: aspectRatio, backgroundColor: "#e8dff2" }}
             onClick={() => onOpen(item.images, item.label)}
           >
-            {!item.firstImage && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{item.label}</span>
-              </div>
-            )}
+            {item.firstImage
+              ? // eslint-disable-next-line @next/next/no-img-element
+                <img src={cl(item.firstImage, 800)} alt={item.label} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+              : <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[#855c9d]/30 text-xs tracking-widest" style={{ fontFamily: "Inter, sans-serif" }}>{item.label}</span>
+                </div>
+            }
             <div className="absolute inset-0 flex items-end p-5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.2)" }} />
             <a href={`/portfolio/${item.id}`} className="sr-only">{item.label}</a>
           </div>
@@ -609,7 +612,7 @@ function RowsView({ projects, aspect, onOpen }: {
                 <div
                   key={i}
                   className="relative overflow-hidden flex-shrink-0 group cursor-pointer"
-                  style={{ backgroundColor: "#e8dff2", height: ROW_HEIGHT, width: ROW_HEIGHT }}
+                  style={{ backgroundColor: "#e8dff2", height: ROW_HEIGHT, aspectRatio: aspect || "1" }}
                   onClick={() => onOpen(rowImages, i)}
                 >
                   {img.url
@@ -666,6 +669,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   }, [active]);
 
   const switchCategory = (cat: Category) => {
+    setProjects([]);
     setActive(cat);
     setSub(null);
     router.replace(`/portfolio?category=${cat}`, { scroll: false });
@@ -722,6 +726,22 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} colsClass="grid-cols-1 md:grid-cols-3" />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
       }
+      if (active === "bannieres") {
+        return projects.length > 0
+          ? <AllImagesGrid projects={projects} aspect={ASPECT.bannieres} onOpen={openViewer} colsClass="grid-cols-1" />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+      }
+      if (active === "affiches") {
+        return projects.length > 0
+          ? <AllImagesGrid
+              projects={projects}
+              aspect={ASPECT.affiches}
+              onOpen={openViewer}
+              onOpenPack={(imgs) => setHorizontalViewer({ images: imgs.map(img => ({ url: img.src || "" })), label: imgs[0]?.label || "" })}
+              colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+            />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+      }
       return projects.length > 0
         ? <AllImagesGrid
             projects={projects}
@@ -748,6 +768,11 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         />;
       }
       if (active === "videos") return <VideoGrid projects={soloProjects} />;
+      if (active === "affiches") {
+        return soloProjects.length > 0
+          ? <AllImagesGrid projects={soloProjects} aspect={ASPECT.affiches} onOpen={openViewer} colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
+      }
       return soloProjects.length > 0
         ? <CardGrid projects={soloProjects} aspectClass={ASPECT_CLASS[active]} aspect={ASPECT[active]} onOpen={openViewer} />
         : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
@@ -758,13 +783,18 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       if (active === "branding") {
         return <BrandingGrid items={brandingGroupItems} onOpen={(imgs, lbl) => setBrandingViewer({ images: imgs, label: lbl })} />;
       }
-      if (active === "covers" || active === "affiches") {
+      if (active === "affiches") {
+        return groupedProjects.length > 0
+          ? <RowsView projects={groupedProjects} aspect={ASPECT.affiches} onOpen={openViewer} />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun pack</p>;
+      }
+      if (active === "covers") {
         const items: BrandingItem[] = groupedProjects.map(p => ({
           id: p.id, firstImage: p.images[0]?.url, label: p.title, images: p.images,
         }));
         return <BrandingGrid
           items={items}
-          aspectRatio={active === "covers" ? "1" : "4/5"}
+          aspectRatio="1"
           cols="grid-cols-2 md:grid-cols-5"
           onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
         />;

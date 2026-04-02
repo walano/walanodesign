@@ -47,11 +47,16 @@ class PortfolioPreviewSlotSerializer(serializers.ModelSerializer):
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    images = ProjectImageSerializer(many=True, read_only=True)
+    images        = ProjectImageSerializer(many=True, read_only=True)
+    thumbnail_url = serializers.SerializerMethodField()
 
     class Meta:
         model  = Project
         fields = [
             "id", "title", "category", "sub_type", "order", "images",
             "youtube_url", "yt_title", "yt_published", "yt_views", "yt_thumbnail",
+            "thumbnail_url",
         ]
+
+    def get_thumbnail_url(self, obj):
+        return obj.thumbnail.url if obj.thumbnail else None
