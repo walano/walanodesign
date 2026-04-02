@@ -133,7 +133,7 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: img.backgroundColor ?? "#e8dff2",
+              backgroundColor: img.backgroundColor ?? "#0c0c0c",
               aspectRatio:     img.aspectRatio ?? "1",
               maxWidth:        "100%",
               maxHeight:       "100%",
@@ -246,7 +246,7 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
                 cursor:          "pointer",
                 opacity:         thumbI === index ? 1 : 0.4,
                 outline:         thumbI === index ? "2px solid #855c9d" : "2px solid transparent",
-                backgroundColor: "#e8dff2",
+                backgroundColor: "#0c0c0c",
                 overflow:        "hidden",
                 transition:      "opacity 0.2s, outline 0.2s",
               }}

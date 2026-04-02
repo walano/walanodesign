@@ -143,13 +143,13 @@ export default function PortfolioPreview() {
                       src:             p.images[0]?.url || p.yt_thumbnail || "",
                       label:           p.title || t(`portfolio.categories.${key}`),
                       aspectRatio:     aspect.replace("aspect-[", "").replace("]", "").replace("aspect-square", "1").replace("aspect-video", "16/9"),
-                      backgroundColor: "#e8dff2",
+                      backgroundColor: "#0c0c0c",
                     }));
                     return (
                       <div
                         key={i}
                         className={`relative ${aspect} overflow-hidden cursor-pointer group/card`}
-                        style={{ backgroundColor: "#e8dff2" }}
+                        style={{ backgroundColor: "#0c0c0c" }}
                         onClick={() => {
                           if (isLast) { router.push(`/portfolio?category=${key}`); return; }
                           if (proj?.youtube_url) {
@@ -254,11 +254,11 @@ export default function PortfolioPreview() {
                 src:             p.images[0]?.url || p.yt_thumbnail || undefined,
                 label:           p.title || "",
                 aspectRatio:     "1",
-                backgroundColor: "#e8dff2",
+                backgroundColor: "#0c0c0c",
               }));
               // pad to 8 slots
               const slots = MOBILE_LAYOUT.map((aspect, i) => ({
-                ...(images[i] ?? { src: undefined, label: `visuel ${i + 1}`, aspectRatio: "1", backgroundColor: "#e8dff2" }),
+                ...(images[i] ?? { src: undefined, label: `visuel ${i + 1}`, aspectRatio: "1", backgroundColor: "#0c0c0c" }),
                 aspect,
               }));
 
@@ -275,7 +275,7 @@ export default function PortfolioPreview() {
                   <div
                     key={idx}
                     className={`relative ${slots[idx].aspect} overflow-hidden cursor-pointer`}
-                    style={{ backgroundColor: "#e8dff2", ...extraStyle }}
+                    style={{ backgroundColor: "#0c0c0c", ...extraStyle }}
                     onClick={handleClick}
                   >
                     {slots[idx].src && (

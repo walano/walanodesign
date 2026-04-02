@@ -727,9 +727,28 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
       }
       if (active === "bannieres") {
-        return projects.length > 0
-          ? <AllImagesGrid projects={projects} aspect={ASPECT.bannieres} onOpen={openViewer} colsClass="grid-cols-1" />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+        const bannerProjects = projects.filter(p => p.images[0]?.url);
+        if (bannerProjects.length === 0) return (
+          <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>
+        );
+        const bannerImages: ViewerImage[] = bannerProjects.map(p => ({ src: p.images[0].url, label: p.title }));
+        return (
+          <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
+            {bannerProjects.map((p, i) => (
+              <div
+                key={p.id}
+                className="relative overflow-hidden group cursor-pointer"
+                style={{ backgroundColor: "#0c0c0c" }}
+                onClick={() => openViewer(bannerImages, i)}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.images[0].url} alt={p.title} loading="lazy" style={{ width: "100%", height: "auto", display: "block" }} />
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundColor: "rgba(133,92,157,0.15)" }} />
+                <a href={`/portfolio/${p.id}`} className="sr-only">{p.title}</a>
+              </div>
+            ))}
+          </div>
+        );
       }
       if (active === "affiches") {
         return projects.length > 0
