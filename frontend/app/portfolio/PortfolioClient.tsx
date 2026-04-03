@@ -792,51 +792,76 @@ function RowsView({ projects, aspect, onOpen }: {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Project navigator helpers
+   Project Navigator — flat snap carousel across all project images
+   Albums/packs: each image = one slide (seamless swipe into next project)
+   Singles: one slide per project
+   Desktop: prev/next text buttons; Mobile: swipe only
 ───────────────────────────────────────────────────────── */
-function getProjectMode(p: Project): "single" | "album" | "branding" {
-  if (p.sub_type === "album" || p.sub_type === "pack") return "album";
-  if (p.sub_type === "branding") return "branding";
-  return "single";
+interface ProjectNavState { projects: Project[]; projectIndex: number; }
+
+interface Slide {
+  projectIdx: number;
+  imageIdx:   number;
+  url:        string;
+  title:      string;
+  imageCount: number;
 }
 
-/* Single-image inner view */
-function SingleImageInner({ project }: { project: Project }) {
-  const imgUrl = project.images[0]?.url || project.yt_thumbnail;
-  return (
-    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(0.5rem,2vw,2rem)" }}>
-      {imgUrl
-        // eslint-disable-next-line @next/next/no-img-element
-        ? <img src={imgUrl} alt={project.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
-        : <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{project.title}</span>
-      }
-    </div>
-  );
-}
+function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState & { onClose: () => void }) {
+  // Build flat slides array: each image of each project = one slide
+  const slides: Slide[] = projects.flatMap((p, pIdx) => {
+    const imgs = p.images.length > 0 ? p.images : (p.yt_thumbnail ? [{ url: p.yt_thumbnail }] : []);
+    if (imgs.length === 0) return [];
+    return imgs.map((img, iIdx) => ({
+      projectIdx: pIdx,
+      imageIdx:   iIdx,
+      url:        img.url,
+      title:      p.title,
+      imageCount: imgs.length,
+    }));
+  });
 
-/* Album/pack inner carousel — desktop inner prev/next, mobile swipe via snap */
-function AlbumCarouselInner({ images, label }: { images: { url: string }[]; label: string }) {
-  const [imgIdx, setImgIdx] = useState(0);
+  const initialSlide = Math.max(0, slides.findIndex(s => s.projectIdx === projectIndex));
+  const [curIdx, setCurIdx] = useState(initialSlide);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const thumbsRef = useRef<HTMLDivElement>(null);
 
-  const scrollToImg = useCallback((i: number) => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollTo({ left: Math.min(Math.max(i, 0), images.length - 1) * scrollRef.current.clientWidth, behavior: "smooth" });
-  }, [images.length]);
+  // Jump to initial slide on mount without animation
+  useEffect(() => {
+    if (!scrollRef.current || initialSlide === 0) return;
+    scrollRef.current.scrollLeft = initialSlide * scrollRef.current.clientWidth;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onClose(); return; }
+      if (!scrollRef.current) return;
+      const cur = Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth);
+      if (e.key === "ArrowLeft")  scrollTo(cur - 1);
+      if (e.key === "ArrowRight") scrollTo(cur + 1);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
-    setImgIdx(Math.min(Math.max(Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth), 0), images.length - 1));
-  }, [images.length]);
+    setCurIdx(Math.min(Math.max(Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth), 0), slides.length - 1));
+  }, [slides.length]);
 
-  useEffect(() => {
-    if (!thumbsRef.current) return;
-    (thumbsRef.current.children[imgIdx] as HTMLElement | undefined)?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
-  }, [imgIdx]);
+  const scrollTo = useCallback((i: number) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollTo({ left: Math.min(Math.max(i, 0), slides.length - 1) * scrollRef.current.clientWidth, behavior: "smooth" });
+  }, [slides.length]);
 
-  const iBtnStyle: React.CSSProperties = {
-    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 5,
+  const slide = slides[curIdx];
+  if (!slide) return null;
+
+  const totalProjects = projects.length;
+
+  const btnStyle: React.CSSProperties = {
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
     padding: "0.5rem 1rem", display: "flex", alignItems: "center", justifyContent: "center",
     background: "rgba(12,12,12,0.55)", border: "1px solid rgba(255,255,255,0.15)",
     backdropFilter: "blur(10px)", color: "#f5f3f7", fontFamily: "Inter,sans-serif",
@@ -844,189 +869,77 @@ function AlbumCarouselInner({ images, label }: { images: { url: string }[]; labe
   };
 
   return (
-    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
-      {images.length > 1 && (
-        <div style={{ textAlign: "center", padding: "0.2rem 0", flexShrink: 0 }}>
-          <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.65rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>
-            {imgIdx + 1} / {images.length}
-          </span>
+    <div className="fixed inset-0 z-[100] flex flex-col bg-black">
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      >
+        <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
+          {slide.title}
+          {slide.imageCount > 1 && <span style={{ color: "rgba(245,243,247,0.3)" }}> — {slide.imageIdx + 1}/{slide.imageCount}</span>}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {totalProjects > 1 && (
+            <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>
+              {slide.projectIdx + 1} / {totalProjects}
+            </span>
+          )}
+          <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>✕</button>
         </div>
-      )}
+      </div>
+
+      {/* Flat snap carousel */}
+      <style>{`.proj-snap::-webkit-scrollbar { display: none; }`}</style>
       <div className="relative flex-1 overflow-hidden">
-        {images.length > 1 && (
+        {/* Desktop prev/next — hidden on mobile */}
+        {slides.length > 1 && (
           <>
-            <button className="hidden md:flex" style={{ ...iBtnStyle, left: "3rem" }}
-              onClick={() => scrollToImg(imgIdx - 1)}
+            <button className="hidden md:flex" style={{ ...btnStyle, left: "clamp(0.5rem,2vw,1.5rem)" }}
+              onClick={() => scrollTo(curIdx - 1)}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
               onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
             >prev</button>
-            <button className="hidden md:flex" style={{ ...iBtnStyle, right: "3rem" }}
-              onClick={() => scrollToImg(imgIdx + 1)}
+            <button className="hidden md:flex" style={{ ...btnStyle, right: "clamp(0.5rem,2vw,1.5rem)" }}
+              onClick={() => scrollTo(curIdx + 1)}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
               onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
             >next</button>
           </>
         )}
-        <div ref={scrollRef} className="snap-carousel" data-lenis-prevent
-          style={{ position: "absolute", inset: 0, display: "flex", overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", overscrollBehavior: "contain" }}
+        <div
+          ref={scrollRef}
+          className="proj-snap"
+          data-lenis-prevent
+          style={{
+            position: "absolute", inset: 0,
+            display: "flex",
+            overflowX: "auto", overflowY: "hidden",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            overscrollBehavior: "contain",
+          }}
           onScroll={handleScroll}
         >
-          {images.map((img, i) => (
-            <div key={i} style={{ flexShrink: 0, width: "100%", height: "100%", scrollSnapAlign: "start", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {img.url && <img src={img.url} alt={`${label} ${i + 1}`} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />}
-            </div>
-          ))}
-        </div>
-      </div>
-      {images.length > 1 && (
-        <div ref={thumbsRef} className="snap-carousel" style={{ display: "flex", gap: "0.35rem", padding: "0.4rem 1rem 0.4rem", overflowX: "auto", justifyContent: "center", flexShrink: 0, scrollbarWidth: "none" }}>
-          {images.map((img, i) => (
-            <div key={i} onClick={() => scrollToImg(i)}
-              style={{ width: 52, height: 29, flexShrink: 0, cursor: "pointer", opacity: i === imgIdx ? 1 : 0.4, outline: i === imgIdx ? "2px solid #855c9d" : "2px solid transparent", backgroundColor: "#0c0c0c", overflow: "hidden", transition: "opacity 0.2s, outline 0.2s" }}
+          {slides.map((s, i) => (
+            <div
+              key={i}
+              style={{
+                flexShrink: 0, width: "100%", height: "100%",
+                scrollSnapAlign: "start",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "clamp(0.5rem,2vw,2rem)",
+              }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+              {s.url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
+                : <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
+              }
             </div>
           ))}
         </div>
-      )}
-    </div>
-  );
-}
-
-/* Branding inner vertical scroll — scrollbar visible on desktop */
-function BrandingScrollInner({ images, label }: { images: { url: string }[]; label: string }) {
-  return (
-    <>
-      <style>{`
-        .brand-inner::-webkit-scrollbar { display: none; }
-        @media (min-width: 768px) {
-          .brand-inner::-webkit-scrollbar { display: block; width: 4px; }
-          .brand-inner::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-          .brand-inner::-webkit-scrollbar-thumb { background: rgba(133,92,157,0.6); border-radius: 2px; }
-          .brand-inner { scrollbar-width: thin; scrollbar-color: rgba(133,92,157,0.6) rgba(255,255,255,0.05); }
-        }
-      `}</style>
-      <div className="brand-inner" data-lenis-prevent
-        style={{ position: "absolute", inset: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
-      >
-        {images.map((img, i) => (
-          <div key={i} style={{ lineHeight: 0 }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {img.url && <img src={img.url} alt={`${label} ${i + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
-          </div>
-        ))}
       </div>
-    </>
-  );
-}
-
-/* Project Navigator — fixed overlay with project-level prev/next */
-interface ProjectNavState { projects: Project[]; projectIndex: number; }
-
-function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState & { onClose: () => void }) {
-  const [pIdx, setPIdx]     = useState(projectIndex);
-  const project             = projects[pIdx];
-  const mode                = getProjectMode(project);
-  const total               = projects.length;
-  const touchStartX         = useRef<number | null>(null);
-  const didSwipe            = useRef(false);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [onClose]);
-
-  const prevP = () => setPIdx(i => Math.max(0, i - 1));
-  const nextP = () => setPIdx(i => Math.min(total - 1, i + 1));
-
-  const onTouchStart = (e: React.TouchEvent) => {
-    if (mode === "album") return;
-    touchStartX.current = e.touches[0].clientX;
-    didSwipe.current = false;
-  };
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (mode === "album" || touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    if (Math.abs(delta) > 60) { didSwipe.current = true; delta < 0 ? nextP() : prevP(); }
-    touchStartX.current = null;
-  };
-
-  const oBtnStyle: React.CSSProperties = {
-    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
-    padding: "1rem 0.4rem", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "rgba(12,12,12,0.7)", border: "1px solid rgba(255,255,255,0.1)",
-    backdropFilter: "blur(10px)", color: "#f5f3f7", fontFamily: "Inter,sans-serif",
-    fontWeight: 400, fontSize: "1.1rem", cursor: "pointer", transition: "background 0.2s", lineHeight: 1,
-  };
-
-  const mBtnStyle: React.CSSProperties = {
-    padding: "0.5rem 1.2rem", background: "rgba(255,255,255,0.08)",
-    border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(20px)",
-    color: "#f5f3f7", fontFamily: "Inter,sans-serif", fontWeight: 600,
-    fontSize: "0.72rem", letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.2s",
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex flex-col bg-black"
-      onClick={(e) => { if (!didSwipe.current) onClose(); didSwipe.current = false; e.stopPropagation(); }}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
-        onClick={e => e.stopPropagation()}
-      >
-        <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
-          {project.title}
-        </span>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {total > 1 && <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>{pIdx + 1} / {total}</span>}
-          <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>✕</button>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="relative flex-1 overflow-hidden" onClick={e => e.stopPropagation()}>
-        {/* Desktop outer project prev/next */}
-        {total > 1 && (
-          <>
-            <button className="hidden md:flex" style={{ ...oBtnStyle, left: 0, opacity: pIdx === 0 ? 0.25 : 1 }}
-              onClick={prevP}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
-            >‹</button>
-            <button className="hidden md:flex" style={{ ...oBtnStyle, right: 0, opacity: pIdx === total - 1 ? 0.25 : 1 }}
-              onClick={nextP}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
-            >›</button>
-          </>
-        )}
-        {/* Inner viewer — resets on project change */}
-        <div key={pIdx} style={{ position: "absolute", inset: 0 }}>
-          {mode === "single"   && <SingleImageInner   project={project} />}
-          {mode === "album"    && <AlbumCarouselInner images={project.images} label={project.title} />}
-          {mode === "branding" && <BrandingScrollInner images={project.images} label={project.title} />}
-        </div>
-      </div>
-
-      {/* Mobile project prev/next — below content */}
-      {total > 1 && (
-        <div className="md:hidden flex items-center justify-center gap-4 py-3 flex-shrink-0"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-          onClick={e => e.stopPropagation()}
-        >
-          <button onClick={prevP} disabled={pIdx === 0} style={{ ...mBtnStyle, opacity: pIdx === 0 ? 0.3 : 1 }}>prev</button>
-          <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.35)", letterSpacing: "0.06em" }}>{pIdx + 1} / {total}</span>
-          <button onClick={nextP} disabled={pIdx === total - 1} style={{ ...mBtnStyle, opacity: pIdx === total - 1 ? 0.3 : 1 }}>next</button>
-        </div>
-      )}
     </div>
   );
 }
