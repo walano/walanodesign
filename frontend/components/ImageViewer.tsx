@@ -28,7 +28,11 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
   useEffect(() => {
     requestAnimationFrame(() => setReady(true));
     lenisRef.current?.stop();
-    return () => { lenisRef.current?.start(); };
+    document.body.style.overscrollBehavior = "none";
+    return () => {
+      lenisRef.current?.start();
+      document.body.style.overscrollBehavior = "";
+    };
   }, []);
 
   const prev = useCallback(() => setIndex((i) => (i - 1 + images.length) % images.length), [images.length]);

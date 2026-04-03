@@ -76,10 +76,12 @@ function BrandingProjectViewer({ images, label, onClose }: {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow           = "hidden";
+    document.body.style.overscrollBehavior = "none";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow           = "";
+      document.body.style.overscrollBehavior = "";
     };
   }, [onClose]);
 
@@ -148,10 +150,12 @@ function HorizontalProjectViewer({ images, label, initialIndex = 0, onClose }: {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow           = "hidden";
+    document.body.style.overscrollBehavior = "none";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow           = "";
+      document.body.style.overscrollBehavior = "";
     };
   }, [onClose]);
 
@@ -839,14 +843,35 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
   const scrollRef  = useRef<HTMLDivElement>(null);
   const thumbsRef  = useRef<HTMLDivElement>(null);
 
-  // Jump to initial slide on mount without animation
+  // Jump to initial slide on mount — rAF ensures layout is complete before reading clientWidth
   useEffect(() => {
-    if (!scrollRef.current || initialSlide === 0) return;
-    scrollRef.current.scrollLeft = initialSlide * scrollRef.current.clientWidth;
+    if (initialSlide === 0) return;
+    requestAnimationFrame(() => {
+      if (!scrollRef.current) return;
+      scrollRef.current.scrollLeft = initialSlide * scrollRef.current.clientWidth;
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
+    const el = scrollRef.current;
+
+    // Detect settled index via scrollend (fires after snap) + debounce fallback
+    const updateIdx = () => {
+      if (!scrollRef.current) return;
+      setCurIdx(c => {
+        const next = Math.round(scrollRef.current!.scrollLeft / scrollRef.current!.clientWidth);
+        return Math.min(Math.max(next, 0), slides.length - 1) !== c
+          ? Math.min(Math.max(next, 0), slides.length - 1)
+          : c;
+      });
+    };
+    let debounce: ReturnType<typeof setTimeout>;
+    const onScroll = () => { clearTimeout(debounce); debounce = setTimeout(updateIdx, 80); };
+    el?.addEventListener("scrollend", updateIdx);
+    el?.addEventListener("scroll",    onScroll);
+
+    // Keyboard navigation
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") { onClose(); return; }
       if (!scrollRef.current) return;
@@ -855,18 +880,28 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
       if (e.key === "ArrowRight") scrollTo(cur + 1);
     };
     window.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
-  }, [onClose]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return;
-    setCurIdx(Math.min(Math.max(Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth), 0), slides.length - 1));
-  }, [slides.length]);
+    // Prevent pull-to-refresh — iOS Safari ignores overscrollBehavior on children,
+    // must be set on body
+    document.body.style.overflow         = "hidden";
+    document.body.style.overscrollBehavior = "none";
 
+    return () => {
+      el?.removeEventListener("scrollend", updateIdx);
+      el?.removeEventListener("scroll",    onScroll);
+      clearTimeout(debounce);
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow         = "";
+      document.body.style.overscrollBehavior = "";
+    };
+  }, [onClose, slides.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Instant scroll — avoids smooth-scroll vs snap conflict on iOS (causes the slice bug)
   const scrollTo = useCallback((i: number) => {
     if (!scrollRef.current) return;
-    scrollRef.current.scrollTo({ left: Math.min(Math.max(i, 0), slides.length - 1) * scrollRef.current.clientWidth, behavior: "smooth" });
+    const clamped = Math.min(Math.max(i, 0), slides.length - 1);
+    scrollRef.current.scrollLeft = clamped * scrollRef.current.clientWidth;
+    setCurIdx(clamped);
   }, [slides.length]);
 
   // Keep active thumbnail in view
@@ -937,13 +972,13 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
           style={{
             position: "absolute", inset: 0,
             display: "flex",
-            overflowX: "auto", overflowY: "hidden",
+            overflowX: "scroll", overflowY: "hidden",  // scroll (not auto) → reliable snap on iOS
             scrollSnapType: "x mandatory",
             WebkitOverflowScrolling: "touch",
             scrollbarWidth: "none",
             overscrollBehavior: "contain",
+            transform: "translateZ(0)",  // GPU layer → smoother snap
           }}
-          onScroll={handleScroll}
         >
           {slides.map((s, i) => (
             <div
