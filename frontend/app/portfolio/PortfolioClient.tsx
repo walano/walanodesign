@@ -937,7 +937,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black" style={{ position: "relative" }}>
+    <div className="fixed inset-0 z-[100] bg-black">
       <style>{`
         .proj-snap::-webkit-scrollbar { display: none; }
         .brand-proj-scroll::-webkit-scrollbar { display: none; }
