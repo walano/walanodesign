@@ -975,6 +975,10 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
               scrollSnapStop: "always",
               overflow: "hidden",
               display: "flex", alignItems: "center", justifyContent: "center",
+              // Reserve space for header (top) and thumbnail strip (bottom) — constant
+              // values so the image zone never shifts regardless of UI around it
+              paddingTop: "3.5rem",
+              paddingBottom: "4rem",
             }}
           >
             {s.isBranding ? (
@@ -1011,7 +1015,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
+        <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", textTransform: "lowercase" }}>
           {slide.title}
           {showThumbs && <span style={{ color: "rgba(245,243,247,0.3)" }}> — {slide.imageIdx + 1}/{slide.imageCount}</span>}
         </span>
