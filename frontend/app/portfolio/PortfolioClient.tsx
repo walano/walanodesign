@@ -885,12 +885,15 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
   // First slide index of the current project (for thumbnail click → scrollTo)
   const projectStartIdx = slides.findIndex(s => s.projectIdx === slide.projectIdx);
 
+  // Fix #2: no display in btnStyle — let className="hidden md:flex" control it
   const btnStyle: React.CSSProperties = {
-    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
-    padding: "0.5rem 1rem", display: "flex", alignItems: "center", justifyContent: "center",
-    background: "rgba(12,12,12,0.55)", border: "1px solid rgba(255,255,255,0.15)",
-    backdropFilter: "blur(10px)", color: "#f5f3f7", fontFamily: "Inter,sans-serif",
-    fontWeight: 600, fontSize: "0.72rem", letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.2s",
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 30,
+    alignItems: "center", justifyContent: "center",
+    padding: "1rem 0.75rem",
+    background: "rgba(12,12,12,0.7)", border: "none",
+    backdropFilter: "blur(10px)", color: "#f5f3f7",
+    fontWeight: 300, fontSize: "1.6rem", lineHeight: 1,
+    cursor: "pointer", transition: "background 0.2s",
   };
 
   return (
@@ -927,21 +930,6 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
 
       {/* Carousel */}
       <div className="relative flex-1 overflow-hidden">
-        {/* Desktop prev/next — hidden on mobile */}
-        {slides.length > 1 && (
-          <>
-            <button className="hidden md:flex" style={{ ...btnStyle, left: "clamp(0.5rem,2vw,1.5rem)" }}
-              onClick={() => scrollTo(curIdx - 1)}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
-            >prev</button>
-            <button className="hidden md:flex" style={{ ...btnStyle, right: "clamp(0.5rem,2vw,1.5rem)" }}
-              onClick={() => scrollTo(curIdx + 1)}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
-            >next</button>
-          </>
-        )}
         <div
           ref={scrollRef}
           className="proj-snap"
@@ -963,23 +951,33 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
               style={{
                 flexShrink: 0, width: "100%", height: "100%",
                 scrollSnapAlign: "start",
+                scrollSnapStop: "always",   // fix #3: no skipping slides
                 overflow: "hidden",
-                ...(!s.isBranding && { display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(0.5rem,2vw,2rem)" }),
+                display: "flex", alignItems: "center", justifyContent: "center",
+                // fix #1: no padding → flush edges between slides
               }}
             >
               {s.isBranding ? (
-                /* Branding slide — vertical scroll */
-                <div
-                  className="brand-proj-scroll"
-                  data-lenis-prevent
-                  style={{ width: "100%", height: "100%", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
+                /* fix #6: branding slide — constrained on desktop, full on mobile */
+                <div className="w-full h-full md:w-[60vw] md:h-[85vh] md:max-w-4xl flex-shrink-0"
+                  style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
                 >
-                  {s.allImages.map((img, ii) => (
-                    <div key={ii} style={{ lineHeight: 0 }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {img.url && <img src={img.url} alt={`${s.title} ${ii + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
-                    </div>
-                  ))}
+                  <div
+                    className="brand-proj-scroll"
+                    data-lenis-prevent
+                    style={{
+                      flex: 1, overflowY: "auto",
+                      WebkitOverflowScrolling: "touch",
+                      overscrollBehavior: "none",  // fix #5: no pull-to-refresh
+                    }}
+                  >
+                    {s.allImages.map((img, ii) => (
+                      <div key={ii} style={{ lineHeight: 0 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {img.url && <img src={img.url} alt={`${s.title} ${ii + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : s.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -1021,6 +1019,27 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
             </div>
           ))}
         </div>
+      )}
+
+      {/* fix #4: Desktop prev/next arrows — stable position relative to the full viewport,
+          outside the carousel div so thumbnails don't shift them */}
+      {slides.length > 1 && (
+        <>
+          <button
+            className="hidden md:flex"
+            style={{ ...btnStyle, left: 0 }}
+            onClick={() => scrollTo(curIdx - 1)}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
+          >‹</button>
+          <button
+            className="hidden md:flex"
+            style={{ ...btnStyle, right: 0 }}
+            onClick={() => scrollTo(curIdx + 1)}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
+          >›</button>
+        </>
       )}
     </div>
   );
