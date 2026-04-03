@@ -150,20 +150,60 @@ export default function Footer() {
         </span>
       </div>
 
-      {/* Copyright */}
-      <p
+      {/* Legal links + copyright bar */}
+      <div
         style={{
-          fontFamily:    "Inter, sans-serif",
-          fontWeight:    400,
-          fontSize:      "clamp(0.75rem, 1.5vw, 0.8rem)",
-          color:         "#0c0c0c",
-          textAlign:     "center",
+          width:         "100%",
+          paddingInline: "clamp(1rem, 5vw, 3rem)",
           paddingBottom: "1.5rem",
-          paddingInline: "1rem",
         }}
       >
-        {t("footer.rights")}
-      </p>
+        <style>{`
+          .footer-legal { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+          @media (min-width: 768px) { .footer-legal { flex-direction: row; justify-content: center; gap: 0; } }
+          .footer-legal-sep { display: none; }
+          @media (min-width: 768px) { .footer-legal-sep { display: inline; color: rgba(12,12,12,0.35); padding: 0 1.25rem; } }
+        `}</style>
+        <div className="footer-legal">
+          {[
+            { label: "Conditions générales de vente", href: "/conditions" },
+            { label: "Politique de confidentialité",  href: "/confidentialite" },
+            { label: "Mentions légales",              href: "/mentions-legales" },
+          ].map(({ label, href }, i) => (
+            <span key={href} style={{ display: "contents" }}>
+              {i > 0 && <span className="footer-legal-sep" aria-hidden>·</span>}
+              <a
+                href={href}
+                style={{
+                  fontFamily:     "Inter, sans-serif",
+                  fontWeight:     400,
+                  fontSize:       "clamp(0.72rem, 1.2vw, 0.78rem)",
+                  color:          "rgba(12,12,12,0.6)",
+                  textDecoration: "none",
+                  transition:     "color 0.2s",
+                  whiteSpace:     "nowrap",
+                }}
+                onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
+                onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(12,12,12,0.6)")}
+              >
+                {label}
+              </a>
+            </span>
+          ))}
+          <span className="footer-legal-sep" aria-hidden>·</span>
+          <span
+            style={{
+              fontFamily: "Inter, sans-serif",
+              fontWeight: 400,
+              fontSize:   "clamp(0.72rem, 1.2vw, 0.78rem)",
+              color:      "rgba(12,12,12,0.6)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            © 2026 walano design. all rights reserved.
+          </span>
+        </div>
+      </div>
     </footer>
   );
 }
