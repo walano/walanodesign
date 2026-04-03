@@ -792,10 +792,11 @@ function RowsView({ projects, aspect, onOpen }: {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Project Navigator — flat snap carousel across all project images
-   Albums/packs: each image = one slide (seamless swipe into next project)
-   Singles: one slide per project
-   Desktop: prev/next text buttons; Mobile: swipe only
+   Project Navigator — flat snap carousel
+   • Singles / logos / album images → 1 horizontal slide per image
+   • Branding projects              → 1 horizontal slide with vertical scroll inside
+   • Album slides show thumbnail strip at bottom; singles/branding don't
+   Desktop: prev/next text buttons; Mobile: swipe only (no buttons)
 ───────────────────────────────────────────────────────── */
 interface ProjectNavState { projects: Project[]; projectIndex: number; }
 
@@ -805,25 +806,38 @@ interface Slide {
   url:        string;
   title:      string;
   imageCount: number;
+  isBranding: boolean;
+  allImages:  { url: string }[];
 }
 
 function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState & { onClose: () => void }) {
-  // Build flat slides array: each image of each project = one slide
   const slides: Slide[] = projects.flatMap((p, pIdx) => {
-    const imgs = p.images.length > 0 ? p.images : (p.yt_thumbnail ? [{ url: p.yt_thumbnail }] : []);
+    const isBranding = p.sub_type === "branding";
+    const allImages  = p.images;
+
+    if (isBranding) {
+      // One slide for the whole branding project (vertical scroll inside)
+      const s: Slide = {
+        projectIdx: pIdx, imageIdx: 0,
+        url: allImages[0]?.url || "", title: p.title,
+        imageCount: allImages.length, isBranding, allImages,
+      };
+      return [s];
+    }
+
+    const imgs = allImages.length > 0 ? allImages : (p.yt_thumbnail ? [{ url: p.yt_thumbnail }] : []);
     if (imgs.length === 0) return [];
-    return imgs.map((img, iIdx) => ({
-      projectIdx: pIdx,
-      imageIdx:   iIdx,
-      url:        img.url,
-      title:      p.title,
-      imageCount: imgs.length,
+    return imgs.map((img, iIdx): Slide => ({
+      projectIdx: pIdx, imageIdx: iIdx,
+      url: img.url, title: p.title,
+      imageCount: imgs.length, isBranding, allImages: imgs,
     }));
   });
 
   const initialSlide = Math.max(0, slides.findIndex(s => s.projectIdx === projectIndex));
   const [curIdx, setCurIdx] = useState(initialSlide);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef  = useRef<HTMLDivElement>(null);
+  const thumbsRef  = useRef<HTMLDivElement>(null);
 
   // Jump to initial slide on mount without animation
   useEffect(() => {
@@ -855,10 +869,21 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
     scrollRef.current.scrollTo({ left: Math.min(Math.max(i, 0), slides.length - 1) * scrollRef.current.clientWidth, behavior: "smooth" });
   }, [slides.length]);
 
+  // Keep active thumbnail in view
+  useEffect(() => {
+    if (!thumbsRef.current) return;
+    const slide = slides[curIdx];
+    if (!slide || slide.imageCount <= 1 || slide.isBranding) return;
+    (thumbsRef.current.children[slide.imageIdx] as HTMLElement | undefined)
+      ?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+  }, [curIdx, slides]);
+
   const slide = slides[curIdx];
   if (!slide) return null;
 
-  const totalProjects = projects.length;
+  const showThumbs = slide.imageCount > 1 && !slide.isBranding;
+  // First slide index of the current project (for thumbnail click → scrollTo)
+  const projectStartIdx = slides.findIndex(s => s.projectIdx === slide.projectIdx);
 
   const btnStyle: React.CSSProperties = {
     position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
@@ -870,26 +895,37 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col bg-black">
+      <style>{`
+        .proj-snap::-webkit-scrollbar { display: none; }
+        .brand-proj-scroll::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .brand-proj-scroll::-webkit-scrollbar { display: block; width: 4px; }
+          .brand-proj-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+          .brand-proj-scroll::-webkit-scrollbar-thumb { background: rgba(133,92,157,0.6); border-radius: 2px; }
+          .brand-proj-scroll { scrollbar-width: thin; scrollbar-color: rgba(133,92,157,0.6) rgba(255,255,255,0.05); }
+        }
+        .thumb-strip::-webkit-scrollbar { display: none; }
+      `}</style>
+
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
         style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
       >
         <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
           {slide.title}
-          {slide.imageCount > 1 && <span style={{ color: "rgba(245,243,247,0.3)" }}> — {slide.imageIdx + 1}/{slide.imageCount}</span>}
+          {showThumbs && <span style={{ color: "rgba(245,243,247,0.3)" }}> — {slide.imageIdx + 1}/{slide.imageCount}</span>}
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {totalProjects > 1 && (
+          {projects.length > 1 && (
             <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>
-              {slide.projectIdx + 1} / {totalProjects}
+              {slide.projectIdx + 1} / {projects.length}
             </span>
           )}
           <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>✕</button>
         </div>
       </div>
 
-      {/* Flat snap carousel */}
-      <style>{`.proj-snap::-webkit-scrollbar { display: none; }`}</style>
+      {/* Carousel */}
       <div className="relative flex-1 overflow-hidden">
         {/* Desktop prev/next — hidden on mobile */}
         {slides.length > 1 && (
@@ -927,19 +963,65 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
               style={{
                 flexShrink: 0, width: "100%", height: "100%",
                 scrollSnapAlign: "start",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: "clamp(0.5rem,2vw,2rem)",
+                overflow: "hidden",
+                ...(!s.isBranding && { display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(0.5rem,2vw,2rem)" }),
               }}
             >
-              {s.url
+              {s.isBranding ? (
+                /* Branding slide — vertical scroll */
+                <div
+                  className="brand-proj-scroll"
+                  data-lenis-prevent
+                  style={{ width: "100%", height: "100%", overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
+                >
+                  {s.allImages.map((img, ii) => (
+                    <div key={ii} style={{ lineHeight: 0 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {img.url && <img src={img.url} alt={`${s.title} ${ii + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
+                    </div>
+                  ))}
+                </div>
+              ) : s.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
-                : <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
-              }
+                <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
+              ) : (
+                <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
+              )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Thumbnail strip — only for album/pack slides */}
+      {showThumbs && (
+        <div
+          ref={thumbsRef}
+          className="thumb-strip"
+          style={{
+            display: "flex", gap: "0.35rem",
+            padding: "0.5rem 1rem 0.75rem",
+            overflowX: "auto", justifyContent: "center",
+            flexShrink: 0, scrollbarWidth: "none",
+          }}
+        >
+          {slide.allImages.map((img, ii) => (
+            <div
+              key={ii}
+              onClick={() => scrollTo(projectStartIdx + ii)}
+              style={{
+                width: 64, height: 36, flexShrink: 0, cursor: "pointer",
+                opacity: ii === slide.imageIdx ? 1 : 0.4,
+                outline: ii === slide.imageIdx ? "2px solid #855c9d" : "2px solid transparent",
+                backgroundColor: "#0c0c0c", overflow: "hidden",
+                transition: "opacity 0.2s, outline 0.2s",
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
