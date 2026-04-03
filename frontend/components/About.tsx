@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useI18n } from "@/lib/i18n";
@@ -21,10 +21,40 @@ export default function About() {
   const photoRef      = useRef<HTMLDivElement>(null);
   const textRef       = useRef<HTMLDivElement>(null);
   const trustTitleRef = useRef<HTMLParagraphElement>(null);
-  const avatarsRef    = useRef<HTMLDivElement>(null);
+  const marqueeTrackRef = useRef<HTMLDivElement>(null);
 
   const [config, setConfig]   = useState<SiteConfig | null>(null);
   const [clients, setClients] = useState<Client[]>(FALLBACK_CLIENTS);
+
+  // JS-driven marquee — pause on hold, resume on release, swipe to navigate
+  const marqueePos   = useRef(0);
+  const marqueePaused = useRef(false);
+  const marqueeDragging = useRef(false);
+  const marqueeStartX  = useRef(0);
+  const marqueeStartPos = useRef(0);
+  const marqueeRaf     = useRef<number>(0);
+
+  const startMarquee = useCallback(() => {
+    const track = marqueeTrackRef.current;
+    if (!track) return;
+    const SPEED = 0.55;
+    const tick = () => {
+      if (!marqueePaused.current && !marqueeDragging.current) {
+        marqueePos.current -= SPEED;
+      }
+      const oneThird = track.scrollWidth / 3;
+      if (marqueePos.current < -oneThird) marqueePos.current += oneThird;
+      if (marqueePos.current > 0) marqueePos.current -= oneThird;
+      track.style.transform = `translateX(${marqueePos.current}px)`;
+      marqueeRaf.current = requestAnimationFrame(tick);
+    };
+    marqueeRaf.current = requestAnimationFrame(tick);
+  }, []);
+
+  useEffect(() => {
+    startMarquee();
+    return () => cancelAnimationFrame(marqueeRaf.current);
+  }, [startMarquee]);
 
   useEffect(() => {
     fetchSiteConfig().then(data => { if (data) setConfig(data); });
@@ -48,7 +78,7 @@ export default function About() {
       <section
         id="about"
         className="about-section relative w-full overflow-hidden"
-        style={{ paddingBlock: "clamp(1rem, 8vw, 8rem)", backgroundColor: "#0c0c0c" }}
+        style={{ paddingTop: "clamp(1rem, 8vw, 8rem)", paddingBottom: "clamp(3rem, 8vw, 8rem)", backgroundColor: "#0c0c0c" }}
       >
         {/* symbol.svg — full section background */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -120,7 +150,7 @@ export default function About() {
                   flexShrink: 0,
                   paddingTop: "0.5rem",
                   paddingLeft: "1.2rem",
-                  paddingBottom: "1.5rem",
+                  paddingBottom: "0.3rem",
                 }}
               >
                 {t("about.title")}
@@ -236,29 +266,52 @@ export default function About() {
               <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 300 }}>.</span>
             </p>
 
-            {/* Client avatars — infinite marquee */}
+            {/* Client avatars — JS marquee: hold to pause, swipe to navigate */}
             <style>{`
-              @keyframes marqueeScroll {
-                0%   { transform: translateX(0); }
-                100% { transform: translateX(-33.333%); }
-              }
-              @media (prefers-reduced-motion: reduce) {
-                .marquee-track { animation: none !important; }
-              }
               .marquee-outer {
                 mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
                 -webkit-mask-image: linear-gradient(to right, transparent 0%, black 12%, black 88%, transparent 100%);
               }
+              @media (prefers-reduced-motion: reduce) {
+                .marquee-outer { mask-image: none; -webkit-mask-image: none; }
+              }
             `}</style>
 
-            <div className="marquee-outer" style={{ width: "100%", overflow: "hidden" }}>
+            <div
+              className="marquee-outer"
+              style={{ width: "100%", overflow: "hidden", cursor: "grab", userSelect: "none" }}
+              onMouseDown={(e) => {
+                marqueePaused.current = true;
+                marqueeDragging.current = false;
+                marqueeStartX.current = e.clientX;
+                marqueeStartPos.current = marqueePos.current;
+              }}
+              onMouseMove={(e) => {
+                if (!marqueePaused.current) return;
+                marqueeDragging.current = true;
+                marqueePos.current = marqueeStartPos.current + (e.clientX - marqueeStartX.current);
+              }}
+              onMouseUp={() => { marqueePaused.current = false; marqueeDragging.current = false; }}
+              onMouseLeave={() => { marqueePaused.current = false; marqueeDragging.current = false; }}
+              onTouchStart={(e) => {
+                marqueePaused.current = true;
+                marqueeDragging.current = false;
+                marqueeStartX.current = e.touches[0].clientX;
+                marqueeStartPos.current = marqueePos.current;
+              }}
+              onTouchMove={(e) => {
+                marqueeDragging.current = true;
+                marqueePos.current = marqueeStartPos.current + (e.touches[0].clientX - marqueeStartX.current);
+              }}
+              onTouchEnd={() => { marqueePaused.current = false; marqueeDragging.current = false; }}
+            >
               <div
-                ref={avatarsRef}
+                ref={marqueeTrackRef}
                 className="marquee-track"
                 style={{
                   display: "flex",
                   width: "max-content",
-                  animation: "marqueeScroll 28s linear infinite",
+                  willChange: "transform",
                 }}
               >
                 {[...Array(3)].flatMap((_, rep) =>

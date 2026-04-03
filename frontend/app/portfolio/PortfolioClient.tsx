@@ -124,13 +124,17 @@ function BrandingProjectViewer({ images, label, onClose }: {
 }
 
 /* ─────────────────────────────────────────────────────────
-   Horizontal project viewer — albums & packs
+   Horizontal project viewer — albums & packs (Instagram carousel)
 ───────────────────────────────────────────────────────── */
 function HorizontalProjectViewer({ images, label, onClose }: {
   images:  { url: string }[];
   label:   string;
   onClose: () => void;
 }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const scrollRef  = useRef<HTMLDivElement>(null);
+  const thumbsRef  = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -141,44 +145,127 @@ function HorizontalProjectViewer({ images, label, onClose }: {
     };
   }, [onClose]);
 
+  // Snap scroll → derive active index
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    const idx = Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth);
+    setCurrentIndex(Math.min(Math.max(idx, 0), images.length - 1));
+  }, [images.length]);
+
+  // Thumbnail click → scroll to slide
+  const scrollToIndex = useCallback((i: number) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollTo({ left: i * scrollRef.current.clientWidth, behavior: "smooth" });
+  }, []);
+
+  // Keep active thumbnail visible in strip
+  useEffect(() => {
+    if (!thumbsRef.current) return;
+    const thumb = thumbsRef.current.children[currentIndex] as HTMLElement | undefined;
+    thumb?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+  }, [currentIndex]);
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70" onClick={onClose}>
       <div className="relative flex flex-col bg-black w-[92vw] h-[75vh] md:w-[85vw] md:h-[80vh] md:max-w-6xl" onClick={e => e.stopPropagation()}>
-        {/* header */}
+
+        {/* header — label left, counter + close right */}
         <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
           <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
             {label}
           </span>
-          <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>
-            ✕
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            {images.length > 1 && (
+              <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.35)", letterSpacing: "0.06em" }}>
+                {currentIndex + 1} / {images.length}
+              </span>
+            )}
+            <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>
+              ✕
+            </button>
+          </div>
         </div>
 
-        {/* horizontal scroll */}
-        <style>{`
-          .horiz-scroll::-webkit-scrollbar { height: 4px; }
-          .horiz-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
-          .horiz-scroll::-webkit-scrollbar-thumb { background: rgba(133,92,157,0.6); }
-          .horiz-scroll { scrollbar-width: thin; scrollbar-color: rgba(133,92,157,0.6) rgba(255,255,255,0.05); }
-        `}</style>
+        {/* Instagram-style snap carousel */}
+        <style>{`.snap-carousel::-webkit-scrollbar { display: none; }`}</style>
         <div
-          className="flex-1 horiz-scroll overflow-x-auto"
+          ref={scrollRef}
+          className="snap-carousel flex-1"
           data-lenis-prevent
-          style={{ display: "flex", flexDirection: "row", alignItems: "stretch", overscrollBehavior: "contain" }}
+          style={{
+            display: "flex",
+            overflowX: "auto",
+            overflowY: "hidden",
+            scrollSnapType: "x mandatory",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            overscrollBehavior: "contain",
+          }}
+          onScroll={handleScroll}
         >
           {images.map((img, i) => (
-            <div key={i} style={{ flexShrink: 0, height: "100%", lineHeight: 0 }}>
+            <div
+              key={i}
+              style={{
+                flexShrink: 0,
+                width: "100%",
+                height: "100%",
+                scrollSnapAlign: "start",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               {img.url && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={img.url}
                   alt={`${label} ${i + 1}`}
-                  style={{ height: "100%", width: "auto", display: "block" }}
+                  style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
                 />
               )}
             </div>
           ))}
         </div>
+
+        {/* Thumbnail strip */}
+        {images.length > 1 && (
+          <div
+            ref={thumbsRef}
+            className="snap-carousel"
+            style={{
+              display: "flex",
+              gap: "0.35rem",
+              padding: "0.5rem 1rem 0.75rem",
+              overflowX: "auto",
+              justifyContent: "center",
+              flexShrink: 0,
+              scrollbarWidth: "none",
+            }}
+          >
+            {images.map((img, i) => (
+              <div
+                key={i}
+                onClick={() => scrollToIndex(i)}
+                style={{
+                  width: 64, height: 36,
+                  flexShrink: 0,
+                  cursor: "pointer",
+                  opacity: i === currentIndex ? 1 : 0.4,
+                  outline: i === currentIndex ? "2px solid #855c9d" : "2px solid transparent",
+                  backgroundColor: "#0c0c0c",
+                  overflow: "hidden",
+                  transition: "opacity 0.2s, outline 0.2s",
+                }}
+              >
+                {img.url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -16,7 +16,7 @@ const CATEGORIES = [
   { key: "videos",     aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
   { key: "affiches",   aspect: "aspect-[3/4]",   count: 5, cols: "grid-cols-5" },
   { key: "miniatures", aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
-  { key: "bannieres",  aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
+  { key: "bannieres",  aspect: "aspect-video",   count: 2, cols: "grid-cols-1" },
 ] as const;
 
 // Mobile layout: 4 squares | 1 wide | 2 tall | 1 wide  (8 slots total)
@@ -189,8 +189,8 @@ export default function PortfolioPreview() {
                         />
                         {isLast && (
                           <>
-                            <div className="absolute inset-0 z-[5]" style={{ backdropFilter: "blur(3px)", backgroundColor: "rgba(12,12,12,0.45)" }} />
-                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1">
+                            <div className="absolute inset-0 z-[5] opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" style={{ backdropFilter: "blur(3px)", backgroundColor: "rgba(12,12,12,0.45)" }} />
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-1 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300">
                               <span
                                 style={{
                                   fontFamily: "Inter, sans-serif",
