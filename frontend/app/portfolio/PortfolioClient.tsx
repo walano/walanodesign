@@ -1019,7 +1019,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
                 style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
               >
                 <div className="brand-proj-scroll" data-lenis-prevent
-                  style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: 0 }}
+                  style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "2.5rem" }}
                 >
                   {s.allImages.map((img, ii) => (
                     <div key={ii} style={{ lineHeight: 0 }}>
