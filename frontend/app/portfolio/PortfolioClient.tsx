@@ -896,11 +896,10 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
     };
   }, [onClose, slides.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Instant scroll — avoids smooth-scroll vs snap conflict on iOS (causes the slice bug)
   const scrollTo = useCallback((i: number) => {
     if (!scrollRef.current) return;
     const clamped = Math.min(Math.max(i, 0), slides.length - 1);
-    scrollRef.current.scrollLeft = clamped * scrollRef.current.clientWidth;
+    scrollRef.current.scrollTo({ left: clamped * scrollRef.current.clientWidth, behavior: "smooth" });
     setCurIdx(clamped);
   }, [slides.length]);
 
@@ -1025,36 +1024,35 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
         </div>
       </div>
 
-      {/* Thumbnail strip — only for album/pack slides */}
-      {showThumbs && (
-        <div
-          ref={thumbsRef}
-          className="thumb-strip"
-          style={{
-            display: "flex", gap: "0.35rem",
-            padding: "0.5rem 1rem 0.75rem",
-            overflowX: "auto", justifyContent: "center",
-            flexShrink: 0, scrollbarWidth: "none",
-          }}
-        >
-          {slide.allImages.map((img, ii) => (
-            <div
-              key={ii}
-              onClick={() => scrollTo(projectStartIdx + ii)}
-              style={{
-                width: 64, height: 36, flexShrink: 0, cursor: "pointer",
-                opacity: ii === slide.imageIdx ? 1 : 0.4,
-                outline: ii === slide.imageIdx ? "2px solid #855c9d" : "2px solid transparent",
-                backgroundColor: "#0c0c0c", overflow: "hidden",
-                transition: "opacity 0.2s, outline 0.2s",
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Thumbnail strip — always rendered to reserve height, hidden when not an album */}
+      <div
+        ref={thumbsRef}
+        className="thumb-strip"
+        style={{
+          display: "flex", gap: "0.35rem",
+          padding: "0.5rem 1rem 0.75rem",
+          overflowX: "auto", justifyContent: "center",
+          flexShrink: 0, scrollbarWidth: "none",
+          visibility: showThumbs ? "visible" : "hidden",
+        }}
+      >
+        {showThumbs && slide.allImages.map((img, ii) => (
+          <div
+            key={ii}
+            onClick={() => scrollTo(projectStartIdx + ii)}
+            style={{
+              width: 64, height: 36, flexShrink: 0, cursor: "pointer",
+              opacity: ii === slide.imageIdx ? 1 : 0.4,
+              outline: ii === slide.imageIdx ? "2px solid #855c9d" : "2px solid transparent",
+              backgroundColor: "#0c0c0c", overflow: "hidden",
+              transition: "opacity 0.2s, outline 0.2s",
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+          </div>
+        ))}
+      </div>
 
       {/* fix #4: Desktop prev/next arrows — stable position relative to the full viewport,
           outside the carousel div so thumbnails don't shift them */}
