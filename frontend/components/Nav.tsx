@@ -69,7 +69,7 @@ export default function Nav() {
   /* ── Pull-to-refresh ── */
   useEffect(() => {
     const onTouchStart = (e: TouchEvent) => {
-      if (window.scrollY === 0 && !heroVel.dragging) {
+      if (window.scrollY === 0 && !heroVel.dragging && !document.body.dataset.viewerOpen) {
         startYRef.current    = e.touches[0].clientY;
         startTimeRef.current = Date.now();
       }

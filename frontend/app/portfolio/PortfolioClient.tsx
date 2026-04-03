@@ -78,10 +78,12 @@ function BrandingProjectViewer({ images, label, onClose }: {
     window.addEventListener("keydown", onKey);
     document.body.style.overflow           = "hidden";
     document.body.style.overscrollBehavior = "none";
+    document.body.dataset.viewerOpen       = "1";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow           = "";
       document.body.style.overscrollBehavior = "";
+      delete document.body.dataset.viewerOpen;
     };
   }, [onClose]);
 
@@ -152,10 +154,12 @@ function HorizontalProjectViewer({ images, label, initialIndex = 0, onClose }: {
     window.addEventListener("keydown", onKey);
     document.body.style.overflow           = "hidden";
     document.body.style.overscrollBehavior = "none";
+    document.body.dataset.viewerOpen       = "1";
     return () => {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow           = "";
       document.body.style.overscrollBehavior = "";
+      delete document.body.dataset.viewerOpen;
     };
   }, [onClose]);
 
@@ -883,16 +887,18 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
 
     // Prevent pull-to-refresh — iOS Safari ignores overscrollBehavior on children,
     // must be set on body
-    document.body.style.overflow         = "hidden";
+    document.body.style.overflow           = "hidden";
     document.body.style.overscrollBehavior = "none";
+    document.body.dataset.viewerOpen       = "1";
 
     return () => {
       el?.removeEventListener("scrollend", updateIdx);
       el?.removeEventListener("scroll",    onScroll);
       clearTimeout(debounce);
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow         = "";
+      document.body.style.overflow           = "";
       document.body.style.overscrollBehavior = "";
+      delete document.body.dataset.viewerOpen;
     };
   }, [onClose, slides.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1002,7 +1008,6 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
                     style={{
                       flex: 1, overflowY: "auto",
                       WebkitOverflowScrolling: "touch",
-                      overscrollBehavior: "none",  // fix #5: no pull-to-refresh
                     }}
                   >
                     {s.allImages.map((img, ii) => (

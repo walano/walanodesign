@@ -29,9 +29,11 @@ export default function ImageViewer({ images, initialIndex, onClose, showThumbna
     requestAnimationFrame(() => setReady(true));
     lenisRef.current?.stop();
     document.body.style.overscrollBehavior = "none";
+    document.body.dataset.viewerOpen       = "1";
     return () => {
       lenisRef.current?.start();
       document.body.style.overscrollBehavior = "";
+      delete document.body.dataset.viewerOpen;
     };
   }, []);
 
