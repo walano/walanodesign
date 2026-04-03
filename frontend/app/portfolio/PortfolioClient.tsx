@@ -787,6 +787,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   const [active,         setActive]         = useState<Category>(initial);
   const [sub,            setSub]            = useState<string | null>(searchParams.get("sub") || null);
   const [projects,       setProjects]       = useState<Project[]>(initialProjects);
+  const [slideDir,       setSlideDir]       = useState<"left" | "right">("right");
   const [viewer,            setViewer]            = useState<ViewerState | null>(null);
   const [brandingViewer,    setBrandingViewer]    = useState<BrandingViewerState | null>(null);
   const [horizontalViewer,  setHorizontalViewer]  = useState<BrandingViewerState | null>(null);
@@ -805,6 +806,9 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   }, [active]);
 
   const switchCategory = (cat: Category) => {
+    const oldIdx = CATEGORIES.indexOf(active);
+    const newIdx = CATEGORIES.indexOf(cat);
+    setSlideDir(newIdx >= oldIdx ? "right" : "left");
     setProjects([]);
     setActive(cat);
     setSub(null);
@@ -812,6 +816,10 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   };
 
   const switchSub = (newSub: string | null) => {
+    const order: (string | null)[] = [null, subtabs?.solo ?? null, subtabs?.grouped ?? null];
+    const oldIdx = order.indexOf(sub);
+    const newIdx = order.indexOf(newSub);
+    setSlideDir(newIdx >= oldIdx ? "right" : "left");
     setSub(newSub);
     const url = newSub
       ? `/portfolio?category=${active}&sub=${newSub}`
@@ -975,7 +983,17 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   return (
     <main className="min-h-screen bg-[#0c0c0c]">
       <Nav />
-      <style>{`.no-scrollbar::-webkit-scrollbar { display: none; }`}</style>
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes slide-in-right {
+          from { transform: translateX(28px); opacity: 0; }
+          to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes slide-in-left {
+          from { transform: translateX(-28px); opacity: 0; }
+          to   { transform: translateX(0);     opacity: 1; }
+        }
+      `}</style>
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(clamp(1rem,2vw,2.5rem),1fr) minmax(0,100rem) minmax(clamp(1rem,2vw,2.5rem),1fr)", paddingTop: "7rem", paddingBottom: "6rem" }}>
         <div style={{ gridColumn: 2, display: "flex", flexDirection: "column", gap: "clamp(2rem,4vw,3rem)" }}>
@@ -1002,9 +1020,17 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
             </div>
           )}
 
-          {/* Content */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "clamp(2rem,4vw,3rem)" }}>
-            {renderContent()}
+          {/* Content — slide transition on tab/sub change */}
+          <div style={{ overflow: "hidden" }}>
+            <div
+              key={`${active}-${sub ?? "tout"}`}
+              style={{
+                display: "flex", flexDirection: "column", gap: "clamp(2rem,4vw,3rem)",
+                animation: `slide-in-${slideDir} 0.28s cubic-bezier(0.4,0,0.2,1)`,
+              }}
+            >
+              {renderContent()}
+            </div>
           </div>
 
           {/* Back */}
