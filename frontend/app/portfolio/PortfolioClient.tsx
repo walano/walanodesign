@@ -1010,7 +1010,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
               display: "flex", alignItems: "center", justifyContent: "center",
               // Reserve space for header (top) and thumbnail strip (bottom) — constant
               // values so the image zone never shifts regardless of UI around it
-              paddingTop: "3.5rem",
+              paddingTop: s.isBranding ? 0 : "3.5rem",
               paddingBottom: hasAnyThumbnails ? "4rem" : 0,
             }}
           >
@@ -1019,7 +1019,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
                 style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
               >
                 <div className="brand-proj-scroll" data-lenis-prevent
-                  style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+                  style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch", paddingTop: "3.5rem" }}
                 >
                   {s.allImages.map((img, ii) => (
                     <div key={ii} style={{ lineHeight: 0 }}>
