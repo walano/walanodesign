@@ -9,16 +9,10 @@ type Translations = typeof fr;
 
 const translations: Record<Lang, Translations> = { fr, en };
 
-const STORAGE_KEY = "wd-lang";
-
 function detectLang(): Lang {
   if (typeof window === "undefined") return "fr";
-  const saved = localStorage.getItem(STORAGE_KEY) as Lang | null;
-  if (saved === "fr" || saved === "en") return saved;
   const preferred = navigator.language || "fr";
-  const detected: Lang = preferred.toLowerCase().startsWith("fr") ? "fr" : "en";
-  localStorage.setItem(STORAGE_KEY, detected);
-  return detected;
+  return preferred.toLowerCase().startsWith("fr") ? "fr" : "en";
 }
 
 interface I18nContextType {

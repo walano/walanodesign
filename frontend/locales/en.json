@@ -69,6 +69,9 @@
     "hint":    "click the logo"
   },
   "footer": {
-    "rights": "© 2026 walano design. all rights reserved"
+    "cgv":     "Terms and conditions",
+    "privacy": "Privacy policy",
+    "legal":   "Legal notice",
+    "rights":  "© 2026 walano design. all rights reserved."
   }
 }

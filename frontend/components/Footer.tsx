@@ -166,10 +166,10 @@ export default function Footer() {
         `}</style>
         <div className="footer-legal">
           {[
-            { label: "Conditions générales de vente", href: "/conditions" },
-            { label: "Politique de confidentialité",  href: "/confidentialite" },
-            { label: "Mentions légales",              href: "/mentions-legales" },
-          ].map(({ label, href }, i) => (
+            { key: "footer.cgv",     href: "/conditions"     },
+            { key: "footer.privacy", href: "/confidentialite" },
+            { key: "footer.legal",   href: "/mentions-legales" },
+          ].map(({ key, href }, i) => (
             <span key={href} style={{ display: "contents" }}>
               {i > 0 && <span className="footer-legal-sep" aria-hidden>·</span>}
               <a
@@ -178,15 +178,12 @@ export default function Footer() {
                   fontFamily:     "Inter, sans-serif",
                   fontWeight:     400,
                   fontSize:       "clamp(0.72rem, 1.2vw, 0.78rem)",
-                  color:          "rgba(12,12,12,0.6)",
+                  color:          "#0c0c0c",
                   textDecoration: "none",
-                  transition:     "color 0.2s",
                   whiteSpace:     "nowrap",
                 }}
-                onMouseEnter={e => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
-                onMouseLeave={e => ((e.currentTarget as HTMLAnchorElement).style.color = "rgba(12,12,12,0.6)")}
               >
-                {label}
+                {t(key)}
               </a>
             </span>
           ))}
@@ -196,11 +193,11 @@ export default function Footer() {
               fontFamily: "Inter, sans-serif",
               fontWeight: 400,
               fontSize:   "clamp(0.72rem, 1.2vw, 0.78rem)",
-              color:      "rgba(12,12,12,0.6)",
+              color:      "#0c0c0c",
               whiteSpace: "nowrap",
             }}
           >
-            © 2026 walano design. all rights reserved.
+            {t("footer.rights")}
           </span>
         </div>
       </div>

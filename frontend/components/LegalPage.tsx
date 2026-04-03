@@ -74,10 +74,10 @@ export default function LegalPage({ fr, en }: Props) {
                 style={{
                   fontFamily:    "Inter, sans-serif",
                   fontWeight:    600,
-                  fontSize:      "clamp(0.82rem, 1.4vw, 0.95rem)",
+                  fontSize:      "clamp(0.95rem, 1.6vw, 1.15rem)",
                   color:         "#855c9d",
                   textTransform: "uppercase",
-                  letterSpacing: "0.02em",
+                  letterSpacing: "-0.01em",
                   marginBottom:  "0.4rem",
                 }}
               >
