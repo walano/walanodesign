@@ -100,8 +100,17 @@ function BrandingProjectViewer({ images, label, onClose }: {
       </div>
 
       {/* vertical scroll — no gap, no snap, pure momentum scroll */}
+      <style>{`
+        .branding-vscroll::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .branding-vscroll::-webkit-scrollbar { display: block; width: 4px; }
+          .branding-vscroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+          .branding-vscroll::-webkit-scrollbar-thumb { background: rgba(133,92,157,0.6); border-radius: 2px; }
+          .branding-vscroll { scrollbar-width: thin; scrollbar-color: rgba(133,92,157,0.6) rgba(255,255,255,0.05); }
+        }
+      `}</style>
       <div
-        className="flex-1 overflow-y-auto no-scrollbar"
+        className="flex-1 overflow-y-auto branding-vscroll"
         data-lenis-prevent
         style={{ WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
       >
@@ -399,14 +408,15 @@ function Card({ project, aspectClass, onOpen, index, allImages }: {
    threeCol: true  → columns-3 on all sizes (videos/miniatures/bannieres)
    threeCol: false → 2 flex cols on mobile (aligned tops), columns-5 on desktop
 ───────────────────────────────────────────────────────── */
-function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false, square = false, colsClass }: {
-  projects:    Project[];
-  aspect:      string;
-  onOpen:      (images: ViewerImage[], index: number) => void;
-  onOpenPack?: (images: ViewerImage[]) => void;
-  threeCol?:   boolean;
-  square?:     boolean;
-  colsClass?:  string;
+function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, onOpenProject, threeCol = false, square = false, colsClass }: {
+  projects:       Project[];
+  aspect:         string;
+  onOpen:         (images: ViewerImage[], index: number) => void;
+  onOpenPack?:    (images: ViewerImage[]) => void;
+  onOpenProject?: (project: Project, index: number, allProjects: Project[]) => void;
+  threeCol?:      boolean;
+  square?:        boolean;
+  colsClass?:     string;
 }) {
   const filteredProjects = projects.filter(p => p.images.length > 0 || p.yt_thumbnail);
   const allImages: ViewerImage[] = filteredProjects.map(p => ({
@@ -424,6 +434,10 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
 
   const handleClick = (i: number) => {
     const p = filteredProjects[i];
+    if (onOpenProject) {
+      onOpenProject(p, i, filteredProjects);
+      return;
+    }
     if (onOpenPack && p && p.images.length > 1) {
       const packImages: ViewerImage[] = p.images.map(img => ({
         src: img.url, label: p.title || "", aspectRatio: aspect, backgroundColor: "#0c0c0c",
@@ -522,11 +536,12 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, threeCol = false,
 /* ─────────────────────────────────────────────────────────
    Card grid — solo projects (non-branding)
 ───────────────────────────────────────────────────────── */
-function CardGrid({ projects, aspectClass, aspect, onOpen }: {
+function CardGrid({ projects, aspectClass, aspect, onOpen, onOpenProject }: {
   projects:   Project[];
   aspectClass: string;
   aspect:     string;
   onOpen:     (images: ViewerImage[], index: number) => void;
+  onOpenProject?: (project: Project, index: number, allProjects: Project[]) => void;
 }) {
   const cols = aspectClass === "aspect-square" || aspectClass === "aspect-[3/4]" || aspectClass === "aspect-[4/5]"
     ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
@@ -545,10 +560,14 @@ function CardGrid({ projects, aspectClass, aspect, onOpen }: {
     </p>
   );
 
+  const effectiveOpen: (images: ViewerImage[], i: number) => void = onOpenProject
+    ? (_imgs, i) => onOpenProject(projects[i], i, projects)
+    : onOpen;
+
   return (
     <div className={`grid ${cols}`} style={{ gap: CARD_GAP }}>
       {projects.map((p, i) => (
-        <Card key={p.id} project={p} aspectClass={aspectClass} onOpen={onOpen} index={i} allImages={allImages} />
+        <Card key={p.id} project={p} aspectClass={aspectClass} onOpen={effectiveOpen} index={i} allImages={allImages} />
       ))}
     </div>
   );
@@ -684,7 +703,7 @@ interface BrandingItem {
 
 function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" }: {
   items:        BrandingItem[];
-  onOpen:       (images: { url: string }[], label: string) => void;
+  onOpen:       (images: { url: string }[], label: string, index: number) => void;
   aspectRatio?: string;
   cols?:        string;
 }) {
@@ -696,12 +715,12 @@ function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 
 
   return (
     <div className={`grid ${cols}`} style={{ columnGap: CARD_GAP, rowGap: "clamp(1.5rem, 2.5vw, 2rem)" }}>
-      {items.map(item => (
+      {items.map((item, itemIdx) => (
         <div key={item.id} style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
           <div
             className="relative w-full overflow-hidden group cursor-pointer"
             style={{ aspectRatio: aspectRatio, backgroundColor: "#0c0c0c" }}
-            onClick={() => onOpen(item.images, item.label)}
+            onClick={() => onOpen(item.images, item.label, itemIdx)}
           >
             {item.firstImage
               ? // eslint-disable-next-line @next/next/no-img-element
@@ -773,6 +792,246 @@ function RowsView({ projects, aspect, onOpen }: {
 }
 
 /* ─────────────────────────────────────────────────────────
+   Project navigator helpers
+───────────────────────────────────────────────────────── */
+function getProjectMode(p: Project): "single" | "album" | "branding" {
+  if (p.sub_type === "album" || p.sub_type === "pack") return "album";
+  if (p.sub_type === "branding") return "branding";
+  return "single";
+}
+
+/* Single-image inner view */
+function SingleImageInner({ project }: { project: Project }) {
+  const imgUrl = project.images[0]?.url || project.yt_thumbnail;
+  return (
+    <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", padding: "clamp(0.5rem,2vw,2rem)" }}>
+      {imgUrl
+        // eslint-disable-next-line @next/next/no-img-element
+        ? <img src={imgUrl} alt={project.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
+        : <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{project.title}</span>
+      }
+    </div>
+  );
+}
+
+/* Album/pack inner carousel — desktop inner prev/next, mobile swipe via snap */
+function AlbumCarouselInner({ images, label }: { images: { url: string }[]; label: string }) {
+  const [imgIdx, setImgIdx] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const thumbsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToImg = useCallback((i: number) => {
+    if (!scrollRef.current) return;
+    scrollRef.current.scrollTo({ left: Math.min(Math.max(i, 0), images.length - 1) * scrollRef.current.clientWidth, behavior: "smooth" });
+  }, [images.length]);
+
+  const handleScroll = useCallback(() => {
+    if (!scrollRef.current) return;
+    setImgIdx(Math.min(Math.max(Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth), 0), images.length - 1));
+  }, [images.length]);
+
+  useEffect(() => {
+    if (!thumbsRef.current) return;
+    (thumbsRef.current.children[imgIdx] as HTMLElement | undefined)?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
+  }, [imgIdx]);
+
+  const iBtnStyle: React.CSSProperties = {
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 5,
+    padding: "0.5rem 1rem", display: "flex", alignItems: "center", justifyContent: "center",
+    background: "rgba(12,12,12,0.55)", border: "1px solid rgba(255,255,255,0.15)",
+    backdropFilter: "blur(10px)", color: "#f5f3f7", fontFamily: "Inter,sans-serif",
+    fontWeight: 600, fontSize: "0.72rem", letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.2s",
+  };
+
+  return (
+    <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column" }}>
+      {images.length > 1 && (
+        <div style={{ textAlign: "center", padding: "0.2rem 0", flexShrink: 0 }}>
+          <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.65rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>
+            {imgIdx + 1} / {images.length}
+          </span>
+        </div>
+      )}
+      <div className="relative flex-1 overflow-hidden">
+        {images.length > 1 && (
+          <>
+            <button className="hidden md:flex" style={{ ...iBtnStyle, left: "3rem" }}
+              onClick={() => scrollToImg(imgIdx - 1)}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
+            >prev</button>
+            <button className="hidden md:flex" style={{ ...iBtnStyle, right: "3rem" }}
+              onClick={() => scrollToImg(imgIdx + 1)}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
+            >next</button>
+          </>
+        )}
+        <div ref={scrollRef} className="snap-carousel" data-lenis-prevent
+          style={{ position: "absolute", inset: 0, display: "flex", overflowX: "auto", overflowY: "hidden", scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch", scrollbarWidth: "none", overscrollBehavior: "contain" }}
+          onScroll={handleScroll}
+        >
+          {images.map((img, i) => (
+            <div key={i} style={{ flexShrink: 0, width: "100%", height: "100%", scrollSnapAlign: "start", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {img.url && <img src={img.url} alt={`${label} ${i + 1}`} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />}
+            </div>
+          ))}
+        </div>
+      </div>
+      {images.length > 1 && (
+        <div ref={thumbsRef} className="snap-carousel" style={{ display: "flex", gap: "0.35rem", padding: "0.4rem 1rem 0.4rem", overflowX: "auto", justifyContent: "center", flexShrink: 0, scrollbarWidth: "none" }}>
+          {images.map((img, i) => (
+            <div key={i} onClick={() => scrollToImg(i)}
+              style={{ width: 52, height: 29, flexShrink: 0, cursor: "pointer", opacity: i === imgIdx ? 1 : 0.4, outline: i === imgIdx ? "2px solid #855c9d" : "2px solid transparent", backgroundColor: "#0c0c0c", overflow: "hidden", transition: "opacity 0.2s, outline 0.2s" }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* Branding inner vertical scroll — scrollbar visible on desktop */
+function BrandingScrollInner({ images, label }: { images: { url: string }[]; label: string }) {
+  return (
+    <>
+      <style>{`
+        .brand-inner::-webkit-scrollbar { display: none; }
+        @media (min-width: 768px) {
+          .brand-inner::-webkit-scrollbar { display: block; width: 4px; }
+          .brand-inner::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+          .brand-inner::-webkit-scrollbar-thumb { background: rgba(133,92,157,0.6); border-radius: 2px; }
+          .brand-inner { scrollbar-width: thin; scrollbar-color: rgba(133,92,157,0.6) rgba(255,255,255,0.05); }
+        }
+      `}</style>
+      <div className="brand-inner" data-lenis-prevent
+        style={{ position: "absolute", inset: 0, overflowY: "auto", WebkitOverflowScrolling: "touch", overscrollBehavior: "contain" }}
+      >
+        {images.map((img, i) => (
+          <div key={i} style={{ lineHeight: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            {img.url && <img src={img.url} alt={`${label} ${i + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* Project Navigator — fixed overlay with project-level prev/next */
+interface ProjectNavState { projects: Project[]; projectIndex: number; }
+
+function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState & { onClose: () => void }) {
+  const [pIdx, setPIdx]     = useState(projectIndex);
+  const project             = projects[pIdx];
+  const mode                = getProjectMode(project);
+  const total               = projects.length;
+  const touchStartX         = useRef<number | null>(null);
+  const didSwipe            = useRef(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => { window.removeEventListener("keydown", onKey); document.body.style.overflow = ""; };
+  }, [onClose]);
+
+  const prevP = () => setPIdx(i => Math.max(0, i - 1));
+  const nextP = () => setPIdx(i => Math.min(total - 1, i + 1));
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (mode === "album") return;
+    touchStartX.current = e.touches[0].clientX;
+    didSwipe.current = false;
+  };
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (mode === "album" || touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(delta) > 60) { didSwipe.current = true; delta < 0 ? nextP() : prevP(); }
+    touchStartX.current = null;
+  };
+
+  const oBtnStyle: React.CSSProperties = {
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
+    padding: "1rem 0.4rem", display: "flex", alignItems: "center", justifyContent: "center",
+    background: "rgba(12,12,12,0.7)", border: "1px solid rgba(255,255,255,0.1)",
+    backdropFilter: "blur(10px)", color: "#f5f3f7", fontFamily: "Inter,sans-serif",
+    fontWeight: 400, fontSize: "1.1rem", cursor: "pointer", transition: "background 0.2s", lineHeight: 1,
+  };
+
+  const mBtnStyle: React.CSSProperties = {
+    padding: "0.5rem 1.2rem", background: "rgba(255,255,255,0.08)",
+    border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(20px)",
+    color: "#f5f3f7", fontFamily: "Inter,sans-serif", fontWeight: 600,
+    fontSize: "0.72rem", letterSpacing: "0.04em", cursor: "pointer", transition: "all 0.2s",
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex flex-col bg-black"
+      onClick={(e) => { if (!didSwipe.current) onClose(); didSwipe.current = false; e.stopPropagation(); }}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
+        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        onClick={e => e.stopPropagation()}
+      >
+        <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
+          {project.title}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {total > 1 && <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.3)", letterSpacing: "0.06em" }}>{pIdx + 1} / {total}</span>}
+          <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>✕</button>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="relative flex-1 overflow-hidden" onClick={e => e.stopPropagation()}>
+        {/* Desktop outer project prev/next */}
+        {total > 1 && (
+          <>
+            <button className="hidden md:flex" style={{ ...oBtnStyle, left: 0, opacity: pIdx === 0 ? 0.25 : 1 }}
+              onClick={prevP}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
+            >‹</button>
+            <button className="hidden md:flex" style={{ ...oBtnStyle, right: 0, opacity: pIdx === total - 1 ? 0.25 : 1 }}
+              onClick={nextP}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.5)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.7)")}
+            >›</button>
+          </>
+        )}
+        {/* Inner viewer — resets on project change */}
+        <div key={pIdx} style={{ position: "absolute", inset: 0 }}>
+          {mode === "single"   && <SingleImageInner   project={project} />}
+          {mode === "album"    && <AlbumCarouselInner images={project.images} label={project.title} />}
+          {mode === "branding" && <BrandingScrollInner images={project.images} label={project.title} />}
+        </div>
+      </div>
+
+      {/* Mobile project prev/next — below content */}
+      {total > 1 && (
+        <div className="md:hidden flex items-center justify-center gap-4 py-3 flex-shrink-0"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+          onClick={e => e.stopPropagation()}
+        >
+          <button onClick={prevP} disabled={pIdx === 0} style={{ ...mBtnStyle, opacity: pIdx === 0 ? 0.3 : 1 }}>prev</button>
+          <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.35)", letterSpacing: "0.06em" }}>{pIdx + 1} / {total}</span>
+          <button onClick={nextP} disabled={pIdx === total - 1} style={{ ...mBtnStyle, opacity: pIdx === total - 1 ? 0.3 : 1 }}>next</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
    Page
 ───────────────────────────────────────────────────────── */
 interface ViewerState        { images: ViewerImage[];       index: number; showThumbnails?: boolean; }
@@ -791,6 +1050,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   const [viewer,            setViewer]            = useState<ViewerState | null>(null);
   const [brandingViewer,    setBrandingViewer]    = useState<BrandingViewerState | null>(null);
   const [horizontalViewer,  setHorizontalViewer]  = useState<BrandingViewerState | null>(null);
+  const [projectNav,        setProjectNav]        = useState<ProjectNavState | null>(null);
 
   const openViewer = useCallback((images: ViewerImage[], index: number) => setViewer({ images, index }), []);
 
@@ -858,16 +1118,14 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         return <AllImagesGrid
           projects={visibleProjects}
           aspect={ASPECT[active]}
-          onOpen={(_, i) => {
-            const p = visibleProjects[i];
-            if (p) setBrandingViewer({ images: p.images, label: p.title });
-          }}
+          onOpen={openViewer}
+          onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })}
           square
         />;
       }
       if (active === "miniatures") {
         return projects.length > 0
-          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} colsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
+          ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} colsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
       }
       if (active === "bannieres") {
@@ -875,7 +1133,6 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         if (bannerProjects.length === 0) return (
           <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>
         );
-        const bannerImages: ViewerImage[] = bannerProjects.map(p => ({ src: p.images[0].url, label: p.title }));
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
             {bannerProjects.map((p, i) => (
@@ -883,7 +1140,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                 key={p.id}
                 className="relative overflow-hidden group cursor-pointer"
                 style={{ backgroundColor: "#0c0c0c" }}
-                onClick={() => openViewer(bannerImages, i)}
+                onClick={() => setProjectNav({ projects: bannerProjects, projectIndex: i })}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={p.images[0].url} alt={p.title} loading="lazy" style={{ width: "100%", height: "auto", display: "block" }} />
@@ -900,7 +1157,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
               projects={projects}
               aspect={ASPECT.affiches}
               onOpen={openViewer}
-              onOpenPack={(imgs) => setHorizontalViewer({ images: imgs.map(img => ({ url: img.src || "" })), label: imgs[0]?.label || "" })}
+              onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })}
               colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
             />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
@@ -910,7 +1167,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
             projects={projects}
             aspect={ASPECT[active]}
             onOpen={openViewer}
-            onOpenPack={(imgs) => setHorizontalViewer({ images: imgs.map(img => ({ url: img.src || "" })), label: imgs[0]?.label || "" })}
+            onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })}
             threeCol={threeCol}
             square={active === "covers"}
           />
@@ -924,27 +1181,24 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           items={brandingLogoItems}
           cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
           aspectRatio="1"
-          onOpen={(imgs, lbl) => {
-            const viewerImages: ViewerImage[] = imgs.map(img => ({ src: img.url, label: lbl, aspectRatio: "1", backgroundColor: "#0c0c0c" }));
-            openViewer(viewerImages, 0);
-          }}
+          onOpen={(_imgs, _lbl, idx) => setProjectNav({ projects: soloProjects, projectIndex: idx })}
         />;
       }
       if (active === "videos") return <VideoGrid projects={soloProjects} />;
       if (active === "affiches") {
         return soloProjects.length > 0
-          ? <AllImagesGrid projects={soloProjects} aspect={ASPECT.affiches} onOpen={openViewer} colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
+          ? <AllImagesGrid projects={soloProjects} aspect={ASPECT.affiches} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
       }
       return soloProjects.length > 0
-        ? <CardGrid projects={soloProjects} aspectClass={ASPECT_CLASS[active]} aspect={ASPECT[active]} onOpen={openViewer} />
+        ? <CardGrid projects={soloProjects} aspectClass={ASPECT_CLASS[active]} aspect={ASPECT[active]} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} />
         : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
     }
 
     // ── grouped sub-tab ──────────────────────────────────
     if (sub === subtabs?.grouped) {
       if (active === "branding") {
-        return <BrandingGrid items={brandingGroupItems} onOpen={(imgs, lbl) => setBrandingViewer({ images: imgs, label: lbl })} />;
+        return <BrandingGrid items={brandingGroupItems} onOpen={(imgs, lbl, _idx) => setBrandingViewer({ images: imgs, label: lbl })} />;
       }
       if (active === "affiches") {
         return groupedProjects.length > 0
@@ -1066,6 +1320,13 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           label={horizontalViewer.label}
           initialIndex={horizontalViewer.initialIndex ?? 0}
           onClose={() => setHorizontalViewer(null)}
+        />
+      )}
+      {projectNav && (
+        <ProjectNavigator
+          projects={projectNav.projects}
+          projectIndex={projectNav.projectIndex}
+          onClose={() => setProjectNav(null)}
         />
       )}
     </main>
