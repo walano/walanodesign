@@ -937,7 +937,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black">
+    <div className="fixed inset-0 z-[100] bg-black" style={{ position: "relative" }}>
       <style>{`
         .proj-snap::-webkit-scrollbar { display: none; }
         .brand-proj-scroll::-webkit-scrollbar { display: none; }
@@ -950,9 +950,66 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
         .thumb-strip::-webkit-scrollbar { display: none; }
       `}</style>
 
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-        style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+      {/* ── Carousel — full viewport so image is always centered in the page ── */}
+      <div
+        ref={scrollRef}
+        className="proj-snap"
+        data-lenis-prevent
+        style={{
+          position: "absolute", inset: 0,
+          display: "flex",
+          overflowX: "scroll", overflowY: "hidden",
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch",
+          scrollbarWidth: "none",
+          overscrollBehavior: "contain",
+          transform: "translateZ(0)",
+        }}
+      >
+        {slides.map((s, i) => (
+          <div
+            key={i}
+            style={{
+              flexShrink: 0, width: "100%", height: "100%",
+              scrollSnapAlign: "start",
+              scrollSnapStop: "always",
+              overflow: "hidden",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}
+          >
+            {s.isBranding ? (
+              <div className="w-full h-full md:w-[60vw] md:h-[85vh] md:max-w-4xl flex-shrink-0"
+                style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+              >
+                <div className="brand-proj-scroll" data-lenis-prevent
+                  style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" }}
+                >
+                  {s.allImages.map((img, ii) => (
+                    <div key={ii} style={{ lineHeight: 0 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {img.url && <img src={img.url} alt={`${s.title} ${ii + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : s.url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
+            ) : (
+              <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Header — overlaid at top, solid bg so it's readable over the image ── */}
+      <div
+        className="flex items-center justify-between px-4 py-3"
+        style={{
+          position: "absolute", top: 0, left: 0, right: 0, zIndex: 20,
+          backgroundColor: "#0c0c0c",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}
       >
         <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
           {slide.title}
@@ -968,99 +1025,41 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
         </div>
       </div>
 
-      {/* Carousel */}
-      <div className="relative flex-1 overflow-hidden">
+      {/* ── Thumbnail strip — overlaid at bottom, only visible for albums ── */}
+      {showThumbs && (
         <div
-          ref={scrollRef}
-          className="proj-snap"
-          data-lenis-prevent
+          ref={thumbsRef}
+          className="thumb-strip"
           style={{
-            position: "absolute", inset: 0,
-            display: "flex",
-            overflowX: "scroll", overflowY: "hidden",  // scroll (not auto) → reliable snap on iOS
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
+            position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
+            display: "flex", gap: "0.35rem",
+            padding: "0.5rem 1rem 0.75rem",
+            overflowX: "auto", justifyContent: "center",
             scrollbarWidth: "none",
-            overscrollBehavior: "contain",
-            transform: "translateZ(0)",  // GPU layer → smoother snap
+            backgroundColor: "#0c0c0c",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
           }}
         >
-          {slides.map((s, i) => (
+          {slide.allImages.map((img, ii) => (
             <div
-              key={i}
+              key={ii}
+              onClick={() => scrollTo(projectStartIdx + ii)}
               style={{
-                flexShrink: 0, width: "100%", height: "100%",
-                scrollSnapAlign: "start",
-                scrollSnapStop: "always",   // fix #3: no skipping slides
-                overflow: "hidden",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                // fix #1: no padding → flush edges between slides
+                width: 64, height: 36, flexShrink: 0, cursor: "pointer",
+                opacity: ii === slide.imageIdx ? 1 : 0.4,
+                outline: ii === slide.imageIdx ? "2px solid #855c9d" : "2px solid transparent",
+                backgroundColor: "#0c0c0c", overflow: "hidden",
+                transition: "opacity 0.2s, outline 0.2s",
               }}
             >
-              {s.isBranding ? (
-                /* fix #6: branding slide — constrained on desktop, full on mobile */
-                <div className="w-full h-full md:w-[60vw] md:h-[85vh] md:max-w-4xl flex-shrink-0"
-                  style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
-                >
-                  <div
-                    className="brand-proj-scroll"
-                    data-lenis-prevent
-                    style={{
-                      flex: 1, overflowY: "auto",
-                      WebkitOverflowScrolling: "touch",
-                    }}
-                  >
-                    {s.allImages.map((img, ii) => (
-                      <div key={ii} style={{ lineHeight: 0 }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        {img.url && <img src={img.url} alt={`${s.title} ${ii + 1}`} style={{ width: "100%", height: "auto", display: "block" }} />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : s.url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
-              ) : (
-                <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
             </div>
           ))}
         </div>
-      </div>
+      )}
 
-      {/* Thumbnail strip — always rendered to reserve height, hidden when not an album */}
-      <div
-        ref={thumbsRef}
-        className="thumb-strip"
-        style={{
-          display: "flex", gap: "0.35rem",
-          padding: "0.5rem 1rem 0.75rem",
-          overflowX: "auto", justifyContent: "center",
-          flexShrink: 0, scrollbarWidth: "none",
-          visibility: showThumbs ? "visible" : "hidden",
-        }}
-      >
-        {showThumbs && slide.allImages.map((img, ii) => (
-          <div
-            key={ii}
-            onClick={() => scrollTo(projectStartIdx + ii)}
-            style={{
-              width: 64, height: 36, flexShrink: 0, cursor: "pointer",
-              opacity: ii === slide.imageIdx ? 1 : 0.4,
-              outline: ii === slide.imageIdx ? "2px solid #855c9d" : "2px solid transparent",
-              backgroundColor: "#0c0c0c", overflow: "hidden",
-              transition: "opacity 0.2s, outline 0.2s",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {img.url && <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
-          </div>
-        ))}
-      </div>
-
-      {/* fix #4: Desktop prev/next arrows — stable position relative to the full viewport,
-          outside the carousel div so thumbnails don't shift them */}
+      {/* ── Desktop prev/next arrows ── */}
       {slides.length > 1 && (
         <>
           <button
