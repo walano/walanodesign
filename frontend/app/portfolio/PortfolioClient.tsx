@@ -126,12 +126,13 @@ function BrandingProjectViewer({ images, label, onClose }: {
 /* ─────────────────────────────────────────────────────────
    Horizontal project viewer — albums & packs (Instagram carousel)
 ───────────────────────────────────────────────────────── */
-function HorizontalProjectViewer({ images, label, onClose }: {
-  images:  { url: string }[];
-  label:   string;
-  onClose: () => void;
+function HorizontalProjectViewer({ images, label, initialIndex = 0, onClose }: {
+  images:       { url: string }[];
+  label:        string;
+  initialIndex?: number;
+  onClose:      () => void;
 }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const scrollRef  = useRef<HTMLDivElement>(null);
   const thumbsRef  = useRef<HTMLDivElement>(null);
 
@@ -145,6 +146,13 @@ function HorizontalProjectViewer({ images, label, onClose }: {
     };
   }, [onClose]);
 
+  // Jump to initialIndex instantly on mount (no animation)
+  useEffect(() => {
+    if (!scrollRef.current || initialIndex === 0) return;
+    scrollRef.current.scrollLeft = initialIndex * scrollRef.current.clientWidth;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Snap scroll → derive active index
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
@@ -152,11 +160,12 @@ function HorizontalProjectViewer({ images, label, onClose }: {
     setCurrentIndex(Math.min(Math.max(idx, 0), images.length - 1));
   }, [images.length]);
 
-  // Thumbnail click → scroll to slide
+  // Scroll to slide (from thumbnail or prev/next buttons)
   const scrollToIndex = useCallback((i: number) => {
     if (!scrollRef.current) return;
-    scrollRef.current.scrollTo({ left: i * scrollRef.current.clientWidth, behavior: "smooth" });
-  }, []);
+    const clamped = Math.min(Math.max(i, 0), images.length - 1);
+    scrollRef.current.scrollTo({ left: clamped * scrollRef.current.clientWidth, behavior: "smooth" });
+  }, [images.length]);
 
   // Keep active thumbnail visible in strip
   useEffect(() => {
@@ -164,6 +173,15 @@ function HorizontalProjectViewer({ images, label, onClose }: {
     const thumb = thumbsRef.current.children[currentIndex] as HTMLElement | undefined;
     thumb?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
   }, [currentIndex]);
+
+  const btnStyle: React.CSSProperties = {
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 10,
+    padding: "0.5rem 1rem", display: "flex", alignItems: "center", justifyContent: "center",
+    background: "rgba(12,12,12,0.55)", border: "1px solid rgba(255,255,255,0.15)",
+    backdropFilter: "blur(10px)", color: "#f5f3f7",
+    fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.72rem",
+    letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.2s",
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70" onClick={onClose}>
@@ -186,46 +204,77 @@ function HorizontalProjectViewer({ images, label, onClose }: {
           </div>
         </div>
 
-        {/* Instagram-style snap carousel */}
+        {/* Carousel area + prev/next buttons */}
         <style>{`.snap-carousel::-webkit-scrollbar { display: none; }`}</style>
-        <div
-          ref={scrollRef}
-          className="snap-carousel flex-1"
-          data-lenis-prevent
-          style={{
-            display: "flex",
-            overflowX: "auto",
-            overflowY: "hidden",
-            scrollSnapType: "x mandatory",
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            overscrollBehavior: "contain",
-          }}
-          onScroll={handleScroll}
-        >
-          {images.map((img, i) => (
-            <div
-              key={i}
-              style={{
-                flexShrink: 0,
-                width: "100%",
-                height: "100%",
-                scrollSnapAlign: "start",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+        <div className="relative flex-1 overflow-hidden">
+
+          {/* Prev button — desktop only */}
+          {images.length > 1 && (
+            <button
+              className="hidden md:flex"
+              style={{ ...btnStyle, left: "clamp(0.5rem, 2vw, 1.5rem)" }}
+              onClick={() => scrollToIndex(currentIndex - 1)}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
             >
-              {img.url && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={img.url}
-                  alt={`${label} ${i + 1}`}
-                  style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
-                />
-              )}
-            </div>
-          ))}
+              prev
+            </button>
+          )}
+
+          {/* Next button — desktop only */}
+          {images.length > 1 && (
+            <button
+              className="hidden md:flex"
+              style={{ ...btnStyle, right: "clamp(0.5rem, 2vw, 1.5rem)" }}
+              onClick={() => scrollToIndex(currentIndex + 1)}
+              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
+            >
+              next
+            </button>
+          )}
+
+          {/* Instagram-style snap carousel */}
+          <div
+            ref={scrollRef}
+            className="snap-carousel"
+            data-lenis-prevent
+            style={{
+              position: "absolute", inset: 0,
+              display: "flex",
+              overflowX: "auto",
+              overflowY: "hidden",
+              scrollSnapType: "x mandatory",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              overscrollBehavior: "contain",
+            }}
+            onScroll={handleScroll}
+          >
+            {images.map((img, i) => (
+              <div
+                key={i}
+                style={{
+                  flexShrink: 0,
+                  width: "100%",
+                  height: "100%",
+                  scrollSnapAlign: "start",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {img.url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={img.url}
+                    alt={`${label} ${i + 1}`}
+                    style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Thumbnail strip */}
@@ -727,7 +776,7 @@ function RowsView({ projects, aspect, onOpen }: {
    Page
 ───────────────────────────────────────────────────────── */
 interface ViewerState        { images: ViewerImage[];       index: number; showThumbnails?: boolean; }
-interface BrandingViewerState { images: { url: string }[]; label: string; }
+interface BrandingViewerState { images: { url: string }[]; label: string; initialIndex?: number; }
 
 function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
   const { t }        = useI18n();
@@ -890,28 +939,30 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         return <BrandingGrid items={brandingGroupItems} onOpen={(imgs, lbl) => setBrandingViewer({ images: imgs, label: lbl })} />;
       }
       if (active === "affiches") {
-        const packItems: BrandingItem[] = groupedProjects.map(p => ({
-          id: p.id, firstImage: p.images[0]?.url, label: p.title, images: p.images,
-        }));
-        return packItems.length > 0
-          ? <BrandingGrid
-              items={packItems}
-              aspectRatio="4/5"
-              cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-              onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
+        return groupedProjects.length > 0
+          ? <RowsView
+              projects={groupedProjects}
+              aspect={ASPECT.affiches}
+              onOpen={(viewerImages, i) => setHorizontalViewer({
+                images: viewerImages.map(img => ({ url: img.src || "" })),
+                label: viewerImages[0]?.label || "",
+                initialIndex: i,
+              })}
             />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun pack</p>;
       }
       if (active === "covers") {
-        const items: BrandingItem[] = groupedProjects.map(p => ({
-          id: p.id, firstImage: p.images[0]?.url, label: p.title, images: p.images,
-        }));
-        return <BrandingGrid
-          items={items}
-          aspectRatio="1"
-          cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
-          onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
-        />;
+        return groupedProjects.length > 0
+          ? <RowsView
+              projects={groupedProjects}
+              aspect={ASPECT.covers}
+              onOpen={(viewerImages, i) => setHorizontalViewer({
+                images: viewerImages.map(img => ({ url: img.src || "" })),
+                label: viewerImages[0]?.label || "",
+                initialIndex: i,
+              })}
+            />
+          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun album</p>;
       }
       return groupedProjects.length > 0
         ? <RowsView projects={groupedProjects} aspect={ASPECT[active]} onOpen={openViewer} />
@@ -987,6 +1038,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         <HorizontalProjectViewer
           images={horizontalViewer.images}
           label={horizontalViewer.label}
+          initialIndex={horizontalViewer.initialIndex ?? 0}
           onClose={() => setHorizontalViewer(null)}
         />
       )}
