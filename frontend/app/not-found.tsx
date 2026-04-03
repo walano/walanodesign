@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { gsap } from "gsap";
 import Nav from "@/components/Nav";
+import Footer from "@/components/Footer";
 import { useI18n } from "@/lib/i18n";
 
 function LogoSVG({ size }: { size: number }) {
@@ -44,7 +45,7 @@ export default function NotFound() {
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "#0c0c0c", display: "flex", flexDirection: "column" }}>
+    <main style={{ minHeight: "100vh", background: "#0c0c0c", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
       <Nav />
 
       <style>{`
@@ -155,6 +156,8 @@ export default function NotFound() {
         </div>
 
       </div>
+
+      <Footer />
     </main>
   );
 }
