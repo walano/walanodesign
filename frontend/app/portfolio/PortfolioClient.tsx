@@ -890,8 +890,16 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
         return <BrandingGrid items={brandingGroupItems} onOpen={(imgs, lbl) => setBrandingViewer({ images: imgs, label: lbl })} />;
       }
       if (active === "affiches") {
-        return groupedProjects.length > 0
-          ? <RowsView projects={groupedProjects} aspect={ASPECT.affiches} onOpen={openViewer} />
+        const packItems: BrandingItem[] = groupedProjects.map(p => ({
+          id: p.id, firstImage: p.images[0]?.url, label: p.title, images: p.images,
+        }));
+        return packItems.length > 0
+          ? <BrandingGrid
+              items={packItems}
+              aspectRatio="4/5"
+              cols="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+              onOpen={(imgs, lbl) => setHorizontalViewer({ images: imgs, label: lbl })}
+            />
           : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun pack</p>;
       }
       if (active === "covers") {

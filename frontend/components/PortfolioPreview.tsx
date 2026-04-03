@@ -16,7 +16,7 @@ const CATEGORIES = [
   { key: "videos",     aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
   { key: "affiches",   aspect: "aspect-[3/4]",   count: 5, cols: "grid-cols-5" },
   { key: "miniatures", aspect: "aspect-video",   count: 3, cols: "grid-cols-3" },
-  { key: "bannieres",  aspect: "aspect-video",   count: 2, cols: "grid-cols-1" },
+  { key: "bannieres",  aspect: "aspect-[16/3]",  count: 2, cols: "grid-cols-1" },
 ] as const;
 
 // Mobile layout: 4 squares | 1 wide | 2 tall | 1 wide  (8 slots total)
