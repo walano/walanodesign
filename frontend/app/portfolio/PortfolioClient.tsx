@@ -140,17 +140,23 @@ function BrandingProjectViewer({ images, label, onClose }: {
    Horizontal project viewer — albums & packs (Instagram carousel)
 ───────────────────────────────────────────────────────── */
 function HorizontalProjectViewer({ images, label, initialIndex = 0, onClose }: {
-  images:       { url: string }[];
-  label:        string;
+  images:        { url: string }[];
+  label:         string;
   initialIndex?: number;
-  onClose:      () => void;
+  onClose:       () => void;
 }) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const scrollRef  = useRef<HTMLDivElement>(null);
-  const thumbsRef  = useRef<HTMLDivElement>(null);
+  const [curIdx, setCurIdx] = useState(initialIndex);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const thumbsRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Body lock + keyboard
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape")     onClose();
+      if (e.key === "ArrowLeft")  scrollToIndex(curIdx - 1);
+      if (e.key === "ArrowRight") scrollToIndex(curIdx + 1);
+    };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow           = "hidden";
     document.body.style.overscrollBehavior = "none";
@@ -161,178 +167,204 @@ function HorizontalProjectViewer({ images, label, initialIndex = 0, onClose }: {
       document.body.style.overscrollBehavior = "";
       delete document.body.dataset.viewerOpen;
     };
-  }, [onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, curIdx]);
 
-  // Jump to initialIndex instantly on mount (no animation)
+  // Jump to initialIndex instantly (rAF so layout is settled)
   useEffect(() => {
-    if (!scrollRef.current || initialIndex === 0) return;
-    scrollRef.current.scrollLeft = initialIndex * scrollRef.current.clientWidth;
+    if (!scrollRef.current) return;
+    requestAnimationFrame(() => {
+      if (scrollRef.current)
+        scrollRef.current.scrollLeft = initialIndex * scrollRef.current.clientWidth;
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Snap scroll → derive active index
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current) return;
-    const idx = Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth);
-    setCurrentIndex(Math.min(Math.max(idx, 0), images.length - 1));
+  // scrollend + debounce fallback for index detection
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const sync = () => {
+      const idx = Math.round(el.scrollLeft / el.clientWidth);
+      setCurIdx(Math.min(Math.max(idx, 0), images.length - 1));
+    };
+    const onScrollEnd = () => { if (debounceRef.current) clearTimeout(debounceRef.current); sync(); };
+    const onScroll    = () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(sync, 80);
+    };
+    el.addEventListener("scrollend", onScrollEnd);
+    el.addEventListener("scroll",    onScroll,    { passive: true });
+    return () => {
+      el.removeEventListener("scrollend", onScrollEnd);
+      el.removeEventListener("scroll",    onScroll);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
   }, [images.length]);
 
-  // Scroll to slide (from thumbnail or prev/next buttons)
   const scrollToIndex = useCallback((i: number) => {
     if (!scrollRef.current) return;
     const clamped = Math.min(Math.max(i, 0), images.length - 1);
     scrollRef.current.scrollTo({ left: clamped * scrollRef.current.clientWidth, behavior: "smooth" });
   }, [images.length]);
 
-  // Keep active thumbnail visible in strip
+  // Sync active thumbnail into view
   useEffect(() => {
     if (!thumbsRef.current) return;
-    const thumb = thumbsRef.current.children[currentIndex] as HTMLElement | undefined;
+    const thumb = thumbsRef.current.children[curIdx] as HTMLElement | undefined;
     thumb?.scrollIntoView({ inline: "center", behavior: "smooth", block: "nearest" });
-  }, [currentIndex]);
+  }, [curIdx]);
+
+  const showThumbs = images.length > 1;
 
   const btnStyle: React.CSSProperties = {
-    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 10,
-    padding: "0.5rem 1rem", display: "flex", alignItems: "center", justifyContent: "center",
+    position: "absolute", top: "50%", transform: "translateY(-50%)", zIndex: 20,
+    padding: "0.5rem 0.9rem", alignItems: "center", justifyContent: "center",
     background: "rgba(12,12,12,0.55)", border: "1px solid rgba(255,255,255,0.15)",
     backdropFilter: "blur(10px)", color: "#f5f3f7",
-    fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "0.72rem",
-    letterSpacing: "0.06em", cursor: "pointer", transition: "background 0.2s",
+    fontFamily: "Inter, sans-serif", fontWeight: 600, fontSize: "1.1rem",
+    cursor: "pointer", transition: "background 0.2s",
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70" onClick={onClose}>
-      <div className="relative flex flex-col bg-black w-[92vw] h-[75vh] md:w-[85vw] md:h-[80vh] md:max-w-6xl" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-[100]"
+      style={{ backgroundColor: "rgba(0,0,0,0.92)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }}
+      onClick={onClose}
+    >
+      <style>{`.hpv-scroll::-webkit-scrollbar { display: none; }`}</style>
 
-        {/* header — label left, counter + close right */}
-        <div className="flex items-center justify-between px-4 py-3 flex-shrink-0">
-          <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", letterSpacing: "0.08em", textTransform: "lowercase" }}>
-            {label}
-          </span>
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            {images.length > 1 && (
-              <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.35)", letterSpacing: "0.06em" }}>
-                {currentIndex + 1} / {images.length}
-              </span>
-            )}
-            <button onClick={onClose} style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}>
-              ✕
-            </button>
-          </div>
-        </div>
-
-        {/* Carousel area + prev/next buttons */}
-        <style>{`.snap-carousel::-webkit-scrollbar { display: none; }`}</style>
-        <div className="relative flex-1 overflow-hidden">
-
-          {/* Prev button — desktop only */}
-          {images.length > 1 && (
-            <button
-              className="hidden md:flex"
-              style={{ ...btnStyle, left: "clamp(0.5rem, 2vw, 1.5rem)" }}
-              onClick={() => scrollToIndex(currentIndex - 1)}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
-            >
-              prev
-            </button>
-          )}
-
-          {/* Next button — desktop only */}
-          {images.length > 1 && (
-            <button
-              className="hidden md:flex"
-              style={{ ...btnStyle, right: "clamp(0.5rem, 2vw, 1.5rem)" }}
-              onClick={() => scrollToIndex(currentIndex + 1)}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
-            >
-              next
-            </button>
-          )}
-
-          {/* Instagram-style snap carousel */}
-          <div
-            ref={scrollRef}
-            className="snap-carousel"
-            data-lenis-prevent
-            style={{
-              position: "absolute", inset: 0,
-              display: "flex",
-              overflowX: "auto",
-              overflowY: "hidden",
-              scrollSnapType: "x mandatory",
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none",
-              overscrollBehavior: "contain",
-            }}
-            onScroll={handleScroll}
-          >
-            {images.map((img, i) => (
-              <div
-                key={i}
-                style={{
-                  flexShrink: 0,
-                  width: "100%",
-                  height: "100%",
-                  scrollSnapAlign: "start",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {img.url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={img.url}
-                    alt={`${label} ${i + 1}`}
-                    style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Thumbnail strip */}
-        {images.length > 1 && (
-          <div
-            ref={thumbsRef}
-            className="snap-carousel"
-            style={{
-              display: "flex",
-              gap: "0.35rem",
-              padding: "0.5rem 1rem 0.75rem",
-              overflowX: "auto",
-              justifyContent: "center",
-              flexShrink: 0,
-              scrollbarWidth: "none",
-            }}
-          >
-            {images.map((img, i) => (
-              <div
-                key={i}
-                onClick={() => scrollToIndex(i)}
-                style={{
-                  width: 64, height: 36,
-                  flexShrink: 0,
-                  cursor: "pointer",
-                  opacity: i === currentIndex ? 1 : 0.4,
-                  outline: i === currentIndex ? "2px solid #855c9d" : "2px solid transparent",
-                  backgroundColor: "#0c0c0c",
-                  overflow: "hidden",
-                  transition: "opacity 0.2s, outline 0.2s",
-                }}
-              >
-                {img.url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+      {/* ── Header — absolute overlay ── */}
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: "absolute", top: 0, left: 0, right: 0, zIndex: 20,
+          backgroundColor: "#0c0c0c",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "0.75rem 1.25rem", flexShrink: 0,
+        }}
+      >
+        <span style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", color: "rgba(245,243,247,0.5)", textTransform: "lowercase" }}>
+          {label}
+          {showThumbs && <span style={{ color: "rgba(245,243,247,0.3)" }}> — {curIdx + 1}/{images.length}</span>}
+        </span>
+        <button
+          onClick={onClose}
+          style={{ color: "#f5f3f7", background: "none", border: "none", fontSize: "1.2rem", cursor: "pointer", lineHeight: 1, padding: "0.25rem 0.5rem" }}
+        >
+          ✕
+        </button>
       </div>
+
+      {/* ── Carousel — fills full viewport ── */}
+      <div
+        ref={scrollRef}
+        className="hpv-scroll"
+        data-lenis-prevent
+        onClick={e => e.stopPropagation()}
+        style={{
+          position: "absolute", inset: 0,
+          display: "flex",
+          overflowX: "scroll",
+          overflowY: "hidden",
+          scrollSnapType: "x mandatory",
+          scrollbarWidth: "none",
+          WebkitOverflowScrolling: "touch",
+          paddingTop: "3.5rem",
+          paddingBottom: showThumbs ? "4rem" : 0,
+          transform: "translateZ(0)",
+        }}
+      >
+        {images.map((img, i) => (
+          <div
+            key={i}
+            style={{
+              flexShrink: 0,
+              width: "100%",
+              height: "100%",
+              scrollSnapAlign: "start",
+              scrollSnapStop: "always",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {img.url && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={img.url}
+                alt={`${label} ${i + 1}`}
+                style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }}
+              />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* ── Prev / Next arrows — desktop only ── */}
+      {images.length > 1 && (
+        <button
+          className="hidden md:flex"
+          style={{ ...btnStyle, left: "clamp(0.5rem, 2vw, 1.5rem)" }}
+          onClick={e => { e.stopPropagation(); scrollToIndex(curIdx - 1); }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
+        >
+          ‹
+        </button>
+      )}
+      {images.length > 1 && (
+        <button
+          className="hidden md:flex"
+          style={{ ...btnStyle, right: "clamp(0.5rem, 2vw, 1.5rem)" }}
+          onClick={e => { e.stopPropagation(); scrollToIndex(curIdx + 1); }}
+          onMouseEnter={e => (e.currentTarget.style.background = "rgba(133,92,157,0.45)")}
+          onMouseLeave={e => (e.currentTarget.style.background = "rgba(12,12,12,0.55)")}
+        >
+          ›
+        </button>
+      )}
+
+      {/* ── Thumbnail strip — absolute at bottom ── */}
+      {showThumbs && (
+        <div
+          ref={thumbsRef}
+          className="hpv-scroll"
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
+            backgroundColor: "#0c0c0c",
+            display: "flex",
+            gap: "0.35rem",
+            padding: "0.5rem 1rem 0.75rem",
+            overflowX: "auto",
+            justifyContent: "center",
+            scrollbarWidth: "none",
+          }}
+        >
+          {images.map((img, i) => (
+            <div
+              key={i}
+              onClick={() => scrollToIndex(i)}
+              style={{
+                width: 64, height: 36,
+                flexShrink: 0,
+                cursor: "pointer",
+                opacity: i === curIdx ? 1 : 0.4,
+                outline: i === curIdx ? "2px solid #855c9d" : "2px solid transparent",
+                backgroundColor: "#0c0c0c",
+                overflow: "hidden",
+                transition: "opacity 0.2s, outline 0.2s",
+              }}
+            >
+              {img.url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={img.url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -921,7 +953,8 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
   const slide = slides[curIdx];
   if (!slide) return null;
 
-  const showThumbs = slide.imageCount > 1 && !slide.isBranding;
+  const showThumbs        = slide.imageCount > 1 && !slide.isBranding;
+  const hasAnyThumbnails  = slides.some(s => s.imageCount > 1 && !s.isBranding);
   // First slide index of the current project (for thumbnail click → scrollTo)
   const projectStartIdx = slides.findIndex(s => s.projectIdx === slide.projectIdx);
 
@@ -978,7 +1011,7 @@ function ProjectNavigator({ projects, projectIndex, onClose }: ProjectNavState &
               // Reserve space for header (top) and thumbnail strip (bottom) — constant
               // values so the image zone never shifts regardless of UI around it
               paddingTop: "3.5rem",
-              paddingBottom: "4rem",
+              paddingBottom: hasAnyThumbnails ? "4rem" : 0,
             }}
           >
             {s.isBranding ? (
