@@ -13,9 +13,9 @@ type Category = "covers" | "branding" | "videos" | "affiches" | "miniatures" | "
 const CATEGORIES: Category[] = ["covers", "branding", "videos", "affiches", "miniatures", "bannieres"];
 
 const SUBTABS: Partial<Record<Category, { solo: string; grouped: string }>> = {
-  covers:   { solo: "singles", grouped: "albums"    },
-  branding: { solo: "logos",   grouped: "brandings" },
-  affiches: { solo: "affiche", grouped: "pack"      },
+  covers:   { solo: "single",  grouped: "album"    },
+  branding: { solo: "logo",    grouped: "branding" },
+  affiches: { solo: "affiche", grouped: "pack"     },
 };
 
 const ASPECT: Record<Category, string> = {

@@ -19,9 +19,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const post = await fetchBlogPost(slug);
-  if (!post) return { title: "Blog | Walano Design" };
+  if (!post) return { title: "Blog" };
   return {
-    title:       `${post.title} | Walano Design`,
+    title:       post.title,
     description: post.description,
     openGraph: {
       title:       post.title,
