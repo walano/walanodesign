@@ -157,7 +157,7 @@ export interface BlogPost {
 
 export async function fetchBlogPosts(): Promise<BlogPost[]> {
   try {
-    const res = await fetch(`${API_URL}/api/blog/`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/blog/`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     return res.json();
   } catch { return []; }
@@ -165,7 +165,7 @@ export async function fetchBlogPosts(): Promise<BlogPost[]> {
 
 export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
   try {
-    const res = await fetch(`${API_URL}/api/blog/${slug}/`, { next: { revalidate: 3600 } });
+    const res = await fetch(`${API_URL}/api/blog/${slug}/`, { next: { revalidate: 60 } });
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
