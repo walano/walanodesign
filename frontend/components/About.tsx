@@ -9,11 +9,6 @@ import { fetchSiteConfig, fetchClients, type SiteConfig, type Client } from "@/l
 
 gsap.registerPlugin(ScrollTrigger);
 
-const FALLBACK_CLIENTS: Client[] = [
-  { id: 1, name: "Toossaint H.", role: "artiste",      avatar_url: null, order: 0 },
-  { id: 2, name: "Trianon Homes",role: "entreprise",   avatar_url: null, order: 1 },
-  { id: 3, name: "QLB Club",     role: "label",        avatar_url: null, order: 2 },
-];
 
 export default function About() {
   const { t } = useI18n();
@@ -24,7 +19,7 @@ export default function About() {
   const marqueeTrackRef = useRef<HTMLDivElement>(null);
 
   const [config, setConfig]   = useState<SiteConfig | null>(null);
-  const [clients, setClients] = useState<Client[]>(FALLBACK_CLIENTS);
+  const [clients, setClients] = useState<Client[]>([]);
 
   // JS-driven marquee — pause on hold, resume on release, swipe to navigate
   const marqueePos   = useRef(0);

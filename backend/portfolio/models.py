@@ -216,6 +216,36 @@ class PortfolioPreviewSlot(models.Model):
         return f"{self.get_device_display()} — {self.project.title} (#{self.order})"
 
 
+BLOG_CATEGORY_CHOICES = [
+    ("branding",  "Branding"),
+    ("tarifs",    "Tarifs"),
+    ("process",   "Process"),
+    ("tendances", "Tendances"),
+    ("musique",   "Musique"),
+]
+
+
+class BlogPost(models.Model):
+    slug         = models.SlugField(max_length=255, unique=True)
+    title        = models.CharField(max_length=255, verbose_name="Titre")
+    description  = models.TextField(verbose_name="Meta description (SEO, max 160 car.)")
+    category     = models.CharField(max_length=100, choices=BLOG_CATEGORY_CHOICES, verbose_name="Catégorie")
+    thumbnail    = models.URLField(max_length=500, blank=True, default="", verbose_name="Thumbnail (URL Cloudinary)")
+    content      = models.TextField(verbose_name="Contenu (markdown)")
+    published    = models.BooleanField(default=True, verbose_name="Publié")
+    published_at = models.DateTimeField(null=True, blank=True, verbose_name="Date de publication")
+    created_at   = models.DateTimeField(auto_now_add=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering            = ["-published_at"]
+        verbose_name        = "Article de blog"
+        verbose_name_plural = "Articles de blog"
+
+    def __str__(self):
+        return self.title
+
+
 class ContactMessage(models.Model):
     name       = models.CharField(max_length=100, verbose_name="Nom")
     email      = models.EmailField(verbose_name="Email")

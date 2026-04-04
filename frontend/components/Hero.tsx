@@ -207,6 +207,7 @@ export default function Hero() {
   const NAV_LINKS = [
     { key: "services",  href: "#services"  },
     { key: "portfolio", href: "/portfolio" },
+    { key: "blog",      href: "/blog"      },
     { key: "about",     href: "#about"     },
   ];
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Project, ProjectImage, SiteConfig, Client, PortfolioPreviewSlot
+from .models import Project, ProjectImage, SiteConfig, Client, PortfolioPreviewSlot, BlogPost
 
 
 class ProjectImageSerializer(serializers.ModelSerializer):
@@ -60,3 +60,15 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_thumbnail_url(self, obj):
         return obj.thumbnail.url if obj.thumbnail else None
+
+
+class BlogPostListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = BlogPost
+        fields = ["id", "slug", "title", "description", "category", "thumbnail", "published_at"]
+
+
+class BlogPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = BlogPost
+        fields = ["id", "slug", "title", "description", "category", "thumbnail", "content", "published_at"]

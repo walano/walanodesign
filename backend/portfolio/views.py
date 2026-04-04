@@ -23,8 +23,8 @@ def _resend(to: str, subject: str, text: str):
         print(f"[resend] to={to} status={r.status_code} body={r.text}", flush=True)
     except Exception as e:
         print(f"[resend error] {e}", flush=True)
-from .models import Project, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
-from .serializers import ProjectSerializer, SiteConfigSerializer, ClientSerializer, PortfolioPreviewSlotSerializer
+from .models import Project, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
+from .serializers import ProjectSerializer, SiteConfigSerializer, ClientSerializer, PortfolioPreviewSlotSerializer, BlogPostListSerializer, BlogPostSerializer
 
 
 @api_view(["GET"])
@@ -58,6 +58,33 @@ def projects(request):
     if category:
         qs = qs.filter(category=category)
     return Response(ProjectSerializer(qs, many=True).data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def project_detail(request, pk):
+    try:
+        project = Project.objects.get(pk=pk, published=True)
+    except Project.DoesNotExist:
+        return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response(ProjectSerializer(project).data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def blog_list(request):
+    posts = BlogPost.objects.filter(published=True)
+    return Response(BlogPostListSerializer(posts, many=True).data)
+
+
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def blog_detail(request, slug):
+    try:
+        post = BlogPost.objects.get(slug=slug, published=True)
+    except BlogPost.DoesNotExist:
+        return Response({"error": "Not found"}, status=status.HTTP_404_NOT_FOUND)
+    return Response(BlogPostSerializer(post).data)
 
 
 CATEGORIES_LABELS = {

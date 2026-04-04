@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import path
 from unfold.admin import ModelAdmin, TabularInline
-from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot
+from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 
 
 class MultipleFileInput(forms.FileInput):
@@ -226,6 +226,24 @@ class ContactMessageAdmin(ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+
+@admin.register(BlogPost)
+class BlogPostAdmin(ModelAdmin):
+    list_display        = ["title", "category", "published", "published_at"]
+    list_filter         = ["category", "published"]
+    list_editable       = ["published"]
+    search_fields       = ["title", "slug"]
+    ordering            = ["-published_at"]
+    prepopulated_fields = {"slug": ("title",)}
+    fieldsets = [
+        (None, {
+            "fields": ["title", "slug", "category", "description", "thumbnail", "published", "published_at"],
+        }),
+        ("Contenu", {
+            "fields": ["content"],
+        }),
+    ]
 
 
 @admin.register(Devis)

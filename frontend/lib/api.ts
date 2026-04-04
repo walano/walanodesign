@@ -133,3 +133,30 @@ export async function fetchProjects(category?: string): Promise<Project[]> {
   if (!res.ok) return [];
   return res.json();
 }
+
+export interface BlogPost {
+  id:           number;
+  slug:         string;
+  title:        string;
+  description:  string;
+  category:     string;
+  thumbnail:    string;
+  content?:     string;
+  published_at: string | null;
+}
+
+export async function fetchBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const res = await fetch(`${API_URL}/api/blog/`, { next: { revalidate: 3600 } });
+    if (!res.ok) return [];
+    return res.json();
+  } catch { return []; }
+}
+
+export async function fetchBlogPost(slug: string): Promise<BlogPost | null> {
+  try {
+    const res = await fetch(`${API_URL}/api/blog/${slug}/`, { next: { revalidate: 3600 } });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
