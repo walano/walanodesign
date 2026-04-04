@@ -65,8 +65,9 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                   color:         "#f5f3f7",
                   textTransform: "uppercase",
                   letterSpacing: "0.02em",
+                  lineHeight:    1.5,
                   marginTop:     "0.75rem",
-                  marginBottom:  "0.25rem",
+                  marginBottom:  "0.01rem",
                 }}
               >
                 {block.text}
