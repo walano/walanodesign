@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { fetchBlogPosts } from "@/lib/api";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
@@ -17,7 +18,9 @@ export default async function BlogPage() {
   return (
     <main style={{ minHeight: "100vh", backgroundColor: "#0c0c0c", display: "flex", flexDirection: "column" }}>
       <Nav />
-      <BlogListClient posts={posts} />
+      <Suspense>
+        <BlogListClient posts={posts} />
+      </Suspense>
       <Footer />
     </main>
   );

@@ -66,7 +66,7 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                   textTransform: "uppercase",
                   letterSpacing: "0.02em",
                   marginTop:     "0.75rem",
-                  marginBottom:  "-0.6rem",
+                  marginBottom:  "0.25rem",
                 }}
               >
                 {block.text}
@@ -207,7 +207,7 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
         .blog-back {
           display:        inline-block;
           border:         1px solid rgba(245,243,247,0.15);
-          border-radius:  20px;
+          border-radius:  0;
           padding:        0.3rem 0.9rem;
           font-family:    Inter, sans-serif;
           font-size:      0.75rem;

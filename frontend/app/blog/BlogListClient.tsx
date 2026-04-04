@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import type { BlogPost } from "@/lib/api";
 
@@ -23,8 +23,16 @@ function formatDate(iso: string | null, lang: string): string {
 }
 
 export default function BlogListClient({ posts }: { posts: BlogPost[] }) {
-  const { lang } = useI18n();
-  const [active, setActive] = useState<BlogCat | null>(null);
+  const { lang }   = useI18n();
+  const router     = useRouter();
+  const params     = useSearchParams();
+  const raw        = params.get("category");
+  const active     = CATEGORIES.includes(raw as BlogCat) ? (raw as BlogCat) : null;
+
+  function setActive(cat: BlogCat | null) {
+    const url = cat ? `/blog?category=${cat}` : "/blog";
+    router.replace(url, { scroll: false });
+  }
 
   const allLabel = lang === "en" ? "All" : "Tout";
   const filtered = active ? posts.filter(p => p.category === active) : posts;
