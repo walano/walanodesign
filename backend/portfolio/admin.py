@@ -6,7 +6,7 @@ from django.contrib import admin, messages
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.urls import path
+from django.urls import path, reverse
 from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
@@ -281,7 +281,7 @@ class BlogPostAdmin(ModelAdmin):
     def translate_button(self, obj):
         if not obj or not obj.pk:
             return "Sauvegardez l'article d'abord."
-        url = f"/admin/portfolio/blogpost/translate/?pk={obj.pk}"
+        url = reverse("admin:portfolio_blogpost_translate") + f"?pk={obj.pk}"
         return format_html(
             '<a href="{}" class="be-translate-btn">⚡ Traduire FR → EN avec Claude</a>',
             url,
@@ -297,18 +297,18 @@ class BlogPostAdmin(ModelAdmin):
         pk = request.GET.get("pk")
         if not pk:
             messages.error(request, "pk manquant.")
-            return redirect("../")
+            return redirect(reverse("admin:portfolio_blogpost_changelist"))
         post = BlogPost.objects.get(pk=pk)
         post = BlogPost.objects.get(pk=pk)
 
         if not post.content:
             messages.error(request, "Pas de contenu FR à traduire.")
-            return redirect(f"../{pk}/change/")
+            return redirect(reverse("admin:portfolio_blogpost_change", args=[pk]))
 
         api_key = os.getenv("ANTHROPIC_API_KEY", "")
         if not api_key:
             messages.error(request, "ANTHROPIC_API_KEY manquante dans les variables d'environnement.")
-            return redirect(f"../{pk}/change/")
+            return redirect(reverse("admin:portfolio_blogpost_change", args=[pk]))
 
         prompt = (
             "Translate the text fields in these JSON content blocks from French to English.\n"
@@ -345,7 +345,7 @@ class BlogPostAdmin(ModelAdmin):
         except Exception as e:
             messages.error(request, f"Erreur lors de la traduction : {e}")
 
-        return redirect(f"../{pk}/change/")
+        return redirect(reverse("admin:portfolio_blogpost_change", args=[pk]))
 
 
 @admin.register(Devis)
