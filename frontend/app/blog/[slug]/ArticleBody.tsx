@@ -31,7 +31,7 @@ function toHtml(text: string): string {
                  : !txt.includes(" ") && txt.includes(".") ? `https://${txt}`
                  : null;
       return href
-        ? `<a href="${href}" target="_blank" rel="noopener noreferrer" class="article-link" style="color:#855c9d;text-decoration:underline;text-underline-offset:3px">${txt}</a>`
+        ? `<a href="${href}" target="_blank" rel="noopener noreferrer" class="article-link" style="color:#855c9d;text-decoration:none">${txt}</a>`
         : `<span style="color:#855c9d">${txt}</span>`;
     });
 }
