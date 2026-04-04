@@ -36,8 +36,9 @@ function parseInline(text: string): React.ReactNode[] {
       );
     } else {
       const txt  = match[2];
-      const href = /^https?:\/\//.test(txt) ? txt
-                 : /^www\./.test(txt)        ? `https://${txt}`
+      const href = /^https?:\/\//.test(txt)              ? txt
+                 : /^www\./.test(txt)                     ? `https://${txt}`
+                 : /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(txt) ? `https://${txt}`
                  : null;
       parts.push(
         href ? (
@@ -97,7 +98,7 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                   textTransform: "uppercase",
                   letterSpacing: "0.02em",
                   marginTop:     "0.75rem",
-                  marginBottom:  "-0.25rem",
+                  marginBottom:  "-0.6rem",
                 }}
               >
                 {block.text}
