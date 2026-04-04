@@ -134,6 +134,13 @@ export async function fetchProjects(category?: string): Promise<Project[]> {
   return res.json();
 }
 
+export type ContentBlock =
+  | { type: "heading";   text: string }
+  | { type: "paragraph"; text: string }
+  | { type: "image";     url: string; alt?: string }
+  | { type: "link";      text: string; url: string }
+  | { type: "embed";     url: string; caption?: string }
+
 export interface BlogPost {
   id:             number;
   slug:           string;
@@ -143,8 +150,8 @@ export interface BlogPost {
   description_en: string;
   category:       string;
   thumbnail:      string;
-  content?:       string;
-  content_en?:    string;
+  content?:       ContentBlock[];
+  content_en?:    ContentBlock[];
   published_at:   string | null;
 }
 

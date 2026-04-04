@@ -231,8 +231,24 @@ class BlogPost(models.Model):
     description_en = models.TextField(blank=True, default="", verbose_name="Meta description EN")
     category       = models.CharField(max_length=100, choices=BLOG_CATEGORY_CHOICES, verbose_name="Catégorie")
     thumbnail      = models.URLField(max_length=500, blank=True, default="", verbose_name="Thumbnail (URL Cloudinary)")
-    content        = models.TextField(verbose_name="Contenu FR (markdown)")
-    content_en     = models.TextField(blank=True, default="", verbose_name="Contenu EN (markdown)")
+    content        = models.JSONField(
+        default=list,
+        verbose_name="Contenu FR",
+        help_text=(
+            'Liste de blocs. Types disponibles :\n'
+            '{"type":"heading","text":"TITRE"}\n'
+            '{"type":"paragraph","text":"Texte avec **gras** et *violet*"}\n'
+            '{"type":"image","url":"https://...","alt":"optionnel"}\n'
+            '{"type":"link","text":"Texte du lien","url":"https://..."}\n'
+            '{"type":"embed","url":"https://www.instagram.com/p/XYZ/","caption":"optionnel"}'
+        ),
+    )
+    content_en     = models.JSONField(
+        blank=True,
+        default=list,
+        verbose_name="Contenu EN",
+        help_text="Same block format as content FR.",
+    )
     published      = models.BooleanField(default=True, verbose_name="Publié")
     published_at   = models.DateTimeField(null=True, blank=True, verbose_name="Date de publication")
     created_at     = models.DateTimeField(auto_now_add=True)
