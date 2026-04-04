@@ -35,10 +35,25 @@ function parseInline(text: string): React.ReactNode[] {
         </strong>
       );
     } else {
+      const txt  = match[2];
+      const href = /^https?:\/\//.test(txt) ? txt
+                 : /^www\./.test(txt)        ? `https://${txt}`
+                 : null;
       parts.push(
-        <span key={match.index} style={{ color: "#855c9d" }}>
-          {match[2]}
-        </span>
+        href ? (
+          <a
+            key={match.index}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="article-link"
+            style={{ color: "#855c9d", textDecoration: "underline", textUnderlineOffset: "3px" }}
+          >
+            {txt}
+          </a>
+        ) : (
+          <span key={match.index} style={{ color: "#855c9d" }}>{txt}</span>
+        )
       );
     }
     last = match.index + match[0].length;
@@ -78,11 +93,11 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                   fontFamily:    "Inter, sans-serif",
                   fontWeight:    600,
                   fontSize:      "clamp(0.95rem, 1.6vw, 1.05rem)",
-                  color:         "#855c9d",
+                  color:         "#f5f3f7",
                   textTransform: "uppercase",
                   letterSpacing: "0.02em",
                   marginTop:     "0.75rem",
-                  marginBottom:  0,
+                  marginBottom:  "-0.25rem",
                 }}
               >
                 {block.text}
