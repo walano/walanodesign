@@ -77,6 +77,7 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
             return (
               <p
                 key={i}
+                className="article-body"
                 // eslint-disable-next-line react/no-danger
                 dangerouslySetInnerHTML={{ __html: toHtml(block.text) }}
                 style={{
@@ -199,13 +200,31 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
   const title    = lang === "en" && post.title_en   ? post.title_en   : post.title;
   const blocks   = (lang === "en" && post.content_en?.length ? post.content_en : post.content) ?? [];
   const catLabel = CAT_LABEL[post.category as BlogCat]?.[lang as "fr" | "en"] ?? post.category;
-  const backBottomLabel = lang === "en" ? "← back to blog" : "← retour au blog";
 
   return (
     <>
       <style>{`
-        .blog-back:hover    { color: #855c9d !important; }
+        .blog-back {
+          display:        inline-block;
+          border:         1px solid rgba(245,243,247,0.15);
+          border-radius:  20px;
+          padding:        0.3rem 0.9rem;
+          font-family:    Inter, sans-serif;
+          font-size:      0.75rem;
+          font-weight:    500;
+          letter-spacing: 0.03em;
+          color:          rgba(245,243,247,0.45);
+          text-decoration: none;
+          transition:     color 0.2s, border-color 0.2s;
+        }
+        .blog-back:hover {
+          color:        rgba(245,243,247,0.9) !important;
+          border-color: rgba(245,243,247,0.35);
+        }
         .article-link:hover { opacity: 0.75; }
+        @media (max-width: 640px) {
+          .article-body p { text-align: justify; }
+        }
       `}</style>
       <article style={{
         flex:     1,
@@ -215,21 +234,8 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
         padding:  "clamp(6rem, 12vw, 9rem) clamp(1.25rem, 5vw, 3rem) clamp(3rem, 6vw, 5rem)",
       }}>
         {/* Back link */}
-        <a
-          href="/blog"
-          className="blog-back"
-          style={{
-            fontFamily:     "Inter, sans-serif",
-            fontSize:       "0.78rem",
-            color:          "rgba(245,243,247,0.32)",
-            textDecoration: "none",
-            letterSpacing:  "0.04em",
-            display:        "inline-block",
-            marginBottom:   "2rem",
-            transition:     "color 0.2s",
-          }}
-        >
-          ← blog
+        <a href="/blog" className="blog-back" style={{ marginBottom: "2rem" }}>
+          {lang === "en" ? "Blog" : "Blog"}
         </a>
 
         {/* Category + date */}
@@ -288,19 +294,8 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
 
         {/* Bottom back link */}
         <div style={{ marginTop: "3rem", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-          <a
-            href="/blog"
-            className="blog-back"
-            style={{
-              fontFamily:     "Inter, sans-serif",
-              fontSize:       "0.8rem",
-              color:          "rgba(245,243,247,0.32)",
-              textDecoration: "none",
-              letterSpacing:  "0.04em",
-              transition:     "color 0.2s",
-            }}
-          >
-            {backBottomLabel}
+          <a href="/blog" className="blog-back">
+            {lang === "en" ? "Back to Blog" : "Retour au Blog"}
           </a>
         </div>
       </article>

@@ -89,7 +89,7 @@ export default function BlogListClient({ posts }: { posts: BlogPost[] }) {
         marginBottom: "clamp(1.5rem, 3vw, 2.5rem)",
         letterSpacing: "-0.03em",
       }}>
-        Blog
+        {lang === "en" ? "Let's talk about design" : "Parlons de design"}
       </h1>
 
       {/* Category tabs */}

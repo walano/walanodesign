@@ -283,7 +283,7 @@ class BlogPostAdmin(ModelAdmin):
             return "Sauvegardez l'article d'abord."
         url = reverse("admin:portfolio_blogpost_translate") + f"?pk={obj.pk}"
         return format_html(
-            '<a href="{}" class="be-translate-btn">⚡ Traduire FR → EN avec Claude</a>',
+            '<a href="{}" class="be-translate-btn">Traduire FR → EN avec Claude</a>',
             url,
         )
     translate_button.short_description = ""
