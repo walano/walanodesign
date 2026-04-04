@@ -36,9 +36,8 @@ function parseInline(text: string): React.ReactNode[] {
       );
     } else {
       const txt  = match[2];
-      const href = /^https?:\/\//.test(txt)              ? txt
-                 : /^www\./.test(txt)                     ? `https://${txt}`
-                 : /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/.test(txt) ? `https://${txt}`
+      const href = /^https?:\/\//.test(txt)           ? txt
+                 : !txt.includes(" ") && txt.includes(".") ? `https://${txt}`
                  : null;
       parts.push(
         href ? (
