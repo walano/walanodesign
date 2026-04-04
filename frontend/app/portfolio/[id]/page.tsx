@@ -1,8 +1,15 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { fetchProject } from "@/lib/api";
+import { fetchProject, fetchProjects } from "@/lib/api";
 import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
+
+export const revalidate = 3600; // re-generate at most once per hour
+
+export async function generateStaticParams() {
+  const projects = await fetchProjects();
+  return projects.map((p) => ({ id: String(p.id) }));
+}
 
 export async function generateMetadata({
   params,
