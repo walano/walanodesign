@@ -52,7 +52,7 @@ function ArticleContent({ content }: { content: string }) {
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       {paragraphs.map((para, i) => {
         const trimmed = para.trim();
-        const headingMatch = trimmed.match(/^\*\*(.+)\*\*$/s);
+        const headingMatch = trimmed.match(/^\*\*([^*]+)\*\*/);
 
         if (headingMatch) {
           return (
