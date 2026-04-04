@@ -16,12 +16,15 @@ PUBLISHED_AT = make_aware(datetime(2026, 4, 4))
 
 
 ARTICLES = [
+    # ── Article 1 : branding ──────────────────────────────────────────────────
     {
         "slug":        "difference-logo-identite-visuelle-charte-graphique",
         "title":       "La différence entre un logo, une identité visuelle et une charte graphique",
+        "title_en":    "The difference between a logo, a visual identity and brand guidelines",
         "description": "Beaucoup confondent logo, identité visuelle et charte graphique. Voici ce que chaque terme signifie concrètement et ce dont tu as vraiment besoin.",
+        "description_en": "Many people confuse logo, visual identity and brand guidelines. Here's what each term actually means and what you really need.",
         "category":    "branding",
-        "content":     """\
+        "content": """\
 C'est la question que je reçois le plus souvent. Un client me dit "je veux un logo" alors qu'en réalité il a besoin d'une identité visuelle complète. Un autre me demande "une charte graphique" mais ce qu'il veut c'est juste un logo avec ses couleurs. Clarifions tout ça.
 
 **Le logo**
@@ -57,13 +60,53 @@ Si tu veux que tout ton univers soit cohérent (pochettes, réseaux, merch) : un
 Si tu travailles avec d'autres personnes qui doivent produire des visuels pour toi : une charte graphique.
 
 Et si tu ne sais pas encore, on en discute. C'est exactement à ça que sert le devis gratuit sur walanodesign.com/devis.""",
+        "content_en": """\
+This is the question I get asked the most. A client says "I want a logo" when they actually need a full visual identity. Another asks for "brand guidelines" but really just wants a logo with their colours. Let's clear this up.
+
+**The logo**
+
+A logo is a symbol, a sign, a mark. It's the simplest and most recognisable element of your brand. It can be a pictogram (an icon), a logotype (your name styled), or a combination of both.
+
+When you order a logo from me, you receive the final design in multiple formats (PNG, JPG, sometimes SVG), with variations: colour version, black and white version, version on light background, version on dark background. It's a precise, contained deliverable that answers a precise need.
+
+A logo alone doesn't tell you how to build your visuals, posts or posters. It just says "this is your brand in image form".
+
+**The visual identity**
+
+A visual identity is the universe around the logo. It includes the logo, but also the colour palette, the typography or typographies, the photographic or illustrative style, textures, patterns, the overall visual tone.
+
+When I create a visual identity for an artist or a business, I don't just deliver a logo file. I deliver an artistic direction. Something that lets anyone look at a visual and say "that's you" without even seeing your name.
+
+Concretely, a visual identity includes: the logo and its variations, the colour palette (hex and RGB codes), primary and secondary typefaces, application examples (mockups on real supports), and the overall visual tone.
+
+**The brand guidelines**
+
+Brand guidelines are the document that formalises everything. It's the instruction manual for your visual identity. It states exactly how to use the logo (minimum size, clear space, what not to do), which colours to use and in what proportions, which typefaces for titles, body text and captions.
+
+It's a PDF or structured document you give to a printer, a web developer, a community manager, so they respect your brand even when you're not in the room.
+
+Not everyone needs brand guidelines. If you're a solo artist managing your own visuals, a visual identity is more than enough. If you work with a team or external contractors, guidelines become essential.
+
+**What you actually need**
+
+If you're starting out and just want to be recognisable: a logo.
+
+If you want your whole universe to be consistent (covers, social media, merch): a visual identity.
+
+If you work with others who need to produce visuals for you: brand guidelines.
+
+And if you're not sure yet, let's talk about it. That's exactly what the free quote on walanodesign.com/devis is for.""",
     },
+
+    # ── Article 2 : process ───────────────────────────────────────────────────
     {
         "slug":        "combien-coute-graphiste-freelance-2026",
         "title":       "Combien coûte un graphiste freelance en 2026",
+        "title_en":    "How much does a freelance graphic designer cost in 2026",
         "description": "Grille tarifaire réaliste pour les prestations graphiques en 2026 : covers, logos, affiches, vidéos. Ce que tu paies et pourquoi.",
-        "category":    "tarifs",
-        "content":     """\
+        "description_en": "Realistic price ranges for graphic design services in 2026: covers, logos, posters, videos. What you pay and why.",
+        "category":    "process",
+        "content": """\
 C'est la question que tout le monde se pose mais que personne n'ose poser clairement. "Tu prends combien ?". Alors voilà une réponse honnête, basée sur ce que je vois dans le marché et sur ma propre pratique.
 
 D'abord, il faut comprendre que le prix d'un graphiste freelance dépend de trois choses : la complexité du projet, le délai, et l'expérience du graphiste. Un logo minimaliste ne coûte pas la même chose qu'une identité visuelle complète avec charte. Une pochette d'album en 48h ne coûte pas la même chose qu'une pochette en 2 semaines.
@@ -99,13 +142,53 @@ C'est standard dans le métier. Si quelqu'un te propose "révisions illimitées"
 **Comment obtenir un prix exact**
 
 Le plus simple c'est de passer par le formulaire de devis sur walanodesign.com/devis. Tu sélectionnes ton type de projet, tu décris ce que tu veux, et tu reçois une estimation. Ensuite on en discute et on ajuste si besoin.""",
+        "content_en": """\
+It's the question everyone has but nobody dares to ask directly. "How much do you charge?" Here's an honest answer, based on what I see in the market and my own practice.
+
+First, you need to understand that a freelance graphic designer's price depends on three things: the complexity of the project, the deadline, and the designer's experience. A minimalist logo doesn't cost the same as a full visual identity with guidelines. An album cover in 48h doesn't cost the same as one over two weeks.
+
+**Realistic price ranges in 2026**
+
+Single cover (simple cover): between 15,000 and 50,000 FCFA (25 to 80 EUR). This is the most common format. A square visual, usually based on a retouched photo or a graphic composition.
+
+Album cover (complex cover, artistic direction): between 50,000 and 150,000 FCFA (80 to 250 EUR). More research, often several proposals, a visual universe to create.
+
+Simple logo: between 30,000 and 80,000 FCFA (50 to 130 EUR). A clean logo, delivered in multiple formats.
+
+Full visual identity (logo + colours + typography + applications): between 100,000 and 300,000 FCFA (160 to 500 EUR). This is real artistic direction work.
+
+Event poster: between 20,000 and 60,000 FCFA (30 to 100 EUR). Depends on complexity and the elements to integrate.
+
+YouTube thumbnail: between 5,000 and 20,000 FCFA (8 to 30 EUR). Quick to produce but requires an eye for what gets clicks.
+
+Lyrics video: between 50,000 and 200,000 FCFA (80 to 330 EUR). Depends heavily on duration, style (2D, cinematic, typographic) and animations.
+
+**Why these prices vary so much**
+
+A designer starting out doesn't charge the same as one with 5 years of experience. That's normal. What you're paying for isn't the time spent in Photoshop, it's the years spent developing an eye, a style, a mastery of tools.
+
+You're also paying for the number of revisions included, the speed of delivery, and the quality of the follow-up. A freelancer who replies within 2 hours and delivers in 48h doesn't charge the same as someone who takes 3 weeks to respond.
+
+**What's included and what isn't**
+
+With me, every quote specifies exactly what you receive. Source files (PSD, AI, etc.) are not included by default unless explicitly stated in the quote. Revisions are limited in number. Alternative concepts beyond what's planned are billed separately.
+
+This is standard in the industry. If someone offers you "unlimited revisions", be cautious: either they have no experience, or they'll rush the work.
+
+**How to get an exact price**
+
+The simplest way is to use the quote form on walanodesign.com/devis. You select your project type, describe what you want, and receive an estimate. Then we discuss and adjust if needed.""",
     },
+
+    # ── Article 3 : process ───────────────────────────────────────────────────
     {
         "slug":        "comment-briefer-un-graphiste",
         "title":       "Comment briefer un graphiste pour obtenir exactement ce que tu veux",
+        "title_en":    "How to brief a graphic designer to get exactly what you want",
         "description": "Un bon brief = un bon résultat. Voici comment communiquer clairement avec ton graphiste pour éviter les allers-retours inutiles.",
+        "description_en": "A good brief = a good result. Here's how to communicate clearly with your graphic designer to avoid unnecessary back-and-forth.",
         "category":    "process",
-        "content":     """\
+        "content": """\
 90 % des projets qui tournent mal ne tournent pas mal à cause du graphiste. Ils tournent mal à cause du brief. Un brief flou donne un résultat flou. Un brief précis donne un résultat précis. Voici comment faire les choses bien.
 
 **Qu'est-ce qu'un brief**
@@ -143,13 +226,55 @@ Si tu devais résumer ton brief en un message WhatsApp, ça ressemblerait à ça
 "Salut, j'ai besoin d'une pochette pour mon single [titre]. C'est du [genre musical]. Je veux un mood [émotion/ambiance]. Voici la photo à utiliser [fichier joint]. Voici 3 refs visuelles qui me parlent [liens ou images]. Format carré 3000x3000. J'en ai besoin pour [date]. Mon budget c'est [montant]."
 
 Avec ça, n'importe quel bon graphiste peut commencer à travailler immédiatement.""",
+        "content_en": """\
+90% of projects that go wrong don't go wrong because of the designer. They go wrong because of the brief. A vague brief gives a vague result. A precise brief gives a precise result. Here's how to do it right.
+
+**What is a brief**
+
+A brief is simply the information you give your designer before they start working. It's the foundation of everything. Without a clear brief, the designer guesses what you want, and guessing means missing.
+
+**The essential information**
+
+What is the project: a single cover? A logo? A poster? Be specific. "I want a visual" is not enough.
+
+For whom: is this for you as an artist? For your label? For an event? The target audience changes everything. A visual for a rap artist has nothing to do with a visual for a cosmetics company.
+
+The message or emotion: what do you want people to feel when they see the visual? Dark, energetic, melancholic, luxurious, raw, futuristic? Even a single word helps enormously.
+
+Visual references: send images that match what you have in mind. They can be covers by other artists, photos, colour palettes, screenshots of things you've seen on Instagram. 3 to 5 references is perfect. 20 references is confusing.
+
+Elements to include: the artist's name, the track title, a photo to use, an existing logo, imposed colours. Everything that must appear on the final visual, say it from the start.
+
+Format and technical specs: square 3000x3000 for a Spotify cover? 1920x1080 for a YouTube banner? 1080x1350 for an Instagram post? If you don't know, say so — the designer will guide you.
+
+Budget and deadline: be honest. If you have 20,000 FCFA and need it in 3 days, say so. The designer will adapt their proposal.
+
+**Classic mistakes**
+
+"Do whatever you want, I trust you": it's well-meaning but it's a trap. The designer will propose something based on their interpretation, and if it doesn't match what you had in mind (but didn't say), everyone wastes time.
+
+Changing direction after validating the concept: if you validate a direction and change your mind afterwards, it's a new project. That's why the initial brief is so important.
+
+Sending elements drip by drip: "oh I forgot, the label logo also needs to go on it" after the visual is finished. Gather everything before you start.
+
+**A good brief in 5 lines**
+
+If you had to summarise your brief in a WhatsApp message, it would look like this:
+
+"Hi, I need a cover for my single [title]. It's [genre]. I want a [emotion/vibe] mood. Here's the photo to use [attached file]. Here are 3 visual references that speak to me [links or images]. Square format 3000x3000. I need it by [date]. My budget is [amount]."
+
+With that, any good designer can start working immediately.""",
     },
+
+    # ── Article 4 : branding ──────────────────────────────────────────────────
     {
         "slug":        "choisir-style-visuel-pochette-album",
         "title":       "Comment choisir le bon style visuel pour sa pochette d'album",
+        "title_en":    "How to choose the right visual style for your album cover",
         "description": "Ta pochette c'est la première impression de ta musique. Voici comment choisir un style visuel qui correspond à ton univers artistique.",
-        "category":    "musique",
-        "content":     """\
+        "description_en": "Your cover is the first impression of your music. Here's how to choose a visual style that matches your artistic universe.",
+        "category":    "branding",
+        "content": """\
 Ta pochette c'est la première chose que les gens voient avant d'écouter un seul son. Sur Spotify, Apple Music, Deezer, YouTube, c'est une image carrée de quelques centimètres qui doit raconter une histoire. Si elle ne capte pas l'attention, personne ne clique.
 
 **Les grands styles visuels**
@@ -193,13 +318,61 @@ Ignorer le format : ta pochette sera affichée en 300x300 pixels sur un téléph
 Choisis un style qui correspond à ta musique, pas à tes goûts personnels en déco. Envoie des références claires à ton graphiste. Assure-toi que la photo de base est de qualité. Et garde le design simple.
 
 Si tu veux en discuter, le devis est gratuit sur walanodesign.com/devis.""",
+        "content_en": """\
+Your cover is the first thing people see before hearing a single note. On Spotify, Apple Music, Deezer, YouTube, it's a square image a few centimetres wide that has to tell a story. If it doesn't grab attention, nobody clicks.
+
+**The main visual styles**
+
+The retouched portrait photo: this is the most common style in rap and pop. A photo of the artist, retouched with a strong colour treatment. It works because people want to see the artist's face. It's personal, direct.
+
+Typographic design: no photo, just text and shapes. The artist's name and the project title become the visual. Works very well for minimalist projects or artists who want to stand out through boldness.
+
+Illustration: a drawing, digital painting, an illustrated universe. It creates an imaginary world around the music. Rarer but very memorable when done well.
+
+Conceptual montage: elements combined to create a surreal or symbolic scene. An artist in front of a landscape that doesn't exist, an object floating in the void, a mix of textures and photos. This is the style I do most often.
+
+3D: objects or scenes modelled in 3D. Gives a modern, premium look. Increasingly requested, especially for singles.
+
+**How to choose**
+
+Listen to your music. Seriously. Put the track on repeat and ask yourself: if this sound had a colour, what would it be? If it were a place, where would it be? If it were a film scene, what would it look like?
+
+The answer to these questions gives you the visual direction.
+
+A dark, introspective track calls for cold colours, shadows, contrast. A festive, energetic track calls for vivid colours, movement, light. A melancholic track calls for desaturated tones, blur, empty space.
+
+**Look at what others do (but don't copy)**
+
+Go on Spotify, search for artists who make the same kind of music as you. Look at their covers. Not to copy, but to understand the visual codes of your genre. Gabonese rap doesn't have the same codes as French rap or American R&B. Every scene has its trends.
+
+Note what you like and what you don't. That's exactly what you'll send your designer as references (see the article on how to brief a designer).
+
+**Mistakes that kill a cover**
+
+Too much text: the title, the name, the featuring, the date, the label, the logo. No. On a square cover, less is more. The name and title are enough.
+
+A blurry or badly framed photo: the quality of the base photo determines 80% of the final result. A photo taken with a good phone in good light is worth more than a professional photo with bad lighting.
+
+Following an outdated trend: the shiny 3D chrome effects of 2022 are dead. The neon violet filters of 2020 too. Look at what's happening now, not 3 years ago.
+
+Ignoring the format: your cover will be displayed at 300x300 pixels on a phone. If your design isn't readable at that size, it doesn't work.
+
+**In summary**
+
+Choose a style that matches your music, not your personal taste in decoration. Send clear references to your designer. Make sure the base photo is quality. And keep the design simple.
+
+If you want to talk about it, the quote is free at walanodesign.com/devis.""",
     },
+
+    # ── Article 5 : tendances ─────────────────────────────────────────────────
     {
         "slug":        "ia-allie-ou-menace-graphiste",
         "title":       "L'IA, alliée ou menace pour le graphiste ?",
+        "title_en":    "AI: ally or threat for the graphic designer?",
         "description": "L'intelligence artificielle va-t-elle remplacer les graphistes ? Retour d'expérience d'un graphiste freelance qui utilise l'IA au quotidien.",
+        "description_en": "Will artificial intelligence replace graphic designers? A freelance designer's take on using AI every day.",
         "category":    "tendances",
-        "content":     """\
+        "content": """\
 Depuis que Midjourney, DALL-E et les autres générateurs d'images ont explosé, je reçois cette question au moins une fois par semaine. "Tu n'as pas peur que l'IA te remplace ?". La réponse courte : non. La réponse longue : c'est plus compliqué que ça.
 
 **Ce que l'IA sait faire**
@@ -223,8 +396,6 @@ L'IA ne fait pas de direction artistique. Elle exécute un prompt, elle ne chall
 L'IA a besoin d'un prompt précis pour donner un bon résultat. Et c'est là que le problème se pose : la plupart des clients ne savent pas exactement ce qu'ils veulent. C'est normal, c'est justement pour ça qu'ils font appel à un graphiste.
 
 Un client me dit "je veux un truc qui claque" ou "quelque chose de sombre mais pas trop". Un graphiste comprend ça. Il pose des questions, il propose des pistes, il traduit un ressenti flou en direction visuelle concrète. L'IA ne fait pas ça. Si ton prompt est vague, le résultat est vague. Si ton prompt est précis, tu as déjà fait la moitié du travail du graphiste toi-même, et tu vas quand même passer des heures à régénérer parce que le résultat ne correspond jamais tout à fait.
-
-Pour obtenir un résultat presque parfait avec l'IA, il faut savoir décrire un style, une composition, un éclairage, une palette, un cadrage, un mood. Bref, il faut penser comme un directeur artistique. Et si tu sais faire ça, tu n'avais pas besoin de l'IA, tu avais besoin d'un exécutant. Le graphiste, lui, est les deux : il pense et il exécute.
 
 **Et surtout, l'IA ne gère pas la relation client**
 
@@ -253,6 +424,58 @@ Les graphistes qui vont rester (et prospérer) ce sont ceux qui ont un style, un
 L'IA est un allié si tu sais l'utiliser comme un outil dans ton process créatif. C'est une menace si ton seul skill c'était d'exécuter des tâches répétitives que la machine fait mieux. Le métier de graphiste ne disparaît pas, il évolue. Comme il a toujours évolué.
 
 Si tu cherches un graphiste qui combine vision créative et outils modernes, on peut en parler sur walanodesign.com/devis.""",
+        "content_en": """\
+Since Midjourney, DALL-E and the other image generators exploded, I've been getting this question at least once a week. "Aren't you afraid AI will replace you?" The short answer: no. The long answer: it's more complicated than that.
+
+**What AI can do**
+
+Let's be honest. AI generates impressive images. You type a prompt, wait 30 seconds, and you get a visual that would have taken hours to produce manually. For someone with no design skills, it's magic.
+
+AI is very strong at quickly generating concepts, exploring visual directions, creating textures and backgrounds, and producing mood or inspiration images. I use AI tools in my workflow myself. Not to produce the final deliverable, but to speed up certain steps: searching for an artistic direction, testing colour palettes, generating background elements I rework afterwards.
+
+**What AI can't do**
+
+AI doesn't understand your project. It doesn't know your single is about your breakup with someone in Libreville on a December evening. It doesn't know your label wants a visual that references the codes of Gabonese rap without copying what already exists. It doesn't know you want exactly that blue, the one from the photo you took on your balcony.
+
+AI can't manage the consistency of a visual identity. It can generate 50 beautiful images that have nothing to do with each other. A visual identity is a system, not a collection of random images.
+
+AI doesn't do clean typography. AI-generated text is often unreadable, badly placed, with invented letters. For an album cover where the artist's name and title must be perfectly integrated into the visual, it's unusable as-is.
+
+AI doesn't do artistic direction. It executes a prompt, it doesn't challenge your idea. A good designer says "what you're asking for won't work, here's why, and here's what I propose instead". AI gives you exactly what you ask for, even if it's bad.
+
+**And you'd still need to know what you want**
+
+AI needs a precise prompt to give a good result. And that's where the problem lies: most clients don't know exactly what they want. That's normal, it's precisely why they hire a designer.
+
+A client tells me "I want something that pops" or "something dark but not too much". A designer understands that. They ask questions, propose directions, translate a vague feeling into a concrete visual direction. AI doesn't do that. If your prompt is vague, the result is vague. If your prompt is precise, you've already done half the designer's work yourself, and you'll still spend hours regenerating because the result never quite matches.
+
+**And above all, AI can't manage the client relationship**
+
+The back-and-forth, understanding the brief, adapting after a "I like it but it's not quite right", delivering in the right format, at the right time, with the right variations. That's a human craft.
+
+**The real danger**
+
+The danger of AI isn't that it replaces good designers. It's that it creates the illusion that design is easy and worthless.
+
+A client who can generate an image in 30 seconds thinks "why would I pay someone for that?" Except the image generated in 30 seconds isn't usable as-is. It doesn't have the right formats, the right specs for Spotify or the printer, no consistency with the rest of your communication, no clear copyright.
+
+The other danger is "designers" who take an AI image, put text on top and charge it as original work. It happens and it drags the industry down. But it doesn't last, because clients eventually see the difference.
+
+**How I see things**
+
+AI is a tool. Just like Photoshop was a tool when it came out. Like Illustrator, After Effects, Figma. Every new tool scared designers of its era. And every time, those who learned to use it became stronger.
+
+I use AI to move faster in exploration phases. I use it to generate elements I rework in Photoshop or Illustrator. I never use it to deliver a visual as-is to a client. The client pays for my vision, my eye, my experience, my ability to understand what they want and translate it visually. AI replaces none of that.
+
+The designers who will disappear are those who were already doing work anyone could do. Those who settled for modified templates and Instagram filters. AI does that better and faster.
+
+The designers who will remain (and thrive) are those who have a style, a vision, an ability to solve visual problems, and a human relationship with their clients. AI doesn't replace that. It amplifies it.
+
+**In summary**
+
+AI is an ally if you know how to use it as a tool in your creative process. It's a threat if your only skill was executing repetitive tasks the machine does better. The graphic design profession isn't disappearing, it's evolving. As it always has.
+
+If you're looking for a designer who combines creative vision and modern tools, let's talk at walanodesign.com/devis.""",
     },
 ]
 
@@ -274,19 +497,23 @@ class Command(BaseCommand):
             _, created = BlogPost.objects.get_or_create(
                 slug=data["slug"],
                 defaults={
-                    "title":        data["title"],
-                    "description":  data["description"],
-                    "category":     data["category"],
-                    "content":      data["content"],
-                    "published":    True,
-                    "published_at": PUBLISHED_AT,
+                    "title":          data["title"],
+                    "title_en":       data["title_en"],
+                    "description":    data["description"],
+                    "description_en": data["description_en"],
+                    "category":       data["category"],
+                    "content":        data["content"],
+                    "content_en":     data["content_en"],
+                    "published":      True,
+                    "published_at":   PUBLISHED_AT,
                 },
             )
             if created:
                 created_posts += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f"{created_posts} article(s) created (skipped {len(ARTICLES) - created_posts} already existing)"
+            f"{created_posts} article(s) created "
+            f"(skipped {len(ARTICLES) - created_posts} already existing)"
         ))
 
         # Clients
@@ -300,5 +527,6 @@ class Command(BaseCommand):
                 created_clients += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f"{created_clients} client(s) created (skipped {len(CLIENTS) - created_clients} already existing)"
+            f"{created_clients} client(s) created "
+            f"(skipped {len(CLIENTS) - created_clients} already existing)"
         ))

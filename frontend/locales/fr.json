@@ -14,7 +14,8 @@
     "tagline_l1": "ce que tu ",
     "tagline_w1": "vois",
     "tagline_l2": "avant d\u2019",
-    "tagline_w2": "entendre"
+    "tagline_w2": "entendre",
+    "swipe_up": "glisser vers le haut"
   },
   "services": {
     "title": "services",
@@ -32,6 +33,15 @@
     "title": "portfolio",
     "back": "retour",
     "voir_plus": "voir plus",
+    "all": "tout",
+    "subtabs": {
+      "single":   "singles",
+      "album":    "albums",
+      "logo":     "logos",
+      "branding": "branding",
+      "affiche":  "affiches",
+      "pack":     "packs"
+    },
     "categories": {
       "covers": "covers",
       "branding": "logo & branding",
@@ -68,6 +78,17 @@
     "sub":     "elle a peut-être été déplacée, supprimée, ou n'a jamais existé.",
     "home":    "retour à l'accueil",
     "hint":    "clique sur le logo"
+  },
+  "blog": {
+    "title": "Blog",
+    "all": "Tout",
+    "back": "← blog",
+    "back_bottom": "← retour au blog",
+    "categories": {
+      "branding":  "Branding",
+      "tendances": "Tendances",
+      "process":   "Process"
+    }
   },
   "footer": {
     "cgv":     "Conditions générales de vente",

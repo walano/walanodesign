@@ -238,10 +238,17 @@ class BlogPostAdmin(ModelAdmin):
     prepopulated_fields = {"slug": ("title",)}
     fieldsets = [
         (None, {
-            "fields": ["title", "slug", "category", "description", "thumbnail", "published", "published_at"],
+            "fields": ["title", "title_en", "slug", "category", "thumbnail", "published", "published_at"],
         }),
-        ("Contenu", {
+        ("Description SEO", {
+            "fields": ["description", "description_en"],
+        }),
+        ("Contenu FR", {
             "fields": ["content"],
+        }),
+        ("Contenu EN", {
+            "fields": ["content_en"],
+            "classes": ["collapse"],
         }),
     ]
 

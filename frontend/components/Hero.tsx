@@ -444,7 +444,7 @@ export default function Hero() {
             textTransform: "lowercase",
           }}
         >
-          swipe up
+          {t("hero.swipe_up")}
         </span>
       </div>
 

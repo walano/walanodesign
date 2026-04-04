@@ -218,24 +218,25 @@ class PortfolioPreviewSlot(models.Model):
 
 BLOG_CATEGORY_CHOICES = [
     ("branding",  "Branding"),
-    ("tarifs",    "Tarifs"),
-    ("process",   "Process"),
     ("tendances", "Tendances"),
-    ("musique",   "Musique"),
+    ("process",   "Process"),
 ]
 
 
 class BlogPost(models.Model):
-    slug         = models.SlugField(max_length=255, unique=True)
-    title        = models.CharField(max_length=255, verbose_name="Titre")
-    description  = models.TextField(verbose_name="Meta description (SEO, max 160 car.)")
-    category     = models.CharField(max_length=100, choices=BLOG_CATEGORY_CHOICES, verbose_name="Catégorie")
-    thumbnail    = models.URLField(max_length=500, blank=True, default="", verbose_name="Thumbnail (URL Cloudinary)")
-    content      = models.TextField(verbose_name="Contenu (markdown)")
-    published    = models.BooleanField(default=True, verbose_name="Publié")
-    published_at = models.DateTimeField(null=True, blank=True, verbose_name="Date de publication")
-    created_at   = models.DateTimeField(auto_now_add=True)
-    updated_at   = models.DateTimeField(auto_now=True)
+    slug           = models.SlugField(max_length=255, unique=True)
+    title          = models.CharField(max_length=255, verbose_name="Titre (FR)")
+    title_en       = models.CharField(max_length=255, blank=True, default="", verbose_name="Titre (EN)")
+    description    = models.TextField(verbose_name="Meta description FR (max 160 car.)")
+    description_en = models.TextField(blank=True, default="", verbose_name="Meta description EN")
+    category       = models.CharField(max_length=100, choices=BLOG_CATEGORY_CHOICES, verbose_name="Catégorie")
+    thumbnail      = models.URLField(max_length=500, blank=True, default="", verbose_name="Thumbnail (URL Cloudinary)")
+    content        = models.TextField(verbose_name="Contenu FR (markdown)")
+    content_en     = models.TextField(blank=True, default="", verbose_name="Contenu EN (markdown)")
+    published      = models.BooleanField(default=True, verbose_name="Publié")
+    published_at   = models.DateTimeField(null=True, blank=True, verbose_name="Date de publication")
+    created_at     = models.DateTimeField(auto_now_add=True)
+    updated_at     = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering            = ["-published_at"]

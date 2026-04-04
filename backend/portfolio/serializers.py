@@ -65,10 +65,10 @@ class ProjectSerializer(serializers.ModelSerializer):
 class BlogPostListSerializer(serializers.ModelSerializer):
     class Meta:
         model  = BlogPost
-        fields = ["id", "slug", "title", "description", "category", "thumbnail", "published_at"]
+        fields = ["id", "slug", "title", "title_en", "description", "description_en", "category", "thumbnail", "published_at"]
 
 
 class BlogPostSerializer(serializers.ModelSerializer):
     class Meta:
         model  = BlogPost
-        fields = ["id", "slug", "title", "description", "category", "thumbnail", "content", "published_at"]
+        fields = ["id", "slug", "title", "title_en", "description", "description_en", "category", "thumbnail", "content", "content_en", "published_at"]

@@ -135,14 +135,17 @@ export async function fetchProjects(category?: string): Promise<Project[]> {
 }
 
 export interface BlogPost {
-  id:           number;
-  slug:         string;
-  title:        string;
-  description:  string;
-  category:     string;
-  thumbnail:    string;
-  content?:     string;
-  published_at: string | null;
+  id:             number;
+  slug:           string;
+  title:          string;
+  title_en:       string;
+  description:    string;
+  description_en: string;
+  category:       string;
+  thumbnail:      string;
+  content?:       string;
+  content_en?:    string;
+  published_at:   string | null;
 }
 
 export async function fetchBlogPosts(): Promise<BlogPost[]> {

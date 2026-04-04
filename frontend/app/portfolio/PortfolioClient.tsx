@@ -466,11 +466,7 @@ function AllImagesGrid({ projects, aspect, onOpen, onOpenPack, onOpenProject, th
     backgroundColor: "#0c0c0c",
   }));
 
-  if (allImages.length === 0) return (
-    <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>
-      aucun projet dans cette catégorie
-    </p>
-  );
+  if (allImages.length === 0) return null;
 
   const handleClick = (i: number) => {
     const p = filteredProjects[i];
@@ -594,11 +590,7 @@ function CardGrid({ projects, aspectClass, aspect, onOpen, onOpenProject }: {
     backgroundColor: "#0c0c0c",
   }));
 
-  if (projects.length === 0) return (
-    <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>
-      aucun projet dans cette catégorie
-    </p>
-  );
+  if (projects.length === 0) return null;
 
   const effectiveOpen: (images: ViewerImage[], i: number) => void = onOpenProject
     ? (_imgs, i) => onOpenProject(projects[i], i, projects)
@@ -681,11 +673,7 @@ function VideoViewer({ project, onClose }: { project: Project; onClose: () => vo
 function VideoGrid({ projects }: { projects: Project[] }) {
   const [playing, setPlaying] = useState<Project | null>(null);
 
-  if (projects.length === 0) return (
-    <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>
-      aucun projet dans cette catégorie
-    </p>
-  );
+  if (projects.length === 0) return null;
 
   return (
     <>
@@ -747,11 +735,7 @@ function BrandingGrid({ items, onOpen, aspectRatio = "5/4", cols = "grid-cols-1 
   aspectRatio?: string;
   cols?:        string;
 }) {
-  if (items.length === 0) return (
-    <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>
-      aucun projet dans cette catégorie
-    </p>
-  );
+  if (items.length === 0) return null;
 
   return (
     <div className={`grid ${cols}`} style={{ columnGap: CARD_GAP, rowGap: "clamp(1.5rem, 2.5vw, 2rem)" }}>
@@ -1214,13 +1198,11 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       if (active === "miniatures") {
         return projects.length > 0
           ? <AllImagesGrid projects={projects} aspect={ASPECT.miniatures} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} colsClass="grid-cols-1 sm:grid-cols-2 lg:grid-cols-3" />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+          : null;
       }
       if (active === "bannieres") {
         const bannerProjects = projects.filter(p => p.images[0]?.url);
-        if (bannerProjects.length === 0) return (
-          <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>
-        );
+        if (bannerProjects.length === 0) return null;
         return (
           <div style={{ display: "flex", flexDirection: "column", gap: CARD_GAP }}>
             {bannerProjects.map((p, i) => (
@@ -1248,7 +1230,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
               onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })}
               colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
             />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+          : null;
       }
       return projects.length > 0
         ? <AllImagesGrid
@@ -1259,7 +1241,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
             threeCol={threeCol}
             square={active === "covers"}
           />
-        : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet dans cette catégorie</p>;
+        : null;
     }
 
     // ── solo sub-tab ─────────────────────────────────────
@@ -1276,11 +1258,11 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
       if (active === "affiches") {
         return soloProjects.length > 0
           ? <AllImagesGrid projects={soloProjects} aspect={ASPECT.affiches} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} colsClass="grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
+          : null;
       }
       return soloProjects.length > 0
         ? <CardGrid projects={soloProjects} aspectClass={ASPECT_CLASS[active]} aspect={ASPECT[active]} onOpen={openViewer} onOpenProject={(p, i, all) => setProjectNav({ projects: all, projectIndex: i })} />
-        : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun projet solo</p>;
+        : null;
     }
 
     // ── grouped sub-tab ──────────────────────────────────
@@ -1299,7 +1281,7 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                 initialIndex: i,
               })}
             />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun pack</p>;
+          : null;
       }
       if (active === "covers") {
         return groupedProjects.length > 0
@@ -1312,11 +1294,11 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
                 initialIndex: i,
               })}
             />
-          : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun album</p>;
+          : null;
       }
       return groupedProjects.length > 0
         ? <RowsView projects={groupedProjects} aspect={ASPECT[active]} onOpen={openViewer} />
-        : <p style={{ color: "rgba(245,243,247,0.3)", fontFamily: "Inter, sans-serif", fontSize: "0.85rem", textAlign: "center" }}>aucun groupe</p>;
+        : null;
     }
 
     return null;
@@ -1356,16 +1338,16 @@ function PortfolioContent({ initialProjects }: { initialProjects: Project[] }) {
           {/* Sub-tabs */}
           {subtabs && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", justifyContent: "center" }}>
-              <button onClick={() => switchSub(null)}            style={tabStyle(sub === null)}>tout</button>
-              <button onClick={() => switchSub(subtabs.solo)}    style={tabStyle(sub === subtabs.solo)}>{subtabs.solo}</button>
-              <button onClick={() => switchSub(subtabs.grouped)} style={tabStyle(sub === subtabs.grouped)}>{subtabs.grouped}</button>
+              <button onClick={() => switchSub(null)}            style={tabStyle(sub === null)}>{t("portfolio.all")}</button>
+              <button onClick={() => switchSub(subtabs.solo)}    style={tabStyle(sub === subtabs.solo)}>{t(`portfolio.subtabs.${subtabs.solo}`)}</button>
+              <button onClick={() => switchSub(subtabs.grouped)} style={tabStyle(sub === subtabs.grouped)}>{t(`portfolio.subtabs.${subtabs.grouped}`)}</button>
             </div>
           )}
 
           {/* Content — slide transition on tab/sub change */}
           <div style={{ overflow: "hidden" }}>
             <div
-              key={`${active}-${sub ?? "tout"}`}
+              key={`${active}-${sub ?? "all"}`}
               style={{
                 display: "flex", flexDirection: "column", gap: "clamp(2rem,4vw,3rem)",
                 animation: `slide-in-${slideDir} 0.28s cubic-bezier(0.4,0,0.2,1)`,

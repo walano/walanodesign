@@ -14,7 +14,8 @@
     "tagline_l1": "what you ",
     "tagline_w1": "see",
     "tagline_l2": "before you ",
-    "tagline_w2": "hear"
+    "tagline_w2": "hear",
+    "swipe_up": "swipe up"
   },
   "services": {
     "title": "services",
@@ -32,6 +33,15 @@
     "title": "portfolio",
     "back": "back",
     "voir_plus": "see more",
+    "all": "all",
+    "subtabs": {
+      "single":   "singles",
+      "album":    "albums",
+      "logo":     "logos",
+      "branding": "branding",
+      "affiche":  "posters",
+      "pack":     "packs"
+    },
     "categories": {
       "covers": "covers",
       "branding": "logo & branding",
@@ -68,6 +78,17 @@
     "sub":     "it may have been moved, deleted, or never existed.",
     "home":    "back to home",
     "hint":    "click the logo"
+  },
+  "blog": {
+    "title": "Blog",
+    "all": "All",
+    "back": "← blog",
+    "back_bottom": "← back to blog",
+    "categories": {
+      "branding":  "Branding",
+      "tendances": "Trends",
+      "process":   "Process"
+    }
   },
   "footer": {
     "cgv":     "Terms and conditions",
