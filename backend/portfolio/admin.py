@@ -281,7 +281,7 @@ class BlogPostAdmin(ModelAdmin):
     def translate_button(self, obj):
         if not obj or not obj.pk:
             return "Sauvegardez l'article d'abord."
-        url = f"/admin/portfolio/blogpost/{obj.pk}/translate/"
+        url = f"/admin/portfolio/blogpost/translate/?pk={obj.pk}"
         return format_html(
             '<a href="{}" class="be-translate-btn">⚡ Traduire FR → EN avec Claude</a>',
             url,
@@ -290,20 +290,25 @@ class BlogPostAdmin(ModelAdmin):
 
     def get_urls(self):
         return [
-            path("<int:pk>/translate/", self.admin_site.admin_view(self.translate_view), name="portfolio_blogpost_translate"),
+            path("translate/", self.admin_site.admin_view(self.translate_view), name="portfolio_blogpost_translate"),
         ] + super().get_urls()
 
-    def translate_view(self, request, pk):
+    def translate_view(self, request):
+        pk = request.GET.get("pk")
+        if not pk:
+            messages.error(request, "pk manquant.")
+            return redirect("../")
+        post = BlogPost.objects.get(pk=pk)
         post = BlogPost.objects.get(pk=pk)
 
         if not post.content:
             messages.error(request, "Pas de contenu FR à traduire.")
-            return redirect(f"../../{pk}/change/")
+            return redirect(f"../{pk}/change/")
 
         api_key = os.getenv("ANTHROPIC_API_KEY", "")
         if not api_key:
             messages.error(request, "ANTHROPIC_API_KEY manquante dans les variables d'environnement.")
-            return redirect(f"../../{pk}/change/")
+            return redirect(f"../{pk}/change/")
 
         prompt = (
             "Translate the text fields in these JSON content blocks from French to English.\n"
@@ -340,7 +345,7 @@ class BlogPostAdmin(ModelAdmin):
         except Exception as e:
             messages.error(request, f"Erreur lors de la traduction : {e}")
 
-        return redirect(f"../../{pk}/change/")
+        return redirect(f"../{pk}/change/")
 
 
 @admin.register(Devis)
