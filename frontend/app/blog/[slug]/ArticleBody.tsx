@@ -19,64 +19,33 @@ function formatDate(iso: string | null, lang: string): string {
   });
 }
 
-/** Parse **bold** and *violet* inline markers into React nodes */
-function parseInline(text: string): React.ReactNode[] {
-  const parts: React.ReactNode[] = [];
-  // Match **bold** before *violet* to avoid conflict
-  const regex = /\*\*(.+?)\*\*|\*([^*]+)\*/g;
-  let last = 0;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > last) parts.push(text.slice(last, match.index));
-    if (match[1] !== undefined) {
-      parts.push(
-        <strong key={match.index} style={{ color: "#f5f3f7", fontWeight: 700 }}>
-          {match[1]}
-        </strong>
-      );
-    } else {
-      const txt  = match[2];
-      const href = /^https?:\/\//.test(txt)           ? txt
+/**
+ * **text** → white bold
+ * *text*   → violet (clickable if it looks like a URL)
+ */
+function toHtml(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#f5f3f7;font-weight:700">$1</strong>')
+    .replace(/\*([^*]+)\*/g, (_full, txt: string) => {
+      const href = /^https?:\/\//.test(txt)            ? txt
                  : !txt.includes(" ") && txt.includes(".") ? `https://${txt}`
                  : null;
-      parts.push(
-        href ? (
-          <a
-            key={match.index}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="article-link"
-            style={{ color: "#855c9d", textDecoration: "underline", textUnderlineOffset: "3px" }}
-          >
-            {txt}
-          </a>
-        ) : (
-          <span key={match.index} style={{ color: "#855c9d" }}>{txt}</span>
-        )
-      );
-    }
-    last = match.index + match[0].length;
-  }
-  if (last < text.length) parts.push(text.slice(last));
-  return parts;
+      return href
+        ? `<a href="${href}" target="_blank" rel="noopener noreferrer" class="article-link" style="color:#855c9d;text-decoration:underline;text-underline-offset:3px">${txt}</a>`
+        : `<span style="color:#855c9d">${txt}</span>`;
+    });
 }
 
 /** Convert a social/video URL to an embeddable iframe src */
 function toEmbedSrc(url: string): string | null {
-  // Instagram: https://www.instagram.com/p/{id}/ or /reel/{id}/
   const igMatch = url.match(/instagram\.com\/(p|reel|tv)\/([A-Za-z0-9_-]+)/);
   if (igMatch) return `https://www.instagram.com/${igMatch[1]}/${igMatch[2]}/embed/`;
 
-  // YouTube: https://youtu.be/{id} or ?v={id}
   const ytMatch = url.match(/(?:youtu\.be\/|[?&]v=)([A-Za-z0-9_-]{11})/);
   if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
 
-  // Twitter / X: https://twitter.com/user/status/{id} or x.com/...
-  // Twitter doesn't support plain iframes — return null, fall back to link
   if (/twitter\.com|x\.com/.test(url)) return null;
 
-  // Generic: assume the URL itself is embeddable (e.g. already an iframe src)
   return url;
 }
 
@@ -108,6 +77,8 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
             return (
               <p
                 key={i}
+                // eslint-disable-next-line react/no-danger
+                dangerouslySetInnerHTML={{ __html: toHtml(block.text) }}
                 style={{
                   fontFamily: "Inter, sans-serif",
                   fontSize:   "clamp(0.88rem, 1.3vw, 1rem)",
@@ -116,9 +87,7 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                   lineHeight: 1.78,
                   margin:     0,
                 }}
-              >
-                {parseInline(block.text)}
-              </p>
+              />
             );
 
           case "image":
@@ -164,7 +133,6 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
           case "embed": {
             const src = toEmbedSrc(block.url);
             if (!src) {
-              // Fallback: render as a violet link
               return (
                 <p key={i} style={{ margin: 0 }}>
                   <a
@@ -185,16 +153,9 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                 </p>
               );
             }
-            // Instagram-style: tall aspect ratio; YouTube: 16/9
             const isInstagram = /instagram\.com/.test(block.url);
             return (
-              <div
-                key={i}
-                style={{
-                  marginTop:    "0.5rem",
-                  marginBottom: "0.5rem",
-                }}
-              >
+              <div key={i} style={{ marginTop: "0.5rem", marginBottom: "0.5rem" }}>
                 <iframe
                   src={src}
                   style={{
@@ -211,11 +172,10 @@ function BlockContent({ blocks }: { blocks: ContentBlock[] }) {
                 />
                 {block.caption && (
                   <p style={{
-                    fontFamily: "Inter, sans-serif",
-                    fontSize:   "0.75rem",
-                    color:      "rgba(245,243,247,0.35)",
-                    marginTop:  "0.4rem",
-                    margin:     0,
+                    fontFamily:      "Inter, sans-serif",
+                    fontSize:        "0.75rem",
+                    color:           "rgba(245,243,247,0.35)",
+                    margin:          0,
                     marginBlockStart: "0.4rem",
                   }}>
                     {block.caption}
@@ -239,13 +199,12 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
   const title    = lang === "en" && post.title_en   ? post.title_en   : post.title;
   const blocks   = (lang === "en" && post.content_en?.length ? post.content_en : post.content) ?? [];
   const catLabel = CAT_LABEL[post.category as BlogCat]?.[lang as "fr" | "en"] ?? post.category;
-  const backLabel       = lang === "en" ? "← blog"         : "← blog";
   const backBottomLabel = lang === "en" ? "← back to blog" : "← retour au blog";
 
   return (
     <>
       <style>{`
-        .blog-back:hover   { color: #855c9d !important; }
+        .blog-back:hover    { color: #855c9d !important; }
         .article-link:hover { opacity: 0.75; }
       `}</style>
       <article style={{
@@ -270,7 +229,7 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
             transition:     "color 0.2s",
           }}
         >
-          {backLabel}
+          ← blog
         </a>
 
         {/* Category + date */}
