@@ -55,7 +55,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = [
             "id", "title", "category", "sub_type", "order", "images",
             "youtube_url", "yt_title", "yt_published", "yt_views", "yt_thumbnail",
-            "thumbnail_url",
+            "thumbnail_url", "description",
         ]
 
     def get_thumbnail_url(self, obj):

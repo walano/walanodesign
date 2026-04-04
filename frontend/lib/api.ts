@@ -54,6 +54,7 @@ export interface Project {
   yt_views:      number;
   yt_thumbnail:  string;
   thumbnail_url: string | null;
+  description:   string;
 }
 
 export interface SiteConfig {

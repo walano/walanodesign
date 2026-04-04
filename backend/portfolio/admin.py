@@ -94,6 +94,10 @@ class ProjectAdmin(ModelAdmin):
         (None, {
             "fields": ["title", "category", "sub_type", "order", "published", "bulk_images"],
         }),
+        ("SEO", {
+            "fields":  ["description"],
+            "classes": ["collapse"],
+        }),
         ("YouTube", {
             "fields":  ["youtube_url", "thumbnail", "yt_title", "yt_published", "yt_views", "yt_thumbnail"],
             "classes": ["youtube-fieldset"],

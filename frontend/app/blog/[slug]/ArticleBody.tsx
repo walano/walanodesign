@@ -224,7 +224,7 @@ export default function ArticleBody({ post }: { post: BlogPost }) {
         }
         .article-link:hover { opacity: 0.75; }
         @media (max-width: 640px) {
-          .article-body p { text-align: justify; }
+          .article-body { text-align: justify; }
         }
       `}</style>
       <article style={{

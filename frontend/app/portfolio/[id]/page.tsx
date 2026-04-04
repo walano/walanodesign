@@ -21,7 +21,7 @@ export async function generateMetadata({
   if (!project) return { title: "Projet | Walano Design" };
   return {
     title: project.title,
-    description: `${project.title} — ${project.category} par Walano Design, graphiste freelance.`,
+    description: project.description || `${project.title} — ${project.category} par Walano Design, graphiste freelance.`,
   };
 }
 
