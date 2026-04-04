@@ -1,10 +1,13 @@
 import json
+import os
+import requests as http
 from django import forms
 from django.contrib import admin, messages
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import path
+from django.utils.html import format_html
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 
@@ -259,6 +262,7 @@ class BlogPostAdmin(ModelAdmin):
     search_fields       = ["title", "slug"]
     ordering            = ["-published_at"]
     prepopulated_fields = {"slug": ("title",)}
+    readonly_fields     = ["translate_button"]
     fieldsets = [
         (None, {
             "fields": ["title", "title_en", "slug", "category", "thumbnail", "published", "published_at"],
@@ -270,10 +274,73 @@ class BlogPostAdmin(ModelAdmin):
             "fields": ["content"],
         }),
         ("Contenu EN", {
-            "fields": ["content_en"],
-            "classes": ["collapse"],
+            "fields": ["translate_button", "content_en"],
         }),
     ]
+
+    def translate_button(self, obj):
+        if not obj or not obj.pk:
+            return "Sauvegardez l'article d'abord."
+        url = f"/admin/portfolio/blogpost/{obj.pk}/translate/"
+        return format_html(
+            '<a href="{}" class="be-translate-btn">⚡ Traduire FR → EN avec Claude</a>',
+            url,
+        )
+    translate_button.short_description = ""
+
+    def get_urls(self):
+        return [
+            path("<int:pk>/translate/", self.admin_site.admin_view(self.translate_view), name="portfolio_blogpost_translate"),
+        ] + super().get_urls()
+
+    def translate_view(self, request, pk):
+        post = BlogPost.objects.get(pk=pk)
+
+        if not post.content:
+            messages.error(request, "Pas de contenu FR à traduire.")
+            return redirect(f"../../{pk}/change/")
+
+        api_key = os.getenv("ANTHROPIC_API_KEY", "")
+        if not api_key:
+            messages.error(request, "ANTHROPIC_API_KEY manquante dans les variables d'environnement.")
+            return redirect(f"../../{pk}/change/")
+
+        prompt = (
+            "Translate the text fields in these JSON content blocks from French to English.\n"
+            "Rules:\n"
+            "- Only translate the values of \"text\" and \"caption\" fields\n"
+            "- Keep \"url\", \"type\", and all other fields exactly as-is\n"
+            "- Preserve **bold** and *italic* markers exactly as written\n"
+            "- Return ONLY the JSON array, no explanation, no code fences\n\n"
+            + json.dumps(post.content, ensure_ascii=False)
+        )
+
+        try:
+            resp = http.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "x-api-key":         api_key,
+                    "anthropic-version": "2023-06-01",
+                    "content-type":      "application/json",
+                },
+                json={
+                    "model":      "claude-haiku-4-5-20251001",
+                    "max_tokens": 4096,
+                    "messages":   [{"role": "user", "content": prompt}],
+                },
+                timeout=30,
+            )
+            raw = resp.json()["content"][0]["text"].strip()
+            # Strip code fences if Claude added them
+            if raw.startswith("```"):
+                raw = raw.split("\n", 1)[1].rsplit("```", 1)[0].strip()
+            post.content_en = json.loads(raw)
+            post.save(update_fields=["content_en"])
+            messages.success(request, "✓ Traduction EN sauvegardée avec succès.")
+        except Exception as e:
+            messages.error(request, f"Erreur lors de la traduction : {e}")
+
+        return redirect(f"../../{pk}/change/")
 
 
 @admin.register(Devis)
