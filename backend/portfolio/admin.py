@@ -9,6 +9,18 @@ from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 
 
+class BlockEditorWidget(forms.Textarea):
+    """Visual block-based editor for JSONField content."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.attrs.setdefault("class", "block-editor-json")
+
+    class Media:
+        js  = ["portfolio/admin/block_editor.js"]
+        css = {"all": ["portfolio/admin/block_editor.css"]}
+
+
 class MultipleFileInput(forms.FileInput):
     allow_multiple_selected = True
 
@@ -228,8 +240,19 @@ class ContactMessageAdmin(ModelAdmin):
         return False
 
 
+class BlogPostAdminForm(forms.ModelForm):
+    class Meta:
+        model   = BlogPost
+        fields  = "__all__"
+        widgets = {
+            "content":    BlockEditorWidget(),
+            "content_en": BlockEditorWidget(),
+        }
+
+
 @admin.register(BlogPost)
 class BlogPostAdmin(ModelAdmin):
+    form                = BlogPostAdminForm
     list_display        = ["title", "category", "published", "published_at"]
     list_filter         = ["category", "published"]
     list_editable       = ["published"]

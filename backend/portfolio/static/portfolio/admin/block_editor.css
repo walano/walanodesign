@@ -1,0 +1,161 @@
+.be-wrap {
+  margin-bottom: 0.5rem;
+}
+
+/* ── Block list ── */
+.be-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.be-empty {
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.3);
+  padding: 1rem;
+  text-align: center;
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
+/* ── Card ── */
+.be-card {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  overflow: hidden;
+}
+
+.be-card-hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.65rem;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.be-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid;
+}
+
+.be-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.be-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.45);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1.4;
+  transition: background 0.15s, color 0.15s;
+}
+.be-btn:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+.be-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+.be-del:hover:not(:disabled) {
+  background: rgba(231,76,60,0.15);
+  border-color: rgba(231,76,60,0.4);
+  color: #e74c3c;
+}
+
+/* ── Fields ── */
+.be-field {
+  padding: 0.5rem 0.65rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.be-field + .be-field {
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.be-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.03em;
+}
+
+.be-input,
+.be-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0,0,0,0.25);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.85);
+  font-size: 0.82rem;
+  font-family: "Inter", sans-serif;
+  padding: 6px 8px;
+  resize: vertical;
+  transition: border-color 0.15s;
+  line-height: 1.55;
+}
+.be-input:focus,
+.be-textarea:focus {
+  outline: none;
+  border-color: rgba(133,92,157,0.6);
+}
+
+/* ── Add-block toolbar ── */
+.be-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 0.25rem;
+}
+
+.be-add {
+  background: transparent;
+  border: 1px solid;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  opacity: 0.8;
+}
+.be-add:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.05);
+}
+
+/* ── Translate button ── */
+.be-translate-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(133,92,157,0.15);
+  border: 1px solid rgba(133,92,157,0.4);
+  border-radius: 6px;
+  color: #b07dd0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.be-translate-btn:hover {
+  background: rgba(133,92,157,0.28);
+  color: #c99de0;
+}
