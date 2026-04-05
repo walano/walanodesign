@@ -137,7 +137,7 @@ export default function PortfolioPreview() {
                     return (
                       <div
                         key={i}
-                        className={`relative ${aspect} overflow-hidden cursor-pointer group/card`}
+                        className={`relative ${aspect} overflow-hidden cursor-pointer group/card img-skeleton`}
                         style={{ backgroundColor: "#0c0c0c" }}
                         onClick={() => {
                           if (isLast) { router.push(`/portfolio?category=${key}`); return; }
@@ -146,7 +146,15 @@ export default function PortfolioPreview() {
                       >
                         {imgUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img src={imgUrl} alt={proj?.title || ""} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                          <img
+                            src={imgUrl} alt={proj?.title || ""} loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover"
+                            style={{ opacity: 0, transition: "opacity 0.35s" }}
+                            onLoad={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.opacity = "1";
+                              (e.currentTarget.parentElement as HTMLDivElement)?.classList.remove("img-skeleton");
+                            }}
+                          />
                         )}
                         {/* Play button overlay for video projects */}
                         {proj?.youtube_url && !isLast && (
@@ -255,13 +263,21 @@ export default function PortfolioPreview() {
                 return (
                   <div
                     key={idx}
-                    className={`relative ${slots[idx].aspect} overflow-hidden cursor-pointer`}
+                    className={`relative ${slots[idx].aspect} overflow-hidden cursor-pointer img-skeleton`}
                     style={{ backgroundColor: "#0c0c0c", ...extraStyle }}
                     onClick={handleClick}
                   >
                     {slots[idx].src && (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={slots[idx].src} alt={proj?.title || ""} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                      <img
+                        src={slots[idx].src} alt={proj?.title || ""} loading="lazy"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ opacity: 0, transition: "opacity 0.35s" }}
+                        onLoad={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.opacity = "1";
+                          (e.currentTarget.parentElement as HTMLDivElement)?.classList.remove("img-skeleton");
+                        }}
+                      />
                     )}
                     {proj?.youtube_url && (
                       <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(12,12,12,0.15)" }}>

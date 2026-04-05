@@ -529,13 +529,16 @@ def devis(request):
     from django.utils import timezone
     from datetime import timedelta
     email_addr = data.get("email", "").lower().strip()
+    req_lang   = data.get("lang", "fr")
     since = timezone.now() - timedelta(hours=24)
     count = Devis.objects.filter(email__iexact=email_addr, created_at__gte=since).count()
     if count >= 3:
-        return Response(
-            {"error": "Limite atteinte. Vous avez déjà soumis 3 demandes aujourd'hui. Réessayez dans 24h."},
-            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        msg = (
+            "Limit reached. You have already submitted 3 requests today. Try again in 24h."
+            if req_lang == "en" else
+            "Limite atteinte. Vous avez déjà soumis 3 demandes aujourd'hui. Réessayez dans 24h."
         )
+        return Response({"error": msg}, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
@@ -658,15 +661,11 @@ def contact(request):
 
     contact_email = os.getenv("CONTACT_EMAIL", "")
     if contact_email:
-        try:
-            send_mail(
-                subject      = f"[Walano Design] {msg.subject}",
-                message      = f"De : {msg.name} <{msg.email}>\n\n{msg.message}",
-                from_email   = os.getenv("DEFAULT_FROM_EMAIL", "noreply@walanodesign.com"),
-                recipient_list = [contact_email],
-                fail_silently  = True,
-            )
-        except Exception:
-            pass
+        body = f"De : {msg.name} <{msg.email}>\nSujet : {msg.subject}\n\n{msg.message}"
+        threading.Thread(
+            target=_resend,
+            args=(contact_email, f"[Walano Design] {msg.subject}", body),
+            daemon=True,
+        ).start()
 
     return Response({"ok": True}, status=status.HTTP_201_CREATED)

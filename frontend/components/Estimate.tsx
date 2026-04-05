@@ -515,6 +515,9 @@ const inputStyle: React.CSSProperties = {
   transition: "border-color 0.2s",
 };
 
+const DRAFT_KEY = "wd_devis_draft";
+const DRAFT_TTL = 24 * 60 * 60 * 1000; // 24 h
+
 export default function Estimate() {
   const { lang } = useI18n();
   const copy     = COPY[lang] ?? COPY.fr;
@@ -524,6 +527,27 @@ export default function Estimate() {
   const [stepIndex, setStepIndex] = useState(0);
   const [done, setDone]           = useState(false);
 
+  // ── Restore draft on mount ──────────────────────────────────────────────────
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const { state: saved, stepIndex: savedStep, savedAt } = JSON.parse(raw);
+      if (Date.now() - savedAt > DRAFT_TTL) { localStorage.removeItem(DRAFT_KEY); return; }
+      setState(s => ({ ...INITIAL_STATE, ...saved, lang: s.lang }));
+      setStepIndex(savedStep ?? 0);
+    } catch { /* ignore */ }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Persist draft on every change ──────────────────────────────────────────
+  useEffect(() => {
+    if (done) { localStorage.removeItem(DRAFT_KEY); return; }
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ state, stepIndex, savedAt: Date.now() }));
+    } catch { /* ignore */ }
+  }, [state, stepIndex, done]);
+
+  // ── Sync lang from i18n context ────────────────────────────────────────────
   useEffect(() => {
     setState(s => ({ ...s, lang }));
   }, [lang]);
@@ -550,7 +574,7 @@ export default function Estimate() {
 
   const goNext = () => { if (isLastBeforeResult) { setDone(true); return; } setStepIndex(i => i + 1); };
   const goBack = () => setStepIndex(i => i - 1);
-  const handleReset = () => { setDone(false); setStepIndex(0); setState(INITIAL_STATE); };
+  const handleReset = () => { localStorage.removeItem(DRAFT_KEY); setDone(false); setStepIndex(0); setState({ ...INITIAL_STATE, lang }); };
 
   const stepMeta = copy.stepMeta[currentStep as keyof typeof copy.stepMeta] || { title: "" };
 

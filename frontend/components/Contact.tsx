@@ -4,13 +4,6 @@ import { useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import { sendContact } from "@/lib/api";
 
-const SOCIALS = [
-  { label: "Instagram", href: "https://instagram.com/saint_walano" },
-  { label: "Behance",   href: "https://behance.net/walanodesign"    },
-  { label: "TikTok",    href: "https://tiktok.com/@saint_walano"    },
-  { label: "X",         href: "https://x.com/saint_walano"          },
-];
-
 const inputStyle: React.CSSProperties = {
   width:           "100%",
   background:      "rgba(255,255,255,0.05)",
@@ -58,18 +51,9 @@ export default function Contact() {
         paddingInline: "clamp(1.2rem, 4vw, 3rem)",
       }}
     >
-      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ maxWidth: 620, margin: "0 auto" }}>
       <style>{`
         .wd-ci:focus { outline-color: rgba(133,92,157,0.6) !important; }
-        .wd-contact-cols {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: clamp(3rem, 6vw, 6rem);
-          margin-top: 0.5rem;
-        }
-        @media (min-width: 768px) {
-          .wd-contact-cols { grid-template-columns: 1fr 1.8fr; align-items: start; }
-        }
       `}</style>
 
       {/* ── Page header ── */}
@@ -91,7 +75,7 @@ export default function Contact() {
           color:         "#f5f3f7",
           lineHeight:    1.05,
           letterSpacing: "-0.04em",
-          margin:        0,
+          margin:        "0 0 clamp(1rem, 2vw, 1.5rem)",
         }}>
           {t("contact.label_before")}
           <em style={{
@@ -104,72 +88,18 @@ export default function Contact() {
           }}>{t("contact.label_em")}</em>
           {t("contact.label_after")}
         </h1>
+        <p style={{
+          fontFamily: "Inter, sans-serif",
+          fontSize:   "clamp(0.82rem, 1vw, 0.92rem)",
+          color:      "rgba(245,243,247,0.45)",
+          lineHeight: 1.75,
+          margin:     0,
+        }}>
+          {t("contact.sub")}
+        </p>
       </div>
 
-      <div className="wd-contact-cols">
-
-        {/* ── Left — info ── */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-          <p style={{
-            fontFamily: "Inter, sans-serif",
-            fontSize:   "clamp(0.82rem, 1vw, 0.92rem)",
-            color:      "rgba(245,243,247,0.45)",
-            lineHeight: 1.75,
-            margin:     0,
-          }}>
-            {t("contact.sub")}
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", letterSpacing: "0.1em", color: "rgba(245,243,247,0.3)", margin: 0 }}>
-              email
-            </p>
-            <a
-              href="mailto:contact@walanodesign.com"
-              style={{
-                fontFamily:     "Inter, sans-serif",
-                fontSize:       "clamp(0.82rem, 1vw, 0.9rem)",
-                color:          "#f5f3f7",
-                textDecoration: "none",
-                transition:     "color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#855c9d")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#f5f3f7")}
-            >
-              contact@walanodesign.com
-            </a>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "0.72rem", letterSpacing: "0.1em", color: "rgba(245,243,247,0.3)", margin: 0 }}>
-              socials
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>
-              {SOCIALS.map(({ label, href }) => (
-                <a
-                  key={label}
-                  href={href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    fontFamily:     "Inter, sans-serif",
-                    fontSize:       "clamp(0.8rem, 1vw, 0.88rem)",
-                    color:          "rgba(245,243,247,0.55)",
-                    textDecoration: "none",
-                    transition:     "color 0.2s",
-                    width:          "fit-content",
-                  }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "#f5f3f7")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,243,247,0.55)")}
-                >
-                  {label.toLowerCase()}
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Right — form ── */}
+        {/* ── Form ── */}
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.75rem" }}>
             <input
@@ -269,7 +199,6 @@ export default function Contact() {
             </a>
           </div>
         </form>
-      </div>
       </div>
     </div>
   );

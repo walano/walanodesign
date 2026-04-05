@@ -86,7 +86,7 @@ export default function Footer() {
           letterSpacing:  "0.02em",
           transition:     "color 0.25s",
         }}
-        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#f5f3f7")}
         onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
       >
         contact@walanodesign.com
@@ -113,7 +113,7 @@ export default function Footer() {
               transition: "color 0.25s",
               display:    "flex",
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#f5f3f7")}
             onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.color = "#0c0c0c")}
           >
             {icon}

@@ -84,6 +84,17 @@ html.lenis, html.lenis body { height: auto; }
   color: var(--white);
 }
 
+/* Image loading skeleton */
+@keyframes wd-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.img-skeleton {
+  background: linear-gradient(90deg, #181818 25%, #252525 50%, #181818 75%);
+  background-size: 200% 100%;
+  animation: wd-shimmer 1.4s ease infinite;
+}
+
 @media (max-width: 767px) {
   .about-symbol {
     transform: translateY(-10%) !important;
