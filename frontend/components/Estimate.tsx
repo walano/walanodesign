@@ -362,12 +362,12 @@ function NavButtons({ onBack, onNext, nextLabel, backLabel, disabled }: {
 }
 
 // ─── Result screen ─────────────────────────────────────────────────────────────
-function ResultScreen({ state, onReset, copy }: {
+function ResultScreen({ state, onReset, copy, lang }: {
   state: FormState;
   onReset: () => void;
   copy: typeof COPY["fr"];
+  lang: string;
 }) {
-  const { lang: currentLang } = useI18n();
   const [result, setResult]   = useState<DevisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
@@ -387,7 +387,7 @@ function ResultScreen({ state, onReset, copy }: {
       budget:        state.budget!,
       name:          state.name,
       email:         state.email,
-      lang:          currentLang,
+      lang,
     })
       .then(setResult)
       .catch((e: Error) => setError(e.message || copy.result.error))
@@ -657,7 +657,7 @@ export default function Estimate() {
         {/* ── Right panel / result ── */}
         {done ? (
           <div className="wd-full">
-            <ResultScreen state={state} onReset={handleReset} copy={copy} />
+            <ResultScreen state={state} onReset={handleReset} copy={copy} lang={lang} />
           </div>
         ) : (
           <div className="wd-right">
