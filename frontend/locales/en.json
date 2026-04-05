@@ -67,6 +67,7 @@
     "email": "your email",
     "subject": "subject",
     "message": "your message",
+    "home": "home",
     "send": "send",
     "sending": "sending…",
     "success": "message sent. we'll get back to you soon.",

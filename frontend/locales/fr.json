@@ -67,6 +67,7 @@
     "email": "votre email",
     "subject": "sujet",
     "message": "votre message",
+    "home": "accueil",
     "send": "envoyer",
     "sending": "envoi en cours…",
     "success": "message envoyé. on vous recontacte bientôt.",

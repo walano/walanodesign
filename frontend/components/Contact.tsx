@@ -153,50 +153,71 @@ export default function Contact() {
             </p>
           )}
 
-          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", marginTop: "0.5rem" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem", marginTop: "0.5rem" }}>
+            <a
+              href="/"
+              style={{
+                fontFamily:          "Inter, sans-serif",
+                fontWeight:          600,
+                fontSize:            "clamp(0.72rem, 0.95vw, 1rem)",
+                padding:             "0.75rem clamp(1rem, 2.5vw, 1.8rem)",
+                backgroundColor:     "rgba(255, 255, 255, 0.08)",
+                backdropFilter:      "blur(20px) saturate(180%)",
+                WebkitBackdropFilter:"blur(20px) saturate(180%)",
+                border:              "1px solid rgba(255, 255, 255, 0.18)",
+                color:               "#f5f3f7",
+                transition:          "all 0.3s",
+                letterSpacing:       "0.04em",
+                textDecoration:      "none",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.35)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "rgba(255, 255, 255, 0.08)";
+                e.currentTarget.style.borderColor = "rgba(255, 255, 255, 0.18)";
+              }}
+            >
+              {t("contact.home")}
+            </a>
+
             <button
               type="submit"
               disabled={!valid || status === "loading" || status === "success"}
               style={{
-                background:           (!valid || status === "loading" || status === "success")
-                  ? "rgba(255,255,255,0.06)"
-                  : "rgba(133,92,157,0.3)",
-                backdropFilter:       "blur(20px)",
-                WebkitBackdropFilter: "blur(20px)",
-                outline:              `1px solid ${(!valid || status === "loading" || status === "success")
-                  ? "rgba(255,255,255,0.12)"
-                  : "rgba(133,92,157,0.5)"}`,
-                border:        "none",
-                color:         (!valid || status === "loading" || status === "success")
+                fontFamily:          "Inter, sans-serif",
+                fontWeight:          600,
+                fontSize:            "clamp(0.72rem, 0.95vw, 1rem)",
+                padding:             "0.75rem clamp(1rem, 2.5vw, 1.8rem)",
+                backgroundColor:     (!valid || status === "loading" || status === "success")
+                  ? "rgba(133,92,157,0.12)"
+                  : "rgba(133, 92, 157, 0.3)",
+                backdropFilter:      "blur(20px) saturate(180%)",
+                WebkitBackdropFilter:"blur(20px) saturate(180%)",
+                border:              `1px solid ${(!valid || status === "loading" || status === "success")
+                  ? "rgba(133,92,157,0.2)"
+                  : "rgba(133, 92, 157, 0.5)"}`,
+                color:               (!valid || status === "loading" || status === "success")
                   ? "rgba(245,243,247,0.3)"
                   : "#f5f3f7",
-                fontFamily:    "Inter, sans-serif",
-                fontWeight:    600,
-                fontSize:      "clamp(0.72rem, 0.95vw, 0.85rem)",
-                letterSpacing: "0.04em",
-                padding:       "0.75rem 2rem",
-                cursor:        (!valid || status === "loading" || status === "success") ? "not-allowed" : "pointer",
-                transition:    "all 0.2s",
+                letterSpacing:       "0.04em",
+                cursor:              (!valid || status === "loading" || status === "success") ? "not-allowed" : "pointer",
+                transition:          "all 0.3s",
+              }}
+              onMouseEnter={(e) => {
+                if (!valid || status === "loading" || status === "success") return;
+                e.currentTarget.style.backgroundColor = "rgba(133, 92, 157, 0.5)";
+                e.currentTarget.style.borderColor = "rgba(133, 92, 157, 0.7)";
+              }}
+              onMouseLeave={(e) => {
+                if (!valid || status === "loading" || status === "success") return;
+                e.currentTarget.style.backgroundColor = "rgba(133, 92, 157, 0.3)";
+                e.currentTarget.style.borderColor = "rgba(133, 92, 157, 0.5)";
               }}
             >
               {status === "loading" ? t("contact.sending") : t("contact.send")}
             </button>
-
-            <a
-              href="/"
-              style={{
-                fontFamily:     "Inter, sans-serif",
-                fontSize:       "0.78rem",
-                color:          "rgba(245,243,247,0.3)",
-                textDecoration: "none",
-                letterSpacing:  "0.04em",
-                transition:     "color 0.2s",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "rgba(245,243,247,0.6)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(245,243,247,0.3)")}
-            >
-              home
-            </a>
           </div>
         </form>
       </div>

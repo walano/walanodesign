@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
+from adminsortable2.admin import SortableAdminMixin
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 
@@ -217,11 +218,9 @@ class SiteConfigAdmin(ModelAdmin):
 
 
 @admin.register(Client)
-class ClientAdmin(ModelAdmin):
-    list_display  = ["name", "role", "order"]
-    list_editable = ["order"]
+class ClientAdmin(SortableAdminMixin, ModelAdmin):
+    list_display  = ["name", "role"]
     search_fields = ["name", "role"]
-    ordering      = ["order"]
 
 
 @admin.register(PortfolioPreviewSlot)
