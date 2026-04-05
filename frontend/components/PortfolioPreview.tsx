@@ -131,7 +131,7 @@ export default function PortfolioPreview() {
                     const catProjects = desktopProjects.filter(p =>
                       (p.images.length > 0 || p.yt_thumbnail) && p.category === key);
                     const proj = catProjects[i];
-                    const imgUrl = proj?.images[0]?.url || proj?.yt_thumbnail;
+                    const imgUrl = proj?.images[0]?.url || proj?.thumbnail_url || proj?.yt_thumbnail;
                     const allPreviewProjects = desktopProjects.filter(p => p.images.length > 0 || p.yt_thumbnail);
                     const globalIndex = proj ? allPreviewProjects.indexOf(proj) : -1;
                     return (
@@ -244,7 +244,7 @@ export default function PortfolioPreview() {
           <div className="md:hidden flex flex-col" style={{ gap: CARD_GAP, paddingTop: "1.5rem" }}>
             {(() => {
               const images = mobileProjects.map(p => ({
-                src:             p.images[0]?.url || p.yt_thumbnail || undefined,
+                src:             p.images[0]?.url || p.thumbnail_url || p.yt_thumbnail || undefined,
                 label:           p.title || "",
                 aspectRatio:     "1",
                 backgroundColor: "#0c0c0c",
