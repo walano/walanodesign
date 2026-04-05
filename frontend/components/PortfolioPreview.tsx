@@ -34,17 +34,12 @@ const MOBILE_LAYOUT = [
 
 const CARD_GAP = "clamp(0.4rem, 0.8vw, 0.75rem)";
 
-function getYouTubeId(url: string): string | null {
-  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
-  return m ? m[1] : null;
-}
 
 export default function PortfolioPreview() {
   const { t } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
   const [projectNav, setProjectNav] = useState<ProjectNavState | null>(null);
-  const [videoUrl,   setVideoUrl]   = useState<string | null>(null);
   const [desktopProjects, setDesktopProjects] = useState<Project[]>([]);
   const [mobileProjects,  setMobileProjects]  = useState<Project[]>([]);
 
@@ -146,10 +141,6 @@ export default function PortfolioPreview() {
                         style={{ backgroundColor: "#0c0c0c" }}
                         onClick={() => {
                           if (isLast) { router.push(`/portfolio?category=${key}`); return; }
-                          if (proj?.youtube_url) {
-                            const id = getYouTubeId(proj.youtube_url);
-                            if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
-                          }
                           if (proj && globalIndex >= 0) setProjectNav({ projects: allPreviewProjects, projectIndex: globalIndex });
                         }}
                       >
@@ -259,10 +250,6 @@ export default function PortfolioPreview() {
               const card = (idx: number, extraStyle?: React.CSSProperties) => {
                 const proj = mobileProjects[idx];
                 const handleClick = () => {
-                  if (proj?.youtube_url) {
-                    const id = getYouTubeId(proj.youtube_url);
-                    if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
-                  }
                   setProjectNav({ projects: mobileProjects, projectIndex: idx });
                 };
                 return (
@@ -363,36 +350,6 @@ export default function PortfolioPreview() {
         />
       )}
 
-      {videoUrl && (
-        <div
-          className="fixed inset-0 z-[200] flex items-center justify-center"
-          style={{ background: "rgba(0,0,0,0.85)" }}
-          onClick={() => setVideoUrl(null)}
-        >
-          <div
-            style={{ position: "relative", width: "min(90vw, 900px)", aspectRatio: "16/9" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <iframe
-              src={videoUrl}
-              allow="autoplay; fullscreen"
-              allowFullScreen
-              style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-            />
-            <button
-              onClick={() => setVideoUrl(null)}
-              style={{
-                position: "absolute", top: "-2.2rem", right: 0,
-                background: "none", border: "none",
-                color: "rgba(245,243,247,0.6)", fontFamily: "Inter, sans-serif",
-                fontSize: "0.8rem", letterSpacing: "0.06em", cursor: "pointer",
-              }}
-            >
-              fermer
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

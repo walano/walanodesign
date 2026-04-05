@@ -8,6 +8,11 @@ export interface ProjectNavState {
   projectIndex: number;
 }
 
+function getYouTubeId(url: string): string | null {
+  const m = url.match(/(?:v=|youtu\.be\/|embed\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+
 interface Slide {
   projectIdx: number;
   imageIdx:   number;
@@ -16,6 +21,7 @@ interface Slide {
   imageCount: number;
   isBranding: boolean;
   allImages:  { url: string }[];
+  youtubeId?: string;
 }
 
 export default function ProjectNavigator({
@@ -34,6 +40,19 @@ export default function ProjectNavigator({
         imageCount: allImages.length, isBranding, allImages,
       };
       return [s];
+    }
+
+    // YouTube video — one slide, plays inline when active
+    if (p.youtube_url) {
+      const ytId = getYouTubeId(p.youtube_url);
+      if (ytId) {
+        return [{
+          projectIdx: pIdx, imageIdx: 0,
+          url: p.yt_thumbnail || "", title: p.title,
+          imageCount: 1, isBranding: false, allImages: [],
+          youtubeId: ytId,
+        }];
+      }
     }
 
     const imgs = allImages.length > 0 ? allImages : (p.yt_thumbnail ? [{ url: p.yt_thumbnail }] : []);
@@ -173,11 +192,27 @@ export default function ProjectNavigator({
               scrollSnapStop: "always",
               overflow: "hidden",
               display: "flex", alignItems: "center", justifyContent: "center",
-              paddingTop: s.isBranding ? 0 : "3.5rem",
-              paddingBottom: hasAnyThumbnails ? "4rem" : 0,
+              paddingTop: (s.isBranding || s.youtubeId) ? 0 : "3.5rem",
+              paddingBottom: (!s.youtubeId && hasAnyThumbnails) ? "4rem" : 0,
             }}
           >
-            {s.isBranding ? (
+            {s.youtubeId ? (
+              curIdx === i ? (
+                <iframe
+                  key={s.youtubeId}
+                  src={`https://www.youtube.com/embed/${s.youtubeId}?autoplay=1&rel=0`}
+                  title={s.title}
+                  allow="autoplay; fullscreen; picture-in-picture"
+                  allowFullScreen
+                  style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                />
+              ) : s.url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "cover", display: "block", width: "100%", height: "100%" }} />
+              ) : (
+                <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
+              )
+            ) : s.isBranding ? (
               <div className="w-full h-full md:w-[60vw] md:h-[85vh] md:max-w-4xl flex-shrink-0"
                 style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
               >
