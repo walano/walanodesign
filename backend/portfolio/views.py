@@ -8,21 +8,198 @@ from rest_framework.response import Response
 from rest_framework import status
 
 
-def _resend(to: str, subject: str, text: str):
+def _resend(to: str, subject: str, text: str, html: str | None = None):
     api_key = os.getenv("RESEND_API_KEY", "")
     if not api_key:
         print("[resend] no API key", flush=True)
         return
     try:
+        payload: dict = {
+            "from": "Walano Design <contact@walanodesign.com>",
+            "to": [to],
+            "subject": subject,
+            "text": text,
+        }
+        if html:
+            payload["html"] = html
         r = http.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-            json={"from": "Walano Design <contact@walanodesign.com>", "to": [to], "subject": subject, "text": text},
+            json=payload,
             timeout=15,
         )
         print(f"[resend] to={to} status={r.status_code} body={r.text}", flush=True)
     except Exception as e:
         print(f"[resend error] {e}", flush=True)
+
+
+def _build_email_html(name: str, pack: str, offer: str, price: str, details: str,
+                      message: str, upsell: str, lang: str) -> str:
+    import re
+    fr = lang != "en"
+
+    # Strip trailing "Walano" from AI message — the HTML has its own signature block
+    msg_clean = re.sub(r'\n+Walano\s*$', '', message.strip())
+    msg_html  = msg_clean.replace("\n", "<br>")
+
+    headline       = "Ton devis est prêt"         if fr else "Your estimate is ready"
+    greeting       = f"Bonjour {name},"            if fr else f"Hi {name},"
+    intro          = "Voici ton estimation pour ton projet :" if fr else "Here is your estimate:"
+    included_label = "Ce qui est inclus :"         if fr else "What's included:"
+    contact_label  = "Pour aller plus loin :"      if fr else "To go further:"
+    disclaimer     = (
+        "Cette estimation est indicative et peut être ajustée selon les détails finaux de votre projet."
+        if fr else
+        "This estimate is indicative and may be adjusted based on the final details of your project."
+    )
+    legal = (
+        "N'hésitez pas à ajouter l'adresse contact@walanodesign.com à votre carnet d'adresses.<br>"
+        "Les données personnelles vous concernant sont traitées par Walano Design dans le cadre de votre demande de devis."
+        "Vous souhaitez ne plus recevoir d'emails de notre part ? "
+        "<a href='mailto:contact@walanodesign.com?subject=Désinscription' style='color:#aaa;'>Se désinscrire</a><br>"
+        "Pour toute question relative à vos données personnelles, consultez notre "
+        "<a href='https://www.walanodesign.com/confidentialite' style='color:#aaa;'>politique de protection des données</a> "
+        "ou contactez <a href='mailto:contact@walanodesign.com' style='color:#aaa;'>contact@walanodesign.com</a>."
+        if fr else
+        "Feel free to add contact@walanodesign.com to your address book.<br>"
+        "Your personal data is processed by Walano Design in the context of your quote request. "
+        "No longer want to receive emails? "
+        "<a href='mailto:contact@walanodesign.com?subject=Unsubscribe' style='color:#aaa;'>Unsubscribe</a><br>"
+        "For any questions about your personal data, see our "
+        "<a href='https://www.walanodesign.com/confidentialite' style='color:#aaa;'>privacy policy</a> "
+        "or contact <a href='mailto:contact@walanodesign.com' style='color:#aaa;'>contact@walanodesign.com</a>."
+    )
+
+    upsell_block = ""
+    if upsell:
+        upsell_block = f"""
+          <tr>
+            <td style="padding:0 40px 28px;">
+              <table width="100%" cellpadding="0" cellspacing="0"
+                     style="border:1px solid #e8dff2;background:#faf8fc;">
+                <tr>
+                  <td style="padding:16px 20px;font-family:Arial,Helvetica,sans-serif;
+                             font-size:13px;color:#666;line-height:1.7;">{upsell}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>"""
+
+    return f"""<!DOCTYPE html>
+<html lang="{lang}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{headline}</title>
+</head>
+<body style="margin:0;padding:0;background:#ede8f2;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0"
+       style="background:#ede8f2;padding:32px 16px;">
+  <tr><td>
+    <table width="100%" cellpadding="0" cellspacing="0"
+           style="max-width:600px;margin:0 auto;background:#ffffff;border:1px solid #ddd6e8;">
+
+      <!-- HEADER -->
+      <tr>
+        <td style="background:#855c9d;padding:32px 40px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="vertical-align:middle;">
+                <div style="color:#0c0c0c;font-size:11px;font-weight:700;
+                            letter-spacing:0.08em;text-transform:uppercase;
+                            margin-bottom:10px;">{headline}</div>
+                <div style="color:#f5f3f7;font-size:26px;font-weight:700;
+                            letter-spacing:-0.01em;">{name}</div>
+              </td>
+              <td style="text-align:right;vertical-align:middle;white-space:nowrap;">
+                <div style="color:#f5f3f7;font-size:20px;font-weight:800;
+                            letter-spacing:-0.04em;line-height:1.1;">Walano</div>
+                <div style="color:rgba(245,243,247,0.55);font-size:10px;
+                            letter-spacing:0.1em;text-transform:uppercase;
+                            margin-top:2px;">Design</div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- BODY -->
+      <tr>
+        <td style="padding:40px 40px 28px;">
+          <p style="margin:0 0 20px;font-size:15px;color:#0c0c0c;line-height:1.6;">{greeting}</p>
+          <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.6;">{intro}</p>
+
+          <!-- Pack -->
+          <table width="100%" cellpadding="0" cellspacing="0"
+                 style="border-left:4px solid #855c9d;background:#faf8fc;margin-bottom:28px;">
+            <tr>
+              <td style="padding:20px 24px;">
+                <div style="font-size:10px;font-weight:700;color:#855c9d;
+                            letter-spacing:0.1em;text-transform:uppercase;
+                            margin-bottom:8px;">{pack}</div>
+                <div style="font-size:15px;font-weight:700;color:#0c0c0c;
+                            margin-bottom:10px;">{offer}</div>
+                <div style="font-size:24px;font-weight:800;color:#855c9d;
+                            letter-spacing:-0.02em;">{price}</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Included -->
+          <p style="margin:0 0 6px;font-size:12px;font-weight:700;
+                    color:#0c0c0c;letter-spacing:0.04em;">{included_label}</p>
+          <p style="margin:0 0 28px;font-size:13px;color:#555;line-height:1.7;">{details}</p>
+
+          <!-- Message -->
+          <p style="margin:0 0 28px;font-size:14px;color:#0c0c0c;line-height:1.85;">{msg_html}</p>
+        </td>
+      </tr>
+
+      <!-- UPSELL -->{upsell_block}
+
+      <!-- SIGNATURE -->
+      <tr>
+        <td style="padding:0 40px 36px;">
+          <table cellpadding="0" cellspacing="0"
+                 style="border-top:1px solid #e8dff2;padding-top:20px;width:100%;">
+            <tr>
+              <td style="padding-top:20px;">
+                <div style="font-size:14px;font-weight:700;color:#0c0c0c;">Walano Design</div>
+                <div style="font-size:12px;color:#855c9d;margin-top:3px;">Création d'univers visuels</div>
+                <div style="font-size:12px;margin-top:5px;">
+                  <a href="https://www.walanodesign.com"
+                     style="color:#855c9d;text-decoration:none;">
+                    https://www.walanodesign.com
+                  </a>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:#f5f3f7;padding:24px 40px;
+                   border-top:1px solid #e8dff2;">
+          <p style="margin:0 0 10px;font-size:11px;color:#888;line-height:1.65;">{disclaimer}</p>
+          <p style="margin:0 0 18px;font-size:11px;color:#888;">
+            {contact_label}
+            <a href="mailto:contact@walanodesign.com"
+               style="color:#855c9d;text-decoration:none;">contact@walanodesign.com</a>
+          </p>
+          <p style="margin:0 0 10px;font-size:11px;font-weight:600;color:#999;">
+            © 2026 Walano Design
+          </p>
+          <p style="margin:0;font-size:10px;color:#bbb;line-height:1.7;">{legal}</p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>"""
 from .models import Project, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 from .serializers import ProjectSerializer, SiteConfigSerializer, ClientSerializer, PortfolioPreviewSlotSerializer, BlogPostListSerializer, BlogPostSerializer
 
@@ -244,7 +421,7 @@ MANIÈRE DE PARLER :
 - Tu ne survends pas. Si le budget est là pour faire quelque chose de bien, tu le dis clairement et tu proposes en conséquence.
 - Tu sais que le client vient souvent parce qu'il a déjà été touché par le travail de Walano, tu pars de là, pas de zéro.
 - Tu n'utilises jamais de tiret long ou trait horizontal (pas de "—", pas de "–") dans le texte du message.
-- La signature est uniquement le mot "Walano" seul sur sa ligne, précédé de deux sauts de ligne. Rien d'autre.
+- La signature est uniquement le mot "Walano" seul sur sa ligne, précédé d'un seul saut de ligne. Rien d'autre.
 
 PROJET DU CLIENT :
 - Catégorie : {cat_label}
@@ -298,7 +475,7 @@ FORMAT JSON uniquement (pas de markdown, pas de backticks) :
   "offerTitle": "nom du service principal + add-ons inclus si applicable",
   "price": "prix total formaté dans la devise {currency} avec supplément si applicable",
   "offerDetails": "2-4 livrables concrets inclus dans l'offre, ton conversationnel court",
-  "message": "message personnalisé 3-4 phrases. Termine par deux sauts de ligne puis uniquement le mot Walano sur sa propre ligne, sans tiret ni trait avant.",
+  "message": "message personnalisé 3-4 phrases. Termine par un saut de ligne puis uniquement le mot Walano sur sa propre ligne, sans tiret ni trait avant.",
   "upsell": "1 suggestion complémentaire naturelle, dans la continuité du projet, 1 phrase max"
 }}"""
 
@@ -366,27 +543,32 @@ def devis(request):
         details = ai_result.get("offerDetails", "")
         message = ai_result.get("message", "")
         upsell  = ai_result.get("upsell", "")
+        lang    = data.get("lang", "fr")
 
-        body_client = f"""Bonjour {client_name},
+        subject = f"Ton estimation est prête · {pack}" if lang != "en" else f"Your estimate is ready · {pack}"
 
-Voici votre estimation Walano Design.
+        body_plain = f"""{("Bonjour" if lang != "en" else "Hi")} {client_name},
 
 {pack}
 {offer}
-Prix estimé : {price}
+{price}
 
-Ce qui est inclus :
+{("Ce qui est inclus" if lang != "en" else "What's included")} :
 {details}
 
 {message}
 
-{"---" + chr(10) + upsell if upsell else ""}
+{upsell if upsell else ""}
 
----
-Cette estimation est indicative et peut être ajustée selon les détails finaux de votre projet.
-Pour aller plus loin : contact@walanodesign.com
+Walano Design
+https://www.walanodesign.com
+contact@walanodesign.com
 """
-        _resend(client_email, f"Votre estimation — {pack}", body_client)
+        html = _build_email_html(
+            name=client_name, pack=pack, offer=offer, price=price,
+            details=details, message=message, upsell=upsell, lang=lang,
+        )
+        _resend(client_email, subject, body_plain, html)
 
         contact_email = os.getenv("CONTACT_EMAIL", "")
         if contact_email:
@@ -398,13 +580,13 @@ Catégorie : {data.get("category")} / {data.get("subtype")}
 Budget : {data.get("budget")} ({data.get("currency")})
 Deadline : {data.get("deadline")}
 
-Description : {data.get("extra", "—")}
+Description : {data.get("extra") or "Non précisé"}
 
 Résultat IA :
-{pack} — {price}
+{pack} / {price}
 {details}
 """
-            _resend(contact_email, f"Devis — {client_name} · {pack}", body_internal)
+            _resend(contact_email, f"Devis · {client_name} · {pack}", body_internal)
 
     threading.Thread(target=_send_emails, daemon=True).start()
 

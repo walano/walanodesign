@@ -127,10 +127,10 @@ export default function About() {
                 flex: 1,
                 backgroundColor: "#0c0c0c",
                 borderRadius: "0",
-                padding: "clamp(1.5rem, 2.5vw, 2.5rem)",
+                padding: "clamp(2rem, 2.5vw, 2.5rem)",
                 display: "flex",
                 flexDirection: "column",
-                gap: "1rem",
+                gap: "2rem",
                 maxHeight: "clamp(200px, 28vw, 400px)",
                 overflow: "hidden",
               }}
@@ -140,12 +140,12 @@ export default function About() {
                   fontFamily: "austin-pen, cursive",
                   fontSize: "clamp(2rem, 4vw, 5rem)",
                   color: "#f5f3f7",
-                  lineHeight: 1,
+                  lineHeight: 0.5,
                   whiteSpace: "nowrap",
                   flexShrink: 0,
-                  paddingTop: "0.5rem",
+                  paddingTop: "2rem",
                   paddingLeft: "1.2rem",
-                  paddingBottom: "0.3rem",
+                  paddingBottom: "0.8rem",
                 }}
               >
                 {t("about.title")}
@@ -156,7 +156,6 @@ export default function About() {
                   paddingLeft: "1rem",
                   paddingRight: "1rem",
                   flexDirection: "column",
-                  gap: "0rem",
                   color: "var(--white)",
                   fontFamily: "Inter, sans-serif",
                   fontSize: "clamp(0.72rem, 0.95vw, 1rem)",
@@ -179,7 +178,6 @@ export default function About() {
                   fontSize: "clamp(0.72rem, 0.95vw, 1rem)",
                   fontFamily: "Inter, sans-serif",
                   fontWeight: 600,
-                  borderRadius: "0",
                   backgroundColor: "rgba(255, 255, 255, 0.08)",
                   backdropFilter: "blur(20px) saturate(180%)",
                   WebkitBackdropFilter: "blur(20px) saturate(180%)",
@@ -187,7 +185,6 @@ export default function About() {
                   color: "var(--white)",
                   textTransform: "lowercase",
                   transition: "all 0.3s",
-                  textDecoration: "none",
                   letterSpacing: "0.04em",
                 }}
                 onMouseEnter={(e) => {

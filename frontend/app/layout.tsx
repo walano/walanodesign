@@ -23,7 +23,7 @@ const metadataFR: Metadata = {
     template: "%s | Walano Design",
   },
   description:
-    "Graphiste freelance spécialisé dans les covers, logos, identités visuelles, affiches et vidéos pour artistes et labels. Devis gratuit en ligne.",
+    "Graphiste freelance spécialisé dans les covers, logos, identités visuelles, affiches et vidéos pour artistes, labels et entreprises. Devis gratuit en ligne.",
   keywords: [
     "walano design",
     "graphiste freelance",
@@ -39,7 +39,7 @@ const metadataFR: Metadata = {
   openGraph: {
     title: "Walano Design — Graphiste Freelance | Covers, Logos & Identités Visuelles",
     description:
-      "Covers, logos, identités visuelles, affiches et vidéos pour artistes et labels indépendants.",
+      "Covers, logos, identités visuelles, affiches et vidéos pour artistes, labels et entreprises.",
     siteName: "Walano Design",
     url: "https://www.walanodesign.com",
     type: "website",
@@ -50,7 +50,7 @@ const metadataFR: Metadata = {
     card: "summary_large_image",
     title: "Walano Design — Graphiste Freelance",
     description:
-      "Covers, logos, identités visuelles, affiches et vidéos pour artistes et labels.",
+      "Covers, logos, identités visuelles, affiches et vidéos pour artistes, labels et entreprises.",
     images: ["https://www.walanodesign.com/ogimage.webp"],
   },
 };
@@ -62,7 +62,7 @@ const metadataEN: Metadata = {
     template: "%s | Walano Design",
   },
   description:
-    "Freelance graphic designer specializing in covers, logos, visual identity, posters and videos for artists and labels. Free quote online.",
+    "Freelance graphic designer specializing in covers, logos, visual identity, posters and videos for artists, labels and companies. Free quote online.",
   keywords: [
     "walano design",
     "freelance graphic designer",
@@ -78,7 +78,7 @@ const metadataEN: Metadata = {
   openGraph: {
     title: "Walano Design — Freelance Graphic Designer | Covers, Logos & Visual Identity",
     description:
-      "Covers, logos, visual identity, posters and videos for independent artists and labels.",
+      "Covers, logos, visual identity, posters and videos for artists, labels and companies.",
     siteName: "Walano Design",
     url: "https://www.walanodesign.com",
     type: "website",
@@ -89,7 +89,7 @@ const metadataEN: Metadata = {
     card: "summary_large_image",
     title: "Walano Design — Freelance Graphic Designer",
     description:
-      "Covers, logos, visual identity, posters and videos for artists and labels.",
+      "Covers, logos, visual identity, posters and videos for artists, labels and companies.",
     images: ["https://www.walanodesign.com/ogimage.webp"],
   },
 };
@@ -106,7 +106,7 @@ const jsonLd = {
   "@type": "ProfessionalService",
   name: "Walano Design",
   description:
-    "Graphiste freelance spécialisé dans les covers, logos, identités visuelles, affiches et vidéos pour artistes et labels.",
+    "Graphiste freelance spécialisé dans les covers, logos, identités visuelles, affiches et vidéos pour artistes, labels et entreprises.",
   url: "https://www.walanodesign.com",
   email: "contact@walanodesign.com",
   image: "https://www.walanodesign.com/ogimage.webp",
