@@ -8,7 +8,6 @@ from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
-from adminsortable2.admin import SortableAdminMixin
 from unfold.admin import ModelAdmin, TabularInline
 from .models import Project, ProjectImage, Devis, SiteConfig, Client, ServicePrice, ContactMessage, PortfolioPreviewSlot, BlogPost
 
@@ -218,9 +217,39 @@ class SiteConfigAdmin(ModelAdmin):
 
 
 @admin.register(Client)
-class ClientAdmin(SortableAdminMixin, ModelAdmin):
-    list_display  = ["name", "role"]
+class ClientAdmin(ModelAdmin):
+    list_display  = ["drag_handle", "name", "role"]
     search_fields = ["name", "role"]
+    ordering      = ["order"]
+
+    @admin.display(description="")
+    def drag_handle(self, obj):
+        from django.utils.safestring import mark_safe
+        return mark_safe('<span class="wl-drag-handle" style="cursor:grab;color:#855c9d;font-size:1.3rem;user-select:none;padding:0 14px;">&#x2837;</span>')
+
+    class Media:
+        js = [
+            "https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js",
+            "portfolio/admin/drag_sort.js",
+        ]
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom = [
+            path("reorder/", self.admin_site.admin_view(self.reorder_view), name="portfolio_client_reorder"),
+        ]
+        return custom + urls
+
+    def reorder_view(self, request):
+        if request.method != "POST":
+            return JsonResponse({"ok": False}, status=405)
+        try:
+            ids = [int(pk) for pk in json.loads(request.body).get("ids", [])]
+            for i, pk in enumerate(ids):
+                Client.objects.filter(pk=pk).update(order=i)
+            return JsonResponse({"ok": True})
+        except Exception as e:
+            return JsonResponse({"ok": False, "error": str(e)}, status=400)
 
 
 @admin.register(PortfolioPreviewSlot)
