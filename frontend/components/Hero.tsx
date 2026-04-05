@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useState, Suspense } from "react";
+import { useRef, useEffect, useState, Suspense, Component, ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { gsap } from "gsap";
@@ -111,6 +111,15 @@ function LogoModel({
 }
 
 /* ─── Hero Section ───────────────────────────────────────────── */
+class CanvasErrorBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (this.state.failed) return null; // silently hide the 3D logo, page stays alive
+    return this.props.children;
+  }
+}
+
 export default function Hero() {
   const { t } = useI18n();
   const topRef        = useRef<HTMLDivElement>(null);
@@ -463,23 +472,25 @@ export default function Hero() {
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
       >
-        <Canvas
-          camera={{ position: [0, 0, 4.5], fov: 75 }}
-          gl={{ antialias: true, alpha: true }}
-          dpr={[1, 2]}
-          style={{ width: "100%", height: "100%" }}
-          onCreated={({ gl }) => {
-            gl.toneMapping         = THREE.ACESFilmicToneMapping;
-            gl.toneMappingExposure = 1.2;
-            gl.outputColorSpace    = THREE.SRGBColorSpace;
-          }}
-        >
-          <SceneLights colorProgress={colorProgress} />
-          <Suspense fallback={null}>
-            <LogoModel colorProgress={colorProgress} />
-            <SceneEnv />
-          </Suspense>
-        </Canvas>
+        <CanvasErrorBoundary>
+          <Canvas
+            camera={{ position: [0, 0, 4.5], fov: 75 }}
+            gl={{ antialias: true, alpha: true }}
+            dpr={[1, 2]}
+            style={{ width: "100%", height: "100%" }}
+            onCreated={({ gl }) => {
+              gl.toneMapping         = THREE.ACESFilmicToneMapping;
+              gl.toneMappingExposure = 1.2;
+              gl.outputColorSpace    = THREE.SRGBColorSpace;
+            }}
+          >
+            <SceneLights colorProgress={colorProgress} />
+            <Suspense fallback={null}>
+              <LogoModel colorProgress={colorProgress} />
+              <SceneEnv />
+            </Suspense>
+          </Canvas>
+        </CanvasErrorBoundary>
       </div>
     </section>
   );
