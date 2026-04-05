@@ -5,7 +5,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useI18n } from "@/lib/i18n";
 import { useRouter } from "next/navigation";
-import ImageViewer, { ViewerImage } from "@/components/ImageViewer";
+import ProjectNavigator, { ProjectNavState } from "@/components/ProjectNavigator";
 import { fetchPreviewSlots, Project } from "@/lib/api";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -39,14 +39,12 @@ function getYouTubeId(url: string): string | null {
   return m ? m[1] : null;
 }
 
-interface ViewerState { images: ViewerImage[]; index: number; }
-
 export default function PortfolioPreview() {
   const { t } = useI18n();
   const sectionRef = useRef<HTMLElement>(null);
   const router = useRouter();
-  const [viewer,   setViewer]   = useState<ViewerState | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [projectNav, setProjectNav] = useState<ProjectNavState | null>(null);
+  const [videoUrl,   setVideoUrl]   = useState<string | null>(null);
   const [desktopProjects, setDesktopProjects] = useState<Project[]>([]);
   const [mobileProjects,  setMobileProjects]  = useState<Project[]>([]);
 
@@ -139,12 +137,8 @@ export default function PortfolioPreview() {
                       (p.images.length > 0 || p.yt_thumbnail) && p.category === key);
                     const proj = catProjects[i];
                     const imgUrl = proj?.images[0]?.url || proj?.yt_thumbnail;
-                    const rowImages: ViewerImage[] = catProjects.slice(0, count - 1).map(p => ({
-                      src:             p.images[0]?.url || p.yt_thumbnail || "",
-                      label:           p.title || t(`portfolio.categories.${key}`),
-                      aspectRatio:     aspect.replace("aspect-[", "").replace("]", "").replace("aspect-square", "1").replace("aspect-video", "16/9"),
-                      backgroundColor: "#0c0c0c",
-                    }));
+                    const allPreviewProjects = desktopProjects.filter(p => p.images.length > 0 || p.yt_thumbnail);
+                    const globalIndex = proj ? allPreviewProjects.indexOf(proj) : -1;
                     return (
                       <div
                         key={i}
@@ -156,7 +150,7 @@ export default function PortfolioPreview() {
                             const id = getYouTubeId(proj.youtube_url);
                             if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
                           }
-                          setViewer({ images: rowImages, index: i });
+                          if (proj && globalIndex >= 0) setProjectNav({ projects: allPreviewProjects, projectIndex: globalIndex });
                         }}
                       >
                         {imgUrl && (
@@ -269,7 +263,7 @@ export default function PortfolioPreview() {
                     const id = getYouTubeId(proj.youtube_url);
                     if (id) { setVideoUrl(`https://www.youtube.com/embed/${id}?autoplay=1`); return; }
                   }
-                  setViewer({ images: images.slice(0, 8), index: idx });
+                  setProjectNav({ projects: mobileProjects, projectIndex: idx });
                 };
                 return (
                   <div
@@ -361,11 +355,11 @@ export default function PortfolioPreview() {
         </div>
       </div>
 
-      {viewer && (
-        <ImageViewer
-          images={viewer.images}
-          initialIndex={viewer.index}
-          onClose={() => setViewer(null)}
+      {projectNav && (
+        <ProjectNavigator
+          projects={projectNav.projects}
+          projectIndex={projectNav.projectIndex}
+          onClose={() => setProjectNav(null)}
         />
       )}
 

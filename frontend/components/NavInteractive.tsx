@@ -155,7 +155,6 @@ export default function NavInteractive({ children }: { children?: ReactNode }) {
           alignItems:           "flex-start",
           justifyContent:       "center",
           overflow:             "hidden",
-          position:             "relative",
         }}
       >
         {/* Logo + ring */}
@@ -212,18 +211,20 @@ export default function NavInteractive({ children }: { children?: ReactNode }) {
           </a>
         </div>
 
-        {/* Nav links — server-rendered by parent, styled here */}
+        {/* Nav links — in DOM for crawlers, visually hidden */}
         {children && (
           <nav
             aria-label="navigation principale"
             style={{
-              position:    "absolute",
-              right:       "clamp(1rem, 3vw, 2rem)",
-              top:         0,
-              height:      `${NAV_H}px`,
-              display:     "flex",
-              alignItems:  "center",
-              gap:         "clamp(1rem, 2.5vw, 1.75rem)",
+              position:   "absolute",
+              width:      1,
+              height:     1,
+              padding:    0,
+              margin:     -1,
+              overflow:   "hidden",
+              clip:       "rect(0,0,0,0)",
+              whiteSpace: "nowrap",
+              border:     0,
             }}
           >
             {children}
