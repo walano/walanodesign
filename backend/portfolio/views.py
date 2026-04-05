@@ -111,14 +111,10 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
                 <div style="color:#f5f3f7;font-size:26px;font-weight:700;
                             letter-spacing:-0.01em;">{name}</div>
               </td>
-              <td style="text-align:right;vertical-align:middle;width:80px;">
+              <td style="text-align:right;vertical-align:middle;">
                 <img src="https://www.walanodesign.com/logo.svg"
-                     alt="Walano Design" width="64" height="64"
+                     alt="Walano Design" width="64"
                      style="display:block;margin-left:auto;
-                            filter:brightness(0) invert(1);">
-                <img src="https://www.walanodesign.com/symbol.svg"
-                     alt="" width="32" height="32"
-                     style="display:block;margin:6px 0 0 auto;opacity:0.45;
                             filter:brightness(0) invert(1);">
               </td>
             </tr>
