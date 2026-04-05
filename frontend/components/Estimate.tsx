@@ -140,6 +140,7 @@ const COPY = {
       fastSurge:      "Supplément délai rapide +15% inclus",
       goFurther:      "Pour aller plus loin",
       sentTo:         "Envoyé à",
+      spamNotice:     "Si vous ne trouvez pas l'email dans votre boîte principale, vérifiez vos spams ou l'onglet Promotions.",
     },
   },
 
@@ -251,6 +252,7 @@ const COPY = {
       fastSurge:      "Fast deadline surcharge +15% included",
       goFurther:      "Go further",
       sentTo:         "Sent to",
+      spamNotice:     "If you don't find the email in your inbox, check your spam or Promotions tab.",
     },
   },
 };
@@ -454,6 +456,10 @@ function ResultScreen({ state, onReset, copy }: {
         <span style={{ color: C.text, fontWeight: 500, fontFamily: "Inter, sans-serif" }}>{state.name} · {state.email}</span>
       </div>
 
+      <p style={{ color: C.textDim, fontSize: 11, fontFamily: "Inter, sans-serif", lineHeight: 1.6, margin: 0 }}>
+        {r.spamNotice}
+      </p>
+
       <div style={{ display: "flex", gap: 8 }}>
         <a href="/" style={{
           flex: 1, background: C.btnBg, border: `1px solid ${C.btnBorder}`,
@@ -511,6 +517,10 @@ export default function Estimate() {
   const [state, setState]         = useState<FormState>({ ...INITIAL_STATE, lang });
   const [stepIndex, setStepIndex] = useState(0);
   const [done, setDone]           = useState(false);
+
+  useEffect(() => {
+    setState(s => ({ ...s, lang }));
+  }, [lang]);
 
   const set = (k: keyof FormState, v: string | null) =>
     setState(s => ({ ...s, [k]: v }));
