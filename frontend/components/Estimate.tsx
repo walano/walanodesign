@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { submitDevis, type DevisResult } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
@@ -361,6 +361,27 @@ function NavButtons({ onBack, onNext, nextLabel, backLabel, disabled }: {
   );
 }
 
+// ─── Result error boundary ─────────────────────────────────────────────────────
+class ResultErrorBoundary extends Component<{ children: ReactNode; errorMsg: string; onReset: () => void }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    if (this.state.failed) {
+      return (
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, padding: "32px 0" }}>
+          <p style={{ color: C.textMid, fontSize: 14, fontFamily: "Inter, sans-serif", margin: 0 }}>{this.props.errorMsg}</p>
+          <button onClick={this.props.onReset} style={{
+            alignSelf: "flex-start", background: C.accent, border: `1px solid ${C.accent}`,
+            color: "#fff", padding: "11px 20px", cursor: "pointer",
+            fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600,
+          }}>réessayer</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Result screen ─────────────────────────────────────────────────────────────
 function ResultScreen({ state, onReset, copy, lang }: {
   state: FormState;
@@ -422,13 +443,13 @@ function ResultScreen({ state, onReset, copy, lang }: {
         <>
           <div>
             <span style={{ background: C.accent, color: "#fff", fontSize: 11, fontWeight: 800, padding: "4px 14px", letterSpacing: "0.04em", fontFamily: "Inter, sans-serif" }}>
-              {result.packName.toLowerCase()}
+              {(result.packName ?? "").toLowerCase()}
             </span>
           </div>
 
           <div style={{ background: C.accentBg, border: `1px solid ${C.accentBorder}`, padding: 20 }}>
             <div style={{ color: C.accent, fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", marginBottom: 10, fontFamily: "Inter, sans-serif" }}>{r.proposal}</div>
-            <div style={{ color: C.text, fontSize: 15, fontWeight: 700, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>{result.offerTitle.toLowerCase()}</div>
+            <div style={{ color: C.text, fontSize: 15, fontWeight: 700, marginBottom: 4, fontFamily: "Inter, sans-serif" }}>{(result.offerTitle ?? "").toLowerCase()}</div>
             <div style={{ color: C.accent, fontSize: 26, fontWeight: 800, letterSpacing: "-0.05em", marginBottom: 10, fontFamily: "Inter, sans-serif" }}>{result.price}</div>
             <p style={{ color: C.textMid, fontSize: 13, lineHeight: 1.7, margin: 0, fontFamily: "Inter, sans-serif" }}>{result.offerDetails}</p>
           </div>
@@ -541,8 +562,8 @@ export default function Estimate() {
 
   // ── Persist draft on every change ──────────────────────────────────────────
   useEffect(() => {
-    if (done) { localStorage.removeItem(DRAFT_KEY); return; }
     try {
+      if (done) { localStorage.removeItem(DRAFT_KEY); return; }
       localStorage.setItem(DRAFT_KEY, JSON.stringify({ state, stepIndex, savedAt: Date.now() }));
     } catch { /* ignore */ }
   }, [state, stepIndex, done]);
@@ -574,7 +595,7 @@ export default function Estimate() {
 
   const goNext = () => { if (isLastBeforeResult) { setDone(true); return; } setStepIndex(i => i + 1); };
   const goBack = () => setStepIndex(i => i - 1);
-  const handleReset = () => { localStorage.removeItem(DRAFT_KEY); setDone(false); setStepIndex(0); setState({ ...INITIAL_STATE, lang }); };
+  const handleReset = () => { try { localStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ } setDone(false); setStepIndex(0); setState({ ...INITIAL_STATE, lang }); };
 
   const stepMeta = copy.stepMeta[currentStep as keyof typeof copy.stepMeta] || { title: "" };
 
@@ -681,7 +702,9 @@ export default function Estimate() {
         {/* ── Right panel / result ── */}
         {done ? (
           <div className="wd-full">
-            <ResultScreen state={state} onReset={handleReset} copy={copy} lang={lang} />
+            <ResultErrorBoundary errorMsg={copy.result.error} onReset={handleReset}>
+              <ResultScreen state={state} onReset={handleReset} copy={copy} lang={lang} />
+            </ResultErrorBoundary>
           </div>
         ) : (
           <div className="wd-right">
