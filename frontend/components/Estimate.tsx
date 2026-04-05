@@ -141,6 +141,7 @@ const COPY = {
       goFurther:      "Pour aller plus loin",
       sentTo:         "Envoyé à",
       spamNotice:     "Si vous ne trouvez pas l'email dans votre boîte principale, vérifiez vos spams ou l'onglet Promotions.",
+      validity:       "Cette estimation est valable 15 jours. Passé ce délai, une nouvelle demande sera nécessaire.",
     },
   },
 
@@ -253,6 +254,7 @@ const COPY = {
       goFurther:      "Go further",
       sentTo:         "Sent to",
       spamNotice:     "If you don't find the email in your inbox, check your spam or Promotions tab.",
+      validity:       "This estimate is valid for 15 days. After that, a new request will be required.",
     },
   },
 };
@@ -365,9 +367,10 @@ function ResultScreen({ state, onReset, copy }: {
   onReset: () => void;
   copy: typeof COPY["fr"];
 }) {
+  const { lang: currentLang } = useI18n();
   const [result, setResult]   = useState<DevisResult | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(false);
+  const [error, setError]     = useState<string | null>(null);
   const fetchedRef = useRef(false);
 
   useEffect(() => {
@@ -384,10 +387,10 @@ function ResultScreen({ state, onReset, copy }: {
       budget:        state.budget!,
       name:          state.name,
       email:         state.email,
-      lang:          state.lang,
+      lang:          currentLang,
     })
       .then(setResult)
-      .catch(() => setError(true))
+      .catch((e: Error) => setError(e.message || copy.result.error))
       .finally(() => setLoading(false));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -411,7 +414,7 @@ function ResultScreen({ state, onReset, copy }: {
 
       {error && (
         <div style={{ background: C.innerBg, border: `1px solid ${C.innerBorder}`, padding: 24, color: C.textMid, fontSize: 14, fontFamily: "Inter, sans-serif" }}>
-          {r.error}
+          {error}
         </div>
       )}
 
@@ -456,6 +459,9 @@ function ResultScreen({ state, onReset, copy }: {
         <span style={{ color: C.text, fontWeight: 500, fontFamily: "Inter, sans-serif" }}>{state.name} · {state.email}</span>
       </div>
 
+      <p style={{ color: C.textDim, fontSize: 11, fontFamily: "Inter, sans-serif", lineHeight: 1.6, margin: 0 }}>
+        {r.validity}
+      </p>
       <p style={{ color: C.textDim, fontSize: 11, fontFamily: "Inter, sans-serif", lineHeight: 1.6, margin: 0 }}>
         {r.spamNotice}
       </p>

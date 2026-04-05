@@ -48,9 +48,11 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
     included_label = "Ce qui est inclus :"         if fr else "What's included:"
     contact_label  = "Pour aller plus loin :"      if fr else "To go further:"
     disclaimer     = (
-        "Cette estimation est indicative et peut être ajustée selon les détails finaux de votre projet."
+        "Cette estimation est valable 15 jours. Passé ce délai, une nouvelle demande sera nécessaire. "
+        "Elle est indicative et peut être ajustée selon les détails finaux de votre projet."
         if fr else
-        "This estimate is indicative and may be adjusted based on the final details of your project."
+        "This estimate is valid for 15 days. After that, a new request will be required. "
+        "It is indicative and may be adjusted based on the final details of your project."
     )
     legal = (
         "N'hésitez pas à ajouter l'adresse contact@walanodesign.com à votre carnet d'adresses.<br>"
@@ -74,7 +76,7 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
     if upsell:
         upsell_block = f"""
           <tr>
-            <td style="padding:0 40px 28px;">
+            <td style="padding:12px 40px 28px;">
               <table width="100%" cellpadding="0" cellspacing="0"
                      style="border:1px solid #e8dff2;background:#faf8fc;">
                 <tr>
@@ -112,10 +114,9 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
                             letter-spacing:-0.01em;">{name}</div>
               </td>
               <td style="text-align:right;vertical-align:middle;">
-                <img src="https://www.walanodesign.com/logo.svg"
+                <img src="https://www.walanodesign.com/logo-white.svg"
                      alt="Walano Design" width="64"
-                     style="display:block;margin-left:auto;
-                            filter:brightness(0) invert(1);">
+                     style="display:block;margin-left:auto;">
               </td>
             </tr>
           </table>
@@ -124,7 +125,7 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
 
       <!-- BODY -->
       <tr>
-        <td style="padding:40px 40px 28px;">
+        <td style="padding:40px 40px 16px;">
           <p style="margin:0 0 20px;font-size:15px;color:#0c0c0c;line-height:1.6;">{greeting}</p>
           <p style="margin:0 0 20px;font-size:13px;color:#666;line-height:1.6;">{intro}</p>
 
@@ -150,7 +151,7 @@ def _build_email_html(name: str, pack: str, offer: str, price: str, details: str
           <p style="margin:0 0 28px;font-size:13px;color:#555;line-height:1.7;">{details}</p>
 
           <!-- Message -->
-          <p style="margin:0 0 28px;font-size:14px;color:#0c0c0c;line-height:1.85;">{msg_html}</p>
+          <p style="margin:0;font-size:14px;color:#0c0c0c;line-height:1.85;">{msg_html}</p>
         </td>
       </tr>
 
@@ -472,7 +473,7 @@ FORMAT JSON uniquement (pas de markdown, pas de backticks) :
 {{
   "packName": "nom créatif du pack (ex: Pack Lancement Single, Pack Campagne EP…)",
   "offerTitle": "nom du service principal + add-ons inclus si applicable",
-  "price": "prix total formaté dans la devise {currency} avec supplément si applicable",
+  "price": "prix total formaté dans la devise {currency} avec supplément si applicable, toujours suivi de HT (hors taxes)",
   "offerDetails": "2-4 livrables concrets inclus dans l'offre, ton conversationnel court",
   "message": "message personnalisé 3-4 phrases. Termine par un saut de ligne puis uniquement le mot Walano sur sa propre ligne, sans tiret ni trait avant.",
   "upsell": "1 suggestion complémentaire naturelle, dans la continuité du projet, 1 phrase max"
@@ -489,6 +490,17 @@ def devis(request):
     for field in required:
         if not data.get(field):
             return Response({"error": f"Champ requis : {field}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    from django.utils import timezone
+    from datetime import timedelta
+    email_addr = data.get("email", "").lower().strip()
+    since = timezone.now() - timedelta(hours=24)
+    count = Devis.objects.filter(email__iexact=email_addr, created_at__gte=since).count()
+    if count >= 3:
+        return Response(
+            {"error": "Limite atteinte. Vous avez déjà soumis 3 demandes aujourd'hui. Réessayez dans 24h."},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
 
     api_key = os.getenv("ANTHROPIC_API_KEY", "")
     if not api_key:
