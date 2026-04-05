@@ -192,23 +192,27 @@ export default function ProjectNavigator({
               scrollSnapStop: "always",
               overflow: "hidden",
               display: "flex", alignItems: "center", justifyContent: "center",
-              paddingTop: (s.isBranding || s.youtubeId) ? 0 : "3.5rem",
-              paddingBottom: (!s.youtubeId && hasAnyThumbnails) ? "4rem" : 0,
+              paddingTop: s.isBranding ? 0 : "3.5rem",
+              paddingBottom: (hasAnyThumbnails && !s.youtubeId) ? "4rem" : 0,
             }}
           >
             {s.youtubeId ? (
               curIdx === i ? (
-                <iframe
-                  key={s.youtubeId}
-                  src={`https://www.youtube.com/embed/${s.youtubeId}?autoplay=1&rel=0`}
-                  title={s.title}
-                  allow="autoplay; fullscreen; picture-in-picture"
-                  allowFullScreen
-                  style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-                />
+                <div style={{ width: "100%", maxWidth: "56rem", padding: "0 clamp(1rem, 4vw, 2rem)" }}>
+                  <div style={{ position: "relative", paddingBottom: "56.25%", background: "#000" }}>
+                    <iframe
+                      key={s.youtubeId}
+                      src={`https://www.youtube.com/embed/${s.youtubeId}?autoplay=1&rel=0`}
+                      title={s.title}
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                    />
+                  </div>
+                </div>
               ) : s.url ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "cover", display: "block", width: "100%", height: "100%" }} />
+                <img src={s.url} alt={s.title} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block" }} />
               ) : (
                 <span style={{ fontFamily: "Inter,sans-serif", fontSize: "0.8rem", color: "rgba(133,92,157,0.4)" }}>{s.title}</span>
               )

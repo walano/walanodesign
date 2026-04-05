@@ -407,20 +407,19 @@ export default function Hero() {
       <div
         className="md:hidden"
         style={{
-          position:       "absolute",
-          bottom:         0,
-          left:           "50%",
-          transform:      "translateX(-50%)",
-          zIndex:         10,
-          display:        "flex",
-          flexDirection:  "column",
-          alignItems:     "center",
-          gap:            "0.3rem",
-          paddingBottom:  "1.25rem",
-          paddingInline:  "3rem",
-          paddingTop:     "2rem",
-          opacity:        scrolled ? 0 : 1,
-          transition:     "opacity 0.6s ease",
+          position:      "absolute",
+          bottom:        0,
+          left:          0,
+          right:         0,
+          zIndex:        10,
+          display:       "flex",
+          flexDirection: "column",
+          alignItems:    "center",
+          gap:           "0.3rem",
+          paddingBottom: "1.25rem",
+          paddingTop:    "2rem",
+          opacity:       scrolled ? 0 : 1,
+          transition:    "opacity 0.6s ease",
         }}
       >
         <svg

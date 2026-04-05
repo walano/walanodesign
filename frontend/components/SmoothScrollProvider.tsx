@@ -33,11 +33,17 @@ export function SmoothScrollProvider({ children }: Props) {
     document.fonts.ready.then(() => ScrollTrigger.refresh());
     const refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 3400);
 
+    const blockImgContext = (e: MouseEvent) => {
+      if (e.target instanceof HTMLImageElement) e.preventDefault();
+    };
+    document.addEventListener("contextmenu", blockImgContext);
+
     return () => {
       clearTimeout(refreshTimer);
       cancelAnimationFrame(rafId);
       lenis.destroy();
       lenisRef.current = null;
+      document.removeEventListener("contextmenu", blockImgContext);
     };
   }, []);
 

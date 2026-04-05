@@ -41,6 +41,14 @@
   padding: 0;
 }
 
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 html {
   scroll-behavior: auto;
   background-color: var(--dark);
