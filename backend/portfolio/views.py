@@ -546,6 +546,7 @@ def devis(request):
 
     prompt = _build_prompt(data)
 
+    en = req_lang == "en"
     try:
         resp = http.post(
             "https://api.anthropic.com/v1/messages",
@@ -559,12 +560,31 @@ def devis(request):
                 "max_tokens": 1000,
                 "messages":   [{"role": "user", "content": prompt}],
             },
-            timeout=90,
+            timeout=25,
         )
         resp.raise_for_status()
         text = resp.json()["content"][0]["text"].strip()
         text = text.replace("```json", "").replace("```", "").strip()
         ai_result = json.loads(text)
+    except http.exceptions.Timeout:
+        msg = (
+            "Request timed out. Please try again in a moment."
+            if en else
+            "Le service a mis trop de temps à répondre. Réessayez dans un instant."
+        )
+        return Response({"error": msg}, status=status.HTTP_504_GATEWAY_TIMEOUT)
+    except http.exceptions.HTTPError as e:
+        status_code = e.response.status_code if e.response is not None else 0
+        if status_code == 429:
+            msg = "Too many requests. Please try again in a few minutes." if en else "Trop de requêtes. Réessayez dans quelques minutes."
+        elif status_code == 401:
+            msg = "Service configuration error. Please contact us." if en else "Erreur de configuration du service. Contactez-nous."
+        else:
+            msg = "Service temporarily unavailable. Please try again." if en else "Service temporairement indisponible. Réessayez."
+        return Response({"error": msg}, status=status.HTTP_502_BAD_GATEWAY)
+    except json.JSONDecodeError:
+        msg = "Invalid response from AI. Please try again." if en else "Réponse invalide du service IA. Réessayez."
+        return Response({"error": msg}, status=status.HTTP_502_BAD_GATEWAY)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_502_BAD_GATEWAY)
 

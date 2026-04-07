@@ -23,16 +23,33 @@ export interface DevisResult {
 }
 
 export async function submitDevis(payload: DevisPayload): Promise<DevisResult> {
-  const res = await fetch(`${API_URL}/api/devis/`, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body:    JSON.stringify(payload),
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || `Erreur ${res.status}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 35_000);
+
+  try {
+    const res = await fetch(`${API_URL}/api/devis/`, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload),
+      signal:  controller.signal,
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error || `Erreur ${res.status}`);
+    }
+    return await res.json();
+  } catch (e) {
+    if (e instanceof DOMException && e.name === "AbortError") {
+      throw new Error(
+        payload.lang === "en"
+          ? "Request timed out. Please try again."
+          : "La requête a pris trop de temps. Réessayez."
+      );
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return res.json();
 }
 
 export interface ProjectImage {

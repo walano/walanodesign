@@ -392,11 +392,16 @@ function ResultScreen({ state, onReset, copy, lang }: {
   const [result, setResult]   = useState<DevisResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const fetchedRef = useRef(false);
 
   useEffect(() => {
-    if (fetchedRef.current) return;
+    if (attempt === 0 && fetchedRef.current) return;
     fetchedRef.current = true;
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    let cancelled = false;
 
     submitDevis({
       category:      state.category!,
@@ -410,10 +415,12 @@ function ResultScreen({ state, onReset, copy, lang }: {
       email:         state.email,
       lang,
     })
-      .then(setResult)
-      .catch((e: Error) => setError(e.message || copy.result.error))
-      .finally(() => setLoading(false));
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+      .then(r  => { if (!cancelled) setResult(r); })
+      .catch((e: Error) => { if (!cancelled) setError(e.message || copy.result.error); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [attempt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const r = copy.result;
   const isUrgent = state.deadline === "urgent" || state.deadline === "rapide";
@@ -434,8 +441,18 @@ function ResultScreen({ state, onReset, copy, lang }: {
       )}
 
       {error && (
-        <div style={{ background: C.innerBg, border: `1px solid ${C.innerBorder}`, padding: 24, color: C.textMid, fontSize: 14, fontFamily: "Inter, sans-serif" }}>
-          {error}
+        <div style={{ background: C.innerBg, border: `1px solid ${C.innerBorder}`, padding: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+          <p style={{ color: C.textMid, fontSize: 14, fontFamily: "Inter, sans-serif", margin: 0 }}>{error}</p>
+          <button
+            onClick={() => setAttempt(a => a + 1)}
+            style={{
+              alignSelf: "flex-start", background: C.accent, border: `1px solid ${C.accent}`,
+              color: "#fff", padding: "10px 20px", cursor: "pointer",
+              fontFamily: "Inter, sans-serif", fontSize: 13, fontWeight: 600,
+            }}
+          >
+            {lang === "en" ? "retry" : "réessayer"}
+          </button>
         </div>
       )}
 
